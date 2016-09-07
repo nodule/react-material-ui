@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/editor/monetization-on": "latest"
+    }
+  },
+  "name": "EditorMonetizationOn",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "EditorMonetizationOn",
+        "type": "Component"
+      }
+    }
+  }
+}

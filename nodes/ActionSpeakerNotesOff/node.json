@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/speaker-notes-off": "latest"
+    }
+  },
+  "name": "ActionSpeakerNotesOff",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionSpeakerNotesOff",
+        "type": "Component"
+      }
+    }
+  }
+}

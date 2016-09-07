@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/content/move-to-inbox": "latest"
+    }
+  },
+  "name": "ContentMoveToInbox",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ContentMoveToInbox",
+        "type": "Component"
+      }
+    }
+  }
+}

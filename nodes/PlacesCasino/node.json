@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/places/casino": "latest"
+    }
+  },
+  "name": "PlacesCasino",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "PlacesCasino",
+        "type": "Component"
+      }
+    }
+  }
+}

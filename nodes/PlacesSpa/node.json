@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/places/spa": "latest"
+    }
+  },
+  "name": "PlacesSpa",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "PlacesSpa",
+        "type": "Component"
+      }
+    }
+  }
+}

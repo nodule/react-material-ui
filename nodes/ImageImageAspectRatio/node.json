@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/image-aspect-ratio": "latest"
+    }
+  },
+  "name": "ImageImageAspectRatio",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageImageAspectRatio",
+        "type": "Component"
+      }
+    }
+  }
+}

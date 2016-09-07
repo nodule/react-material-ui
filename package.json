@@ -1,0 +1,24 @@
+{
+  "name": "chix-react-material-ui",
+  "description": "React Material-ui for Chiχ",
+  "author": "Rob Halff <rob.halff@gmail.com>",
+  "version": "0.0.2",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nodule/react-material-ui.git"
+  },
+  "scripts": {
+    "test": "chit -r"
+  },
+  "dependencies": {
+    "material-ui": "^0.15.4"
+  },
+  "devDependencies": {
+    "chit": "0.x.x"
+  },
+  "chix": {
+    "name": "react-material-ui",
+    "color": "rgb(136,0,35)"
+  }
+}

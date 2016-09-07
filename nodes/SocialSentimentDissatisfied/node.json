@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/social/sentiment-dissatisfied": "latest"
+    }
+  },
+  "name": "SocialSentimentDissatisfied",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "SocialSentimentDissatisfied",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/linked-camera": "latest"
+    }
+  },
+  "name": "ImageLinkedCamera",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageLinkedCamera",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/blur-circular": "latest"
+    }
+  },
+  "name": "ImageBlurCircular",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageBlurCircular",
+        "type": "Component"
+      }
+    }
+  }
+}

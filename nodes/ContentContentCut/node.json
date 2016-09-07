@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/content/content-cut": "latest"
+    }
+  },
+  "name": "ContentContentCut",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ContentContentCut",
+        "type": "Component"
+      }
+    }
+  }
+}

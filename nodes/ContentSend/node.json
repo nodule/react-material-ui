@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/content/send": "latest"
+    }
+  },
+  "name": "ContentSend",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ContentSend",
+        "type": "Component"
+      }
+    }
+  }
+}

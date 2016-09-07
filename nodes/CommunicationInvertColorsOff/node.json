@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/communication/invert-colors-off": "latest"
+    }
+  },
+  "name": "CommunicationInvertColorsOff",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "CommunicationInvertColorsOff",
+        "type": "Component"
+      }
+    }
+  }
+}

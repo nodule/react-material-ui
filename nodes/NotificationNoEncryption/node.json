@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/notification/no-encryption": "latest"
+    }
+  },
+  "name": "NotificationNoEncryption",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "NotificationNoEncryption",
+        "type": "Component"
+      }
+    }
+  }
+}

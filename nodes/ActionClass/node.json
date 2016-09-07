@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/class": "latest"
+    }
+  },
+  "name": "ActionClass",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionClass",
+        "type": "Component"
+      }
+    }
+  }
+}

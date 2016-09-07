@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/hardware/developer-board": "latest"
+    }
+  },
+  "name": "HardwareDeveloperBoard",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "HardwareDeveloperBoard",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/editor/format-align-justify": "latest"
+    }
+  },
+  "name": "EditorFormatAlignJustify",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "EditorFormatAlignJustify",
+        "type": "Component"
+      }
+    }
+  }
+}

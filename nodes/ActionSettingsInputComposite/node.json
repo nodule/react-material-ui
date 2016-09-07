@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/settings-input-composite": "latest"
+    }
+  },
+  "name": "ActionSettingsInputComposite",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionSettingsInputComposite",
+        "type": "Component"
+      }
+    }
+  }
+}

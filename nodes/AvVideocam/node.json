@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/av/videocam": "latest"
+    }
+  },
+  "name": "AvVideocam",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "AvVideocam",
+        "type": "Component"
+      }
+    }
+  }
+}

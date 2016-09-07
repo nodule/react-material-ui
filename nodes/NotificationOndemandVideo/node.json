@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/notification/ondemand-video": "latest"
+    }
+  },
+  "name": "NotificationOndemandVideo",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "NotificationOndemandVideo",
+        "type": "Component"
+      }
+    }
+  }
+}

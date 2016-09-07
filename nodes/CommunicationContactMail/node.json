@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/communication/contact-mail": "latest"
+    }
+  },
+  "name": "CommunicationContactMail",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "CommunicationContactMail",
+        "type": "Component"
+      }
+    }
+  }
+}

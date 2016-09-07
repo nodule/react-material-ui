@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/av/av-timer": "latest"
+    }
+  },
+  "name": "AvAvTimer",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "AvAvTimer",
+        "type": "Component"
+      }
+    }
+  }
+}

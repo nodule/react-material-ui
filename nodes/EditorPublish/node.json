@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/editor/publish": "latest"
+    }
+  },
+  "name": "EditorPublish",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "EditorPublish",
+        "type": "Component"
+      }
+    }
+  }
+}

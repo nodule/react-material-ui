@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/social/person-add": "latest"
+    }
+  },
+  "name": "SocialPersonAdd",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "SocialPersonAdd",
+        "type": "Component"
+      }
+    }
+  }
+}

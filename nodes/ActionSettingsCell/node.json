@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/settings-cell": "latest"
+    }
+  },
+  "name": "ActionSettingsCell",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionSettingsCell",
+        "type": "Component"
+      }
+    }
+  }
+}

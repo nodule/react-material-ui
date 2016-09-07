@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/notification/priority-high": "latest"
+    }
+  },
+  "name": "NotificationPriorityHigh",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "NotificationPriorityHigh",
+        "type": "Component"
+      }
+    }
+  }
+}

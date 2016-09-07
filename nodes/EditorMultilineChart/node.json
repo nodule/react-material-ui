@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/editor/multiline-chart": "latest"
+    }
+  },
+  "name": "EditorMultilineChart",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "EditorMultilineChart",
+        "type": "Component"
+      }
+    }
+  }
+}

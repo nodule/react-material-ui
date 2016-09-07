@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/device/battery-unknown": "latest"
+    }
+  },
+  "name": "DeviceBatteryUnknown",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "DeviceBatteryUnknown",
+        "type": "Component"
+      }
+    }
+  }
+}

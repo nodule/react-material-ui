@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/navigation/expand-less": "latest"
+    }
+  },
+  "name": "NavigationExpandLess",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "NavigationExpandLess",
+        "type": "Component"
+      }
+    }
+  }
+}

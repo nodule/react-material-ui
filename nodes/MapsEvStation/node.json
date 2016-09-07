@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/maps/ev-station": "latest"
+    }
+  },
+  "name": "MapsEvStation",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "MapsEvStation",
+        "type": "Component"
+      }
+    }
+  }
+}

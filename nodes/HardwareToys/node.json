@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/hardware/toys": "latest"
+    }
+  },
+  "name": "HardwareToys",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "HardwareToys",
+        "type": "Component"
+      }
+    }
+  }
+}

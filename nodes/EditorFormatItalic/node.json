@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/editor/format-italic": "latest"
+    }
+  },
+  "name": "EditorFormatItalic",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "EditorFormatItalic",
+        "type": "Component"
+      }
+    }
+  }
+}

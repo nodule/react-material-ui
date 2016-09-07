@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/book": "latest"
+    }
+  },
+  "name": "ActionBook",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionBook",
+        "type": "Component"
+      }
+    }
+  }
+}

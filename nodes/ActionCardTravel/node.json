@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/card-travel": "latest"
+    }
+  },
+  "name": "ActionCardTravel",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionCardTravel",
+        "type": "Component"
+      }
+    }
+  }
+}

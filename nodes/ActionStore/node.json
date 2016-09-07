@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/store": "latest"
+    }
+  },
+  "name": "ActionStore",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionStore",
+        "type": "Component"
+      }
+    }
+  }
+}

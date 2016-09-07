@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/stars": "latest"
+    }
+  },
+  "name": "ActionStars",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionStars",
+        "type": "Component"
+      }
+    }
+  }
+}

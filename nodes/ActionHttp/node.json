@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/http": "latest"
+    }
+  },
+  "name": "ActionHttp",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionHttp",
+        "type": "Component"
+      }
+    }
+  }
+}

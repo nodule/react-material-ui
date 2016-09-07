@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/av/call-to-action": "latest"
+    }
+  },
+  "name": "AvCallToAction",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "AvCallToAction",
+        "type": "Component"
+      }
+    }
+  }
+}

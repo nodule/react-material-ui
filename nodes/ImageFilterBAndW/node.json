@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/filter-b-and-w": "latest"
+    }
+  },
+  "name": "ImageFilterBAndW",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageFilterBAndW",
+        "type": "Component"
+      }
+    }
+  }
+}

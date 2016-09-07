@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/hardware/tv": "latest"
+    }
+  },
+  "name": "HardwareTv",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "HardwareTv",
+        "type": "Component"
+      }
+    }
+  }
+}

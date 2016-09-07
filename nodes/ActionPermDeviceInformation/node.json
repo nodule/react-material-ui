@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/perm-device-information": "latest"
+    }
+  },
+  "name": "ActionPermDeviceInformation",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionPermDeviceInformation",
+        "type": "Component"
+      }
+    }
+  }
+}

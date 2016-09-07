@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/communication/chat-bubble-outline": "latest"
+    }
+  },
+  "name": "CommunicationChatBubbleOutline",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "CommunicationChatBubbleOutline",
+        "type": "Component"
+      }
+    }
+  }
+}

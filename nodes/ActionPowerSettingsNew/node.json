@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/power-settings-new": "latest"
+    }
+  },
+  "name": "ActionPowerSettingsNew",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionPowerSettingsNew",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/g-translate": "latest"
+    }
+  },
+  "name": "ActionGTranslate",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionGTranslate",
+        "type": "Component"
+      }
+    }
+  }
+}

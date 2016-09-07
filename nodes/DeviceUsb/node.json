@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/device/usb": "latest"
+    }
+  },
+  "name": "DeviceUsb",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "DeviceUsb",
+        "type": "Component"
+      }
+    }
+  }
+}

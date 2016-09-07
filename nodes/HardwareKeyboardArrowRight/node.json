@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/hardware/keyboard-arrow-right": "latest"
+    }
+  },
+  "name": "HardwareKeyboardArrowRight",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "HardwareKeyboardArrowRight",
+        "type": "Component"
+      }
+    }
+  }
+}

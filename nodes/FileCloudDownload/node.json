@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/file/cloud-download": "latest"
+    }
+  },
+  "name": "FileCloudDownload",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "FileCloudDownload",
+        "type": "Component"
+      }
+    }
+  }
+}

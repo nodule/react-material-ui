@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/music-note": "latest"
+    }
+  },
+  "name": "ImageMusicNote",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageMusicNote",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/content/text-format": "latest"
+    }
+  },
+  "name": "ContentTextFormat",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ContentTextFormat",
+        "type": "Component"
+      }
+    }
+  }
+}

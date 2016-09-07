@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/communication/portable-wifi-off": "latest"
+    }
+  },
+  "name": "CommunicationPortableWifiOff",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "CommunicationPortableWifiOff",
+        "type": "Component"
+      }
+    }
+  }
+}

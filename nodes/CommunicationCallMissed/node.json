@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/communication/call-missed": "latest"
+    }
+  },
+  "name": "CommunicationCallMissed",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "CommunicationCallMissed",
+        "type": "Component"
+      }
+    }
+  }
+}

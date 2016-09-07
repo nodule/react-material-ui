@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/places/business-center": "latest"
+    }
+  },
+  "name": "PlacesBusinessCenter",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "PlacesBusinessCenter",
+        "type": "Component"
+      }
+    }
+  }
+}

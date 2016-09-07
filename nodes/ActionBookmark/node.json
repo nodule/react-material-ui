@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/bookmark": "latest"
+    }
+  },
+  "name": "ActionBookmark",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionBookmark",
+        "type": "Component"
+      }
+    }
+  }
+}

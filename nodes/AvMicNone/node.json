@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/av/mic-none": "latest"
+    }
+  },
+  "name": "AvMicNone",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "AvMicNone",
+        "type": "Component"
+      }
+    }
+  }
+}

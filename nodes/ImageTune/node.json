@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/tune": "latest"
+    }
+  },
+  "name": "ImageTune",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageTune",
+        "type": "Component"
+      }
+    }
+  }
+}

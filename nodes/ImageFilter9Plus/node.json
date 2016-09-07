@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/filter-9-plus": "latest"
+    }
+  },
+  "name": "ImageFilter9Plus",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageFilter9Plus",
+        "type": "Component"
+      }
+    }
+  }
+}

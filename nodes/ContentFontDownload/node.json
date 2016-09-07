@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/content/font-download": "latest"
+    }
+  },
+  "name": "ContentFontDownload",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ContentFontDownload",
+        "type": "Component"
+      }
+    }
+  }
+}

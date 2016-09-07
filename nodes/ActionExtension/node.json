@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/extension": "latest"
+    }
+  },
+  "name": "ActionExtension",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionExtension",
+        "type": "Component"
+      }
+    }
+  }
+}

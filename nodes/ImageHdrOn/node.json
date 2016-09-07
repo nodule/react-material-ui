@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/hdr-on": "latest"
+    }
+  },
+  "name": "ImageHdrOn",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageHdrOn",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/places/rv-hookup": "latest"
+    }
+  },
+  "name": "PlacesRvHookup",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "PlacesRvHookup",
+        "type": "Component"
+      }
+    }
+  }
+}

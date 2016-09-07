@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/editor/format-textdirection-l-to-r": "latest"
+    }
+  },
+  "name": "EditorFormatTextdirectionLToR",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "EditorFormatTextdirectionLToR",
+        "type": "Component"
+      }
+    }
+  }
+}

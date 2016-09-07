@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/add-a-photo": "latest"
+    }
+  },
+  "name": "ImageAddAPhoto",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageAddAPhoto",
+        "type": "Component"
+      }
+    }
+  }
+}

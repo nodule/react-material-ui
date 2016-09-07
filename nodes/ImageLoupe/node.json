@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/loupe": "latest"
+    }
+  },
+  "name": "ImageLoupe",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageLoupe",
+        "type": "Component"
+      }
+    }
+  }
+}

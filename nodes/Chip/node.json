@@ -1,0 +1,151 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/Chip/Chip": "latest"
+    }
+  },
+  "name": "Chip",
+  "ports": {
+    "input": {
+      "backgroundColor": {
+        "type": "string",
+        "name": "backgroundColor"
+      },
+      "children": {
+        "type": "node",
+        "name": "children"
+      },
+      "className": {
+        "type": "node",
+        "name": "className"
+      },
+      "labelColor": {
+        "type": "string",
+        "name": "labelColor"
+      },
+      "labelStyle": {
+        "type": "object",
+        "name": "labelStyle"
+      },
+      "onBlur": {
+        "title": "Enable onBlur",
+        "type": "boolean",
+        "name": "onBlur",
+        "default": false
+      },
+      "onFocus": {
+        "title": "Enable onFocus",
+        "type": "boolean",
+        "name": "onFocus",
+        "default": false
+      },
+      "onKeyDown": {
+        "title": "Enable onKeyDown",
+        "type": "boolean",
+        "name": "onKeyDown",
+        "default": false
+      },
+      "onKeyboardFocus": {
+        "title": "Enable onKeyboardFocus",
+        "type": "boolean",
+        "name": "onKeyboardFocus",
+        "default": false
+      },
+      "onMouseDown": {
+        "title": "Enable onMouseDown",
+        "type": "boolean",
+        "name": "onMouseDown",
+        "default": false
+      },
+      "onMouseEnter": {
+        "title": "Enable onMouseEnter",
+        "type": "boolean",
+        "name": "onMouseEnter",
+        "default": false
+      },
+      "onMouseLeave": {
+        "title": "Enable onMouseLeave",
+        "type": "boolean",
+        "name": "onMouseLeave",
+        "default": false
+      },
+      "onMouseUp": {
+        "title": "Enable onMouseUp",
+        "type": "boolean",
+        "name": "onMouseUp",
+        "default": false
+      },
+      "onRequestDelete": {
+        "title": "Enable onRequestDelete",
+        "type": "boolean",
+        "name": "onRequestDelete"
+      },
+      "onTouchEnd": {
+        "title": "Enable onTouchEnd",
+        "type": "boolean",
+        "name": "onTouchEnd",
+        "default": false
+      },
+      "onTouchStart": {
+        "title": "Enable onTouchStart",
+        "type": "boolean",
+        "name": "onTouchStart",
+        "default": false
+      },
+      "onTouchTap": {
+        "title": "Enable onTouchTap",
+        "type": "boolean",
+        "name": "onTouchTap"
+      },
+      "style": {
+        "type": "object",
+        "name": "style"
+      }
+    },
+    "output": {
+      "component": {
+        "title": "Chip",
+        "type": "Component"
+      },
+      "onBlur": {
+        "type": "any"
+      },
+      "onFocus": {
+        "type": "any"
+      },
+      "onKeyDown": {
+        "type": "any"
+      },
+      "onKeyboardFocus": {
+        "type": "any"
+      },
+      "onMouseDown": {
+        "type": "any"
+      },
+      "onMouseEnter": {
+        "type": "any"
+      },
+      "onMouseLeave": {
+        "type": "any"
+      },
+      "onMouseUp": {
+        "type": "any"
+      },
+      "onRequestDelete": {
+        "type": "any"
+      },
+      "onTouchEnd": {
+        "type": "any"
+      },
+      "onTouchStart": {
+        "type": "any"
+      },
+      "onTouchTap": {
+        "type": "any"
+      }
+    }
+  }
+}

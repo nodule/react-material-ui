@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/help": "latest"
+    }
+  },
+  "name": "ActionHelp",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionHelp",
+        "type": "Component"
+      }
+    }
+  }
+}

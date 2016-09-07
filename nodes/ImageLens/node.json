@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/lens": "latest"
+    }
+  },
+  "name": "ImageLens",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageLens",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/social/public": "latest"
+    }
+  },
+  "name": "SocialPublic",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "SocialPublic",
+        "type": "Component"
+      }
+    }
+  }
+}

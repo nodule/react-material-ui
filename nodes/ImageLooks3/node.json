@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/looks-3": "latest"
+    }
+  },
+  "name": "ImageLooks3",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageLooks3",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/communication/screen-share": "latest"
+    }
+  },
+  "name": "CommunicationScreenShare",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "CommunicationScreenShare",
+        "type": "Component"
+      }
+    }
+  }
+}

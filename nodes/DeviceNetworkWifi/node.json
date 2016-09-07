@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/device/network-wifi": "latest"
+    }
+  },
+  "name": "DeviceNetworkWifi",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "DeviceNetworkWifi",
+        "type": "Component"
+      }
+    }
+  }
+}

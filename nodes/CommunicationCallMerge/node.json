@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/communication/call-merge": "latest"
+    }
+  },
+  "name": "CommunicationCallMerge",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "CommunicationCallMerge",
+        "type": "Component"
+      }
+    }
+  }
+}

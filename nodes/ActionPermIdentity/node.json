@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/perm-identity": "latest"
+    }
+  },
+  "name": "ActionPermIdentity",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionPermIdentity",
+        "type": "Component"
+      }
+    }
+  }
+}

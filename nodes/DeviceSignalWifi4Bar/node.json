@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/device/signal-wifi-4-bar": "latest"
+    }
+  },
+  "name": "DeviceSignalWifi4Bar",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "DeviceSignalWifi4Bar",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/maps/local-dining": "latest"
+    }
+  },
+  "name": "MapsLocalDining",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "MapsLocalDining",
+        "type": "Component"
+      }
+    }
+  }
+}

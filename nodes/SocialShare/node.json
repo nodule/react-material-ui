@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/social/share": "latest"
+    }
+  },
+  "name": "SocialShare",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "SocialShare",
+        "type": "Component"
+      }
+    }
+  }
+}

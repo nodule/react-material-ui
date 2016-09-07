@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/communication/stay-current-portrait": "latest"
+    }
+  },
+  "name": "CommunicationStayCurrentPortrait",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "CommunicationStayCurrentPortrait",
+        "type": "Component"
+      }
+    }
+  }
+}

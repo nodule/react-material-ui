@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/view-quilt": "latest"
+    }
+  },
+  "name": "ActionViewQuilt",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionViewQuilt",
+        "type": "Component"
+      }
+    }
+  }
+}

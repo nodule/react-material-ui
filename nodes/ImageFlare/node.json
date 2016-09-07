@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/flare": "latest"
+    }
+  },
+  "name": "ImageFlare",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageFlare",
+        "type": "Component"
+      }
+    }
+  }
+}

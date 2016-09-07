@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/hardware/phonelink-off": "latest"
+    }
+  },
+  "name": "HardwarePhonelinkOff",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "HardwarePhonelinkOff",
+        "type": "Component"
+      }
+    }
+  }
+}

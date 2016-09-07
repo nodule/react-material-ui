@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/navigation/apps": "latest"
+    }
+  },
+  "name": "NavigationApps",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "NavigationApps",
+        "type": "Component"
+      }
+    }
+  }
+}

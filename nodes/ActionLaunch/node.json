@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/launch": "latest"
+    }
+  },
+  "name": "ActionLaunch",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionLaunch",
+        "type": "Component"
+      }
+    }
+  }
+}

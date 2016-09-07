@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/notification/vibration": "latest"
+    }
+  },
+  "name": "NotificationVibration",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "NotificationVibration",
+        "type": "Component"
+      }
+    }
+  }
+}

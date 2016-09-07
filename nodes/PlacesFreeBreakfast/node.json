@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/places/free-breakfast": "latest"
+    }
+  },
+  "name": "PlacesFreeBreakfast",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "PlacesFreeBreakfast",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/account-circle": "latest"
+    }
+  },
+  "name": "ActionAccountCircle",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionAccountCircle",
+        "type": "Component"
+      }
+    }
+  }
+}

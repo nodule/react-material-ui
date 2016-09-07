@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/maps/local-phone": "latest"
+    }
+  },
+  "name": "MapsLocalPhone",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "MapsLocalPhone",
+        "type": "Component"
+      }
+    }
+  }
+}

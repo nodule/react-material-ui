@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/notification/tap-and-play": "latest"
+    }
+  },
+  "name": "NotificationTapAndPlay",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "NotificationTapAndPlay",
+        "type": "Component"
+      }
+    }
+  }
+}

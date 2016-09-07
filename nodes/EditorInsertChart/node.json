@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/editor/insert-chart": "latest"
+    }
+  },
+  "name": "EditorInsertChart",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "EditorInsertChart",
+        "type": "Component"
+      }
+    }
+  }
+}

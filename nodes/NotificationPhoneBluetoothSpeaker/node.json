@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/notification/phone-bluetooth-speaker": "latest"
+    }
+  },
+  "name": "NotificationPhoneBluetoothSpeaker",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "NotificationPhoneBluetoothSpeaker",
+        "type": "Component"
+      }
+    }
+  }
+}

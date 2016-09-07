@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/filter": "latest"
+    }
+  },
+  "name": "ImageFilter",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageFilter",
+        "type": "Component"
+      }
+    }
+  }
+}

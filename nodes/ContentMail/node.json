@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/content/mail": "latest"
+    }
+  },
+  "name": "ContentMail",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ContentMail",
+        "type": "Component"
+      }
+    }
+  }
+}

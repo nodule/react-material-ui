@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/control-point-duplicate": "latest"
+    }
+  },
+  "name": "ImageControlPointDuplicate",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageControlPointDuplicate",
+        "type": "Component"
+      }
+    }
+  }
+}

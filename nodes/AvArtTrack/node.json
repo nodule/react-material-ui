@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/av/art-track": "latest"
+    }
+  },
+  "name": "AvArtTrack",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "AvArtTrack",
+        "type": "Component"
+      }
+    }
+  }
+}

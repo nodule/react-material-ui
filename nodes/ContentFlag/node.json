@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/content/flag": "latest"
+    }
+  },
+  "name": "ContentFlag",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ContentFlag",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/editor/mode-comment": "latest"
+    }
+  },
+  "name": "EditorModeComment",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "EditorModeComment",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/editor/highlight": "latest"
+    }
+  },
+  "name": "EditorHighlight",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "EditorHighlight",
+        "type": "Component"
+      }
+    }
+  }
+}

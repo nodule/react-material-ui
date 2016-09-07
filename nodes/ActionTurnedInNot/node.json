@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/turned-in-not": "latest"
+    }
+  },
+  "name": "ActionTurnedInNot",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionTurnedInNot",
+        "type": "Component"
+      }
+    }
+  }
+}

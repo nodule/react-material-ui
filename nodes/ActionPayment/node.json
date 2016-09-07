@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/payment": "latest"
+    }
+  },
+  "name": "ActionPayment",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionPayment",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/notification/phone-paused": "latest"
+    }
+  },
+  "name": "NotificationPhonePaused",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "NotificationPhonePaused",
+        "type": "Component"
+      }
+    }
+  }
+}

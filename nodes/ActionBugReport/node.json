@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/bug-report": "latest"
+    }
+  },
+  "name": "ActionBugReport",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionBugReport",
+        "type": "Component"
+      }
+    }
+  }
+}

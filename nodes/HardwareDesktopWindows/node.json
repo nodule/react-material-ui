@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/hardware/desktop-windows": "latest"
+    }
+  },
+  "name": "HardwareDesktopWindows",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "HardwareDesktopWindows",
+        "type": "Component"
+      }
+    }
+  }
+}

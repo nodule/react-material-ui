@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/av/explicit": "latest"
+    }
+  },
+  "name": "AvExplicit",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "AvExplicit",
+        "type": "Component"
+      }
+    }
+  }
+}

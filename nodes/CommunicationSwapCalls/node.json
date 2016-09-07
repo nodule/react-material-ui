@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/communication/swap-calls": "latest"
+    }
+  },
+  "name": "CommunicationSwapCalls",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "CommunicationSwapCalls",
+        "type": "Component"
+      }
+    }
+  }
+}

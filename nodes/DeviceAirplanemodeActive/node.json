@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/device/airplanemode-active": "latest"
+    }
+  },
+  "name": "DeviceAirplanemodeActive",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "DeviceAirplanemodeActive",
+        "type": "Component"
+      }
+    }
+  }
+}

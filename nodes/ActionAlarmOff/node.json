@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/alarm-off": "latest"
+    }
+  },
+  "name": "ActionAlarmOff",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionAlarmOff",
+        "type": "Component"
+      }
+    }
+  }
+}

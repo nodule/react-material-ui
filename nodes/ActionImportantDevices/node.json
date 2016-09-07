@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/important-devices": "latest"
+    }
+  },
+  "name": "ActionImportantDevices",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionImportantDevices",
+        "type": "Component"
+      }
+    }
+  }
+}

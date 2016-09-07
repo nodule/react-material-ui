@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/swap-vert": "latest"
+    }
+  },
+  "name": "ActionSwapVert",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionSwapVert",
+        "type": "Component"
+      }
+    }
+  }
+}

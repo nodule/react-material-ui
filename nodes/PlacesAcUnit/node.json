@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/places/ac-unit": "latest"
+    }
+  },
+  "name": "PlacesAcUnit",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "PlacesAcUnit",
+        "type": "Component"
+      }
+    }
+  }
+}

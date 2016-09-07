@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/toggle/check-box-outline-blank": "latest"
+    }
+  },
+  "name": "ToggleCheckBoxOutlineBlank",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ToggleCheckBoxOutlineBlank",
+        "type": "Component"
+      }
+    }
+  }
+}

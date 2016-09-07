@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/editor/space-bar": "latest"
+    }
+  },
+  "name": "EditorSpaceBar",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "EditorSpaceBar",
+        "type": "Component"
+      }
+    }
+  }
+}

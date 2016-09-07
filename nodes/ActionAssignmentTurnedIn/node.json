@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/assignment-turned-in": "latest"
+    }
+  },
+  "name": "ActionAssignmentTurnedIn",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionAssignmentTurnedIn",
+        "type": "Component"
+      }
+    }
+  }
+}

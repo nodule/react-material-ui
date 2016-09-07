@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/line-weight": "latest"
+    }
+  },
+  "name": "ActionLineWeight",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionLineWeight",
+        "type": "Component"
+      }
+    }
+  }
+}

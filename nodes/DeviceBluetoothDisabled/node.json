@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/device/bluetooth-disabled": "latest"
+    }
+  },
+  "name": "DeviceBluetoothDisabled",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "DeviceBluetoothDisabled",
+        "type": "Component"
+      }
+    }
+  }
+}

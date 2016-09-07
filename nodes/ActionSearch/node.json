@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/search": "latest"
+    }
+  },
+  "name": "ActionSearch",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionSearch",
+        "type": "Component"
+      }
+    }
+  }
+}

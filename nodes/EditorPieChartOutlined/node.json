@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/editor/pie-chart-outlined": "latest"
+    }
+  },
+  "name": "EditorPieChartOutlined",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "EditorPieChartOutlined",
+        "type": "Component"
+      }
+    }
+  }
+}

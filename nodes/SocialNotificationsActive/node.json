@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/social/notifications-active": "latest"
+    }
+  },
+  "name": "SocialNotificationsActive",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "SocialNotificationsActive",
+        "type": "Component"
+      }
+    }
+  }
+}

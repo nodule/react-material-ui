@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/editor/linear-scale": "latest"
+    }
+  },
+  "name": "EditorLinearScale",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "EditorLinearScale",
+        "type": "Component"
+      }
+    }
+  }
+}

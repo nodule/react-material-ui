@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/movie-creation": "latest"
+    }
+  },
+  "name": "ImageMovieCreation",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageMovieCreation",
+        "type": "Component"
+      }
+    }
+  }
+}

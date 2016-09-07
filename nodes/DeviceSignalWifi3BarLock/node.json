@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/device/signal-wifi-3-bar-lock": "latest"
+    }
+  },
+  "name": "DeviceSignalWifi3BarLock",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "DeviceSignalWifi3BarLock",
+        "type": "Component"
+      }
+    }
+  }
+}

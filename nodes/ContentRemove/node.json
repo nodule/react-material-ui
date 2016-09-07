@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/content/remove": "latest"
+    }
+  },
+  "name": "ContentRemove",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ContentRemove",
+        "type": "Component"
+      }
+    }
+  }
+}

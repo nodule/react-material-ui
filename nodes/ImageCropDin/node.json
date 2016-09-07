@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/crop-din": "latest"
+    }
+  },
+  "name": "ImageCropDin",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageCropDin",
+        "type": "Component"
+      }
+    }
+  }
+}

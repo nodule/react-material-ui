@@ -1,0 +1,25 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/internal/AutoLockScrolling": "latest"
+    }
+  },
+  "name": "AutoLockScrolling",
+  "ports": {
+    "input": {
+      "lock": {
+        "type": "boolean",
+        "name": "lock"
+      }
+    },
+    "output": {
+      "component": {
+        "title": "AutoLockScrolling",
+        "type": "Component"
+      }
+    }
+  }
+}

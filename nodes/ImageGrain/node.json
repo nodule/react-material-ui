@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/grain": "latest"
+    }
+  },
+  "name": "ImageGrain",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageGrain",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/settings": "latest"
+    }
+  },
+  "name": "ActionSettings",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionSettings",
+        "type": "Component"
+      }
+    }
+  }
+}

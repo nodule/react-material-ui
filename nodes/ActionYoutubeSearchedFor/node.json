@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/youtube-searched-for": "latest"
+    }
+  },
+  "name": "ActionYoutubeSearchedFor",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionYoutubeSearchedFor",
+        "type": "Component"
+      }
+    }
+  }
+}

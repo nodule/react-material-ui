@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/supervisor-account": "latest"
+    }
+  },
+  "name": "ActionSupervisorAccount",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionSupervisorAccount",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/communication/clear-all": "latest"
+    }
+  },
+  "name": "CommunicationClearAll",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "CommunicationClearAll",
+        "type": "Component"
+      }
+    }
+  }
+}

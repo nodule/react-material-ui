@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/maps/local-bar": "latest"
+    }
+  },
+  "name": "MapsLocalBar",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "MapsLocalBar",
+        "type": "Component"
+      }
+    }
+  }
+}

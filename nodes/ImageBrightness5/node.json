@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/brightness-5": "latest"
+    }
+  },
+  "name": "ImageBrightness5",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageBrightness5",
+        "type": "Component"
+      }
+    }
+  }
+}

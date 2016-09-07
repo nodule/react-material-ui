@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/maps/directions-car": "latest"
+    }
+  },
+  "name": "MapsDirectionsCar",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "MapsDirectionsCar",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/view-module": "latest"
+    }
+  },
+  "name": "ActionViewModule",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionViewModule",
+        "type": "Component"
+      }
+    }
+  }
+}

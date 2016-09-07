@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/av/video-call": "latest"
+    }
+  },
+  "name": "AvVideoCall",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "AvVideoCall",
+        "type": "Component"
+      }
+    }
+  }
+}

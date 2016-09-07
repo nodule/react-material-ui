@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/notification/event-busy": "latest"
+    }
+  },
+  "name": "NotificationEventBusy",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "NotificationEventBusy",
+        "type": "Component"
+      }
+    }
+  }
+}

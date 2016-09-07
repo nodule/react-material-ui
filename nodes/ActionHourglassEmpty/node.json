@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/hourglass-empty": "latest"
+    }
+  },
+  "name": "ActionHourglassEmpty",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionHourglassEmpty",
+        "type": "Component"
+      }
+    }
+  }
+}

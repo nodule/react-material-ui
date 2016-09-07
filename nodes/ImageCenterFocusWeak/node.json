@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/center-focus-weak": "latest"
+    }
+  },
+  "name": "ImageCenterFocusWeak",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageCenterFocusWeak",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/crop-free": "latest"
+    }
+  },
+  "name": "ImageCropFree",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageCropFree",
+        "type": "Component"
+      }
+    }
+  }
+}

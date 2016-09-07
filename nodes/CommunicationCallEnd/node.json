@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/communication/call-end": "latest"
+    }
+  },
+  "name": "CommunicationCallEnd",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "CommunicationCallEnd",
+        "type": "Component"
+      }
+    }
+  }
+}

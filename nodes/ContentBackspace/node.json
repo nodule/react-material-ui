@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/content/backspace": "latest"
+    }
+  },
+  "name": "ContentBackspace",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ContentBackspace",
+        "type": "Component"
+      }
+    }
+  }
+}

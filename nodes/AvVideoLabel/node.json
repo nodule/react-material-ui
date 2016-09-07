@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/av/video-label": "latest"
+    }
+  },
+  "name": "AvVideoLabel",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "AvVideoLabel",
+        "type": "Component"
+      }
+    }
+  }
+}

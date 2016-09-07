@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/maps/local-activity": "latest"
+    }
+  },
+  "name": "MapsLocalActivity",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "MapsLocalActivity",
+        "type": "Component"
+      }
+    }
+  }
+}

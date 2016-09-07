@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/query-builder": "latest"
+    }
+  },
+  "name": "ActionQueryBuilder",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionQueryBuilder",
+        "type": "Component"
+      }
+    }
+  }
+}

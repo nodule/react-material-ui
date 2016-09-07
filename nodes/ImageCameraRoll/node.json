@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/camera-roll": "latest"
+    }
+  },
+  "name": "ImageCameraRoll",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageCameraRoll",
+        "type": "Component"
+      }
+    }
+  }
+}

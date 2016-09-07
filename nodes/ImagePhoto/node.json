@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/photo": "latest"
+    }
+  },
+  "name": "ImagePhoto",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImagePhoto",
+        "type": "Component"
+      }
+    }
+  }
+}

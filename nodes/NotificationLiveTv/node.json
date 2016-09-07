@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/notification/live-tv": "latest"
+    }
+  },
+  "name": "NotificationLiveTv",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "NotificationLiveTv",
+        "type": "Component"
+      }
+    }
+  }
+}

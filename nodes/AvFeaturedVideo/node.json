@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/av/featured-video": "latest"
+    }
+  },
+  "name": "AvFeaturedVideo",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "AvFeaturedVideo",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/hardware/phone-iphone": "latest"
+    }
+  },
+  "name": "HardwarePhoneIphone",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "HardwarePhoneIphone",
+        "type": "Component"
+      }
+    }
+  }
+}

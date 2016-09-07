@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/style": "latest"
+    }
+  },
+  "name": "ImageStyle",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageStyle",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/content/clear": "latest"
+    }
+  },
+  "name": "ContentClear",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ContentClear",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/device/devices": "latest"
+    }
+  },
+  "name": "DeviceDevices",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "DeviceDevices",
+        "type": "Component"
+      }
+    }
+  }
+}

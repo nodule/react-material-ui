@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/av/repeat-one": "latest"
+    }
+  },
+  "name": "AvRepeatOne",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "AvRepeatOne",
+        "type": "Component"
+      }
+    }
+  }
+}

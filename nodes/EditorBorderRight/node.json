@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/editor/border-right": "latest"
+    }
+  },
+  "name": "EditorBorderRight",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "EditorBorderRight",
+        "type": "Component"
+      }
+    }
+  }
+}

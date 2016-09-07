@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/add-shopping-cart": "latest"
+    }
+  },
+  "name": "ActionAddShoppingCart",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionAddShoppingCart",
+        "type": "Component"
+      }
+    }
+  }
+}

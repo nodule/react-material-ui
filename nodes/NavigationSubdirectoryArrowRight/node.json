@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/navigation/subdirectory-arrow-right": "latest"
+    }
+  },
+  "name": "NavigationSubdirectoryArrowRight",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "NavigationSubdirectoryArrowRight",
+        "type": "Component"
+      }
+    }
+  }
+}

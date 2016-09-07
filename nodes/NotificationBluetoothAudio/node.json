@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/notification/bluetooth-audio": "latest"
+    }
+  },
+  "name": "NotificationBluetoothAudio",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "NotificationBluetoothAudio",
+        "type": "Component"
+      }
+    }
+  }
+}

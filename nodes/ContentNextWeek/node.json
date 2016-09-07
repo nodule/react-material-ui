@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/content/next-week": "latest"
+    }
+  },
+  "name": "ContentNextWeek",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ContentNextWeek",
+        "type": "Component"
+      }
+    }
+  }
+}

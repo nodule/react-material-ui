@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/collections-bookmark": "latest"
+    }
+  },
+  "name": "ImageCollectionsBookmark",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageCollectionsBookmark",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/photo-library": "latest"
+    }
+  },
+  "name": "ImagePhotoLibrary",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImagePhotoLibrary",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/hardware/mouse": "latest"
+    }
+  },
+  "name": "HardwareMouse",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "HardwareMouse",
+        "type": "Component"
+      }
+    }
+  }
+}

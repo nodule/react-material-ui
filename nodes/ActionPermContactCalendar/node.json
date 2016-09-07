@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/perm-contact-calendar": "latest"
+    }
+  },
+  "name": "ActionPermContactCalendar",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionPermContactCalendar",
+        "type": "Component"
+      }
+    }
+  }
+}

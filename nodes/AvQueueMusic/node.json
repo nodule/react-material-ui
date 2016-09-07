@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/av/queue-music": "latest"
+    }
+  },
+  "name": "AvQueueMusic",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "AvQueueMusic",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/device/network-cell": "latest"
+    }
+  },
+  "name": "DeviceNetworkCell",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "DeviceNetworkCell",
+        "type": "Component"
+      }
+    }
+  }
+}

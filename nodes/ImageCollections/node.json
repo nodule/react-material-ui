@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/collections": "latest"
+    }
+  },
+  "name": "ImageCollections",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageCollections",
+        "type": "Component"
+      }
+    }
+  }
+}

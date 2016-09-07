@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/maps/local-drink": "latest"
+    }
+  },
+  "name": "MapsLocalDrink",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "MapsLocalDrink",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/device/access-time": "latest"
+    }
+  },
+  "name": "DeviceAccessTime",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "DeviceAccessTime",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/content/delete-sweep": "latest"
+    }
+  },
+  "name": "ContentDeleteSweep",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ContentDeleteSweep",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/navigation/arrow-drop-down": "latest"
+    }
+  },
+  "name": "NavigationArrowDropDown",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "NavigationArrowDropDown",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/grade": "latest"
+    }
+  },
+  "name": "ActionGrade",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionGrade",
+        "type": "Component"
+      }
+    }
+  }
+}

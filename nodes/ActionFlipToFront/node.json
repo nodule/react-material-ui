@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/flip-to-front": "latest"
+    }
+  },
+  "name": "ActionFlipToFront",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionFlipToFront",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/notification/airline-seat-individual-suite": "latest"
+    }
+  },
+  "name": "NotificationAirlineSeatIndividualSuite",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "NotificationAirlineSeatIndividualSuite",
+        "type": "Component"
+      }
+    }
+  }
+}

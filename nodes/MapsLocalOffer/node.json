@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/maps/local-offer": "latest"
+    }
+  },
+  "name": "MapsLocalOffer",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "MapsLocalOffer",
+        "type": "Component"
+      }
+    }
+  }
+}

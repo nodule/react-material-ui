@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/av/sort-by-alpha": "latest"
+    }
+  },
+  "name": "AvSortByAlpha",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "AvSortByAlpha",
+        "type": "Component"
+      }
+    }
+  }
+}

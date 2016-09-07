@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/credit-card": "latest"
+    }
+  },
+  "name": "ActionCreditCard",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionCreditCard",
+        "type": "Component"
+      }
+    }
+  }
+}

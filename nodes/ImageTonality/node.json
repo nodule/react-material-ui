@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/tonality": "latest"
+    }
+  },
+  "name": "ImageTonality",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageTonality",
+        "type": "Component"
+      }
+    }
+  }
+}

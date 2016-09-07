@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/editor/border-all": "latest"
+    }
+  },
+  "name": "EditorBorderAll",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "EditorBorderAll",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/edit": "latest"
+    }
+  },
+  "name": "ImageEdit",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageEdit",
+        "type": "Component"
+      }
+    }
+  }
+}

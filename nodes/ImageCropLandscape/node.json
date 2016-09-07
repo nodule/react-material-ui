@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/image/crop-landscape": "latest"
+    }
+  },
+  "name": "ImageCropLandscape",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ImageCropLandscape",
+        "type": "Component"
+      }
+    }
+  }
+}

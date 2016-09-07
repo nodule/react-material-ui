@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/device/storage": "latest"
+    }
+  },
+  "name": "DeviceStorage",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "DeviceStorage",
+        "type": "Component"
+      }
+    }
+  }
+}

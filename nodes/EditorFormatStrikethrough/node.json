@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/editor/format-strikethrough": "latest"
+    }
+  },
+  "name": "EditorFormatStrikethrough",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "EditorFormatStrikethrough",
+        "type": "Component"
+      }
+    }
+  }
+}

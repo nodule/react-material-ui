@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/content/filter-list": "latest"
+    }
+  },
+  "name": "ContentFilterList",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ContentFilterList",
+        "type": "Component"
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/action/chrome-reader-mode": "latest"
+    }
+  },
+  "name": "ActionChromeReaderMode",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "ActionChromeReaderMode",
+        "type": "Component"
+      }
+    }
+  }
+}

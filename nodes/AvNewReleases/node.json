@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/av/new-releases": "latest"
+    }
+  },
+  "name": "AvNewReleases",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "AvNewReleases",
+        "type": "Component"
+      }
+    }
+  }
+}

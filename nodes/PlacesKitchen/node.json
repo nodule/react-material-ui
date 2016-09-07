@@ -1,0 +1,20 @@
+{
+  "description": "",
+  "ns": "react-material-ui",
+  "type": "ReactNode",
+  "dependencies": {
+    "npm": {
+      "material-ui/svg-icons/places/kitchen": "latest"
+    }
+  },
+  "name": "PlacesKitchen",
+  "ports": {
+    "input": {},
+    "output": {
+      "component": {
+        "title": "PlacesKitchen",
+        "type": "Component"
+      }
+    }
+  }
+}
