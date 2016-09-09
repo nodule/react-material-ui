@@ -12,15 +12,18 @@ module.exports = {
     input: {
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       className: {
         type: "string",
-        name: "className"
+        name: "className",
+        required: false
       },
       open: {
         type: "boolean",
-        name: "open"
+        name: "open",
+        required: true
       },
       style: {
         type: "object",
@@ -29,7 +32,8 @@ module.exports = {
       },
       targetOrigin: {
         type: "custom",
-        name: "targetOrigin"
+        name: "targetOrigin",
+        required: false
       },
       zDepth: {
         type: "custom",

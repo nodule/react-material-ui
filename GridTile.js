@@ -12,7 +12,8 @@ module.exports = {
     input: {
       actionIcon: {
         type: "element",
-        name: "actionIcon"
+        name: "actionIcon",
+        required: false
       },
       actionPosition: {
         type: "enum",
@@ -21,7 +22,8 @@ module.exports = {
       },
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       cols: {
         type: "number",
@@ -40,15 +42,18 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       subtitle: {
         type: "node",
-        name: "subtitle"
+        name: "subtitle",
+        required: false
       },
       title: {
         type: "node",
-        name: "title"
+        name: "title",
+        required: false
       },
       titleBackground: {
         type: "string",

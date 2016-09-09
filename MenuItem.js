@@ -13,7 +13,8 @@ module.exports = {
       animation: {
         title: "Enable animation",
         type: "boolean",
-        name: "animation"
+        name: "animation",
+        required: false
       },
       checked: {
         type: "boolean",
@@ -22,7 +23,8 @@ module.exports = {
       },
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       desktop: {
         type: "boolean",
@@ -41,7 +43,8 @@ module.exports = {
       },
       innerDivStyle: {
         type: "object",
-        name: "innerDivStyle"
+        name: "innerDivStyle",
+        required: false
       },
       insetChildren: {
         type: "boolean",
@@ -50,36 +53,44 @@ module.exports = {
       },
       leftIcon: {
         type: "element",
-        name: "leftIcon"
+        name: "leftIcon",
+        required: false
       },
       menuItems: {
         type: "node",
-        name: "menuItems"
+        name: "menuItems",
+        required: false
       },
       onTouchTap: {
         title: "Enable onTouchTap",
         type: "boolean",
-        name: "onTouchTap"
+        name: "onTouchTap",
+        required: false
       },
       primaryText: {
         type: "node",
-        name: "primaryText"
+        name: "primaryText",
+        required: false
       },
       rightIcon: {
         type: "element",
-        name: "rightIcon"
+        name: "rightIcon",
+        required: false
       },
       secondaryText: {
         type: "node",
-        name: "secondaryText"
+        name: "secondaryText",
+        required: false
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       value: {
         type: "any",
-        name: "value"
+        name: "value",
+        required: false
       }
     },
     output: {

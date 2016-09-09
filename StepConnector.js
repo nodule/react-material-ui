@@ -12,7 +12,8 @@ module.exports = {
     input: {
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

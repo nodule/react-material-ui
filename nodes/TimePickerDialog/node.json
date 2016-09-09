@@ -12,11 +12,13 @@
     "input": {
       "autoOk": {
         "type": "boolean",
-        "name": "autoOk"
+        "name": "autoOk",
+        "required": false
       },
       "bodyStyle": {
         "type": "object",
-        "name": "bodyStyle"
+        "name": "bodyStyle",
+        "required": false
       },
       "cancelLabel": {
         "type": "node",
@@ -25,11 +27,13 @@
       },
       "format": {
         "type": "enum",
-        "name": "format"
+        "name": "format",
+        "required": false
       },
       "initialTime": {
         "type": "object",
-        "name": "initialTime"
+        "name": "initialTime",
+        "required": false
       },
       "okLabel": {
         "type": "node",
@@ -39,21 +43,25 @@
       "onAccept": {
         "title": "Enable onAccept",
         "type": "boolean",
-        "name": "onAccept"
+        "name": "onAccept",
+        "required": false
       },
       "onDismiss": {
         "title": "Enable onDismiss",
         "type": "boolean",
-        "name": "onDismiss"
+        "name": "onDismiss",
+        "required": false
       },
       "onShow": {
         "title": "Enable onShow",
         "type": "boolean",
-        "name": "onShow"
+        "name": "onShow",
+        "required": false
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       }
     },
     "output": {

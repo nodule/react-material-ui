@@ -12,11 +12,13 @@ module.exports = {
     input: {
       childStyle: {
         type: "object",
-        name: "childStyle"
+        name: "childStyle",
+        required: false
       },
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       direction: {
         type: "enum",
@@ -30,7 +32,8 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

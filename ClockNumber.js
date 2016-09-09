@@ -18,7 +18,8 @@ module.exports = {
       onSelected: {
         title: "Enable onSelected",
         type: "boolean",
-        name: "onSelected"
+        name: "onSelected",
+        required: false
       },
       type: {
         type: "enum",

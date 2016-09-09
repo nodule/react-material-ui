@@ -17,7 +17,8 @@
       },
       "children": {
         "type": "node",
-        "name": "children"
+        "name": "children",
+        "required": false
       },
       "disableKeyboardFocus": {
         "type": "boolean",
@@ -36,7 +37,8 @@
       },
       "innerDivStyle": {
         "type": "object",
-        "name": "innerDivStyle"
+        "name": "innerDivStyle",
+        "required": false
       },
       "insetChildren": {
         "type": "boolean",
@@ -45,15 +47,18 @@
       },
       "leftAvatar": {
         "type": "element",
-        "name": "leftAvatar"
+        "name": "leftAvatar",
+        "required": false
       },
       "leftCheckbox": {
         "type": "element",
-        "name": "leftCheckbox"
+        "name": "leftCheckbox",
+        "required": false
       },
       "leftIcon": {
         "type": "element",
-        "name": "leftIcon"
+        "name": "leftIcon",
+        "required": false
       },
       "nestedItems": {
         "type": "arrayOf",
@@ -67,7 +72,8 @@
       },
       "nestedListStyle": {
         "type": "object",
-        "name": "nestedListStyle"
+        "name": "nestedListStyle",
+        "required": false
       },
       "onKeyboardFocus": {
         "title": "Enable onKeyboardFocus",
@@ -102,7 +108,8 @@
       "onTouchTap": {
         "title": "Enable onTouchTap",
         "type": "boolean",
-        "name": "onTouchTap"
+        "name": "onTouchTap",
+        "required": false
       },
       "open": {
         "type": "boolean",
@@ -111,7 +118,8 @@
       },
       "primaryText": {
         "type": "node",
-        "name": "primaryText"
+        "name": "primaryText",
+        "required": false
       },
       "primaryTogglesNestedList": {
         "type": "boolean",
@@ -120,23 +128,28 @@
       },
       "rightAvatar": {
         "type": "element",
-        "name": "rightAvatar"
+        "name": "rightAvatar",
+        "required": false
       },
       "rightIcon": {
         "type": "element",
-        "name": "rightIcon"
+        "name": "rightIcon",
+        "required": false
       },
       "rightIconButton": {
         "type": "element",
-        "name": "rightIconButton"
+        "name": "rightIconButton",
+        "required": false
       },
       "rightToggle": {
         "type": "element",
-        "name": "rightToggle"
+        "name": "rightToggle",
+        "required": false
       },
       "secondaryText": {
         "type": "node",
-        "name": "secondaryText"
+        "name": "secondaryText",
+        "required": false
       },
       "secondaryTextLines": {
         "type": "enum",
@@ -145,7 +158,8 @@
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       }
     },
     "output": {

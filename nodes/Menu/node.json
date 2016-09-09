@@ -17,7 +17,8 @@
       },
       "children": {
         "type": "node",
-        "name": "children"
+        "name": "children",
+        "required": false
       },
       "desktop": {
         "type": "boolean",
@@ -36,7 +37,8 @@
       },
       "listStyle": {
         "type": "object",
-        "name": "listStyle"
+        "name": "listStyle",
+        "required": false
       },
       "maxHeight": {
         "type": "number",
@@ -74,23 +76,28 @@
       },
       "selectedMenuItemStyle": {
         "type": "object",
-        "name": "selectedMenuItemStyle"
+        "name": "selectedMenuItemStyle",
+        "required": false
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       },
       "value": {
         "type": "any",
-        "name": "value"
+        "name": "value",
+        "required": false
       },
       "valueLink": {
         "type": "object",
-        "name": "valueLink"
+        "name": "valueLink",
+        "required": false
       },
       "width": {
         "type": "custom",
-        "name": "width"
+        "name": "width",
+        "required": false
       }
     },
     "output": {

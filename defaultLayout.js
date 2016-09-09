@@ -2,17 +2,16 @@ module.exports = {
   "type": "flow",
   "nodes": [
     {
-      "id": "AutoComplete",
-      "title": "AutoComplete",
+      "id": "MuiThemeProvider",
+      "title": "MuiThemeProvider",
       "ns": "react-material-ui",
-      "name": "AutoComplete",
-      "context": {
-        "dataSource": [
-          "aaaaa",
-          "bbbbb",
-          "ccccc"
-        ]
-      }
+      "name": "MuiThemeProvider"
+    },
+    {
+      "id": "Star",
+      "title": "Star",
+      "ns": "react-material-ui",
+      "name": "ToggleStar"
     },
     {
       "id": "Render",
@@ -51,7 +50,20 @@ module.exports = {
   "links": [
     {
       "source": {
-        "id": "AutoComplete",
+        "id": "Star",
+        "port": "component"
+      },
+      "target": {
+        "id": "MuiThemeProvider",
+        "port": "children"
+      },
+      "metadata": {
+        "title": "Star component -> children MuiThemeProvider"
+      }
+    },
+    {
+      "source": {
+        "id": "MuiThemeProvider",
         "port": "component"
       },
       "target": {
@@ -59,7 +71,7 @@ module.exports = {
         "port": "element"
       },
       "metadata": {
-        "title": "AutoComplete component -> element Render"
+        "title": "MuiThemeProvider component -> element Render"
       }
     },
     {

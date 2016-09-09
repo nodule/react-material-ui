@@ -12,39 +12,48 @@
     "input": {
       "actAsExpander": {
         "type": "boolean",
-        "name": "actAsExpander"
+        "name": "actAsExpander",
+        "required": false
       },
       "children": {
         "type": "node",
-        "name": "children"
+        "name": "children",
+        "required": false
       },
       "expandable": {
         "type": "boolean",
-        "name": "expandable"
+        "name": "expandable",
+        "required": false
       },
       "mediaStyle": {
         "type": "object",
-        "name": "mediaStyle"
+        "name": "mediaStyle",
+        "required": false
       },
       "overlay": {
         "type": "node",
-        "name": "overlay"
+        "name": "overlay",
+        "required": false
       },
       "overlayContainerStyle": {
         "type": "object",
-        "name": "overlayContainerStyle"
+        "name": "overlayContainerStyle",
+        "required": false
       },
       "overlayContentStyle": {
         "type": "object",
-        "name": "overlayContentStyle"
+        "name": "overlayContentStyle",
+        "required": false
       },
       "overlayStyle": {
         "type": "object",
-        "name": "overlayStyle"
+        "name": "overlayStyle",
+        "required": false
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       }
     },
     "output": {

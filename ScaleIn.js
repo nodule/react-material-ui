@@ -12,11 +12,13 @@ module.exports = {
     input: {
       childStyle: {
         type: "object",
-        name: "childStyle"
+        name: "childStyle",
+        required: false
       },
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       enterDelay: {
         type: "number",
@@ -25,15 +27,18 @@ module.exports = {
       },
       maxScale: {
         type: "number",
-        name: "maxScale"
+        name: "maxScale",
+        required: false
       },
       minScale: {
         type: "number",
-        name: "minScale"
+        name: "minScale",
+        required: false
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

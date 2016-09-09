@@ -12,7 +12,8 @@
     "input": {
       "muiTheme": {
         "type": "object",
-        "name": "muiTheme"
+        "name": "muiTheme",
+        "required": true
       },
       "show": {
         "type": "boolean",
@@ -21,11 +22,13 @@
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       },
       "text": {
         "type": "node",
-        "name": "text"
+        "name": "text",
+        "required": false
       }
     },
     "output": {

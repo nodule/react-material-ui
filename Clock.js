@@ -12,7 +12,8 @@ module.exports = {
     input: {
       format: {
         type: "enum",
-        name: "format"
+        name: "format",
+        required: false
       },
       initialTime: {
         type: "object",
@@ -22,12 +23,14 @@ module.exports = {
       onChangeHours: {
         title: "Enable onChangeHours",
         type: "boolean",
-        name: "onChangeHours"
+        name: "onChangeHours",
+        required: false
       },
       onChangeMinutes: {
         title: "Enable onChangeMinutes",
         type: "boolean",
-        name: "onChangeMinutes"
+        name: "onChangeMinutes",
+        required: false
       }
     },
     output: {

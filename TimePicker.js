@@ -27,11 +27,13 @@ module.exports = {
       },
       dialogBodyStyle: {
         type: "object",
-        name: "dialogBodyStyle"
+        name: "dialogBodyStyle",
+        required: false
       },
       dialogStyle: {
         type: "object",
-        name: "dialogStyle"
+        name: "dialogStyle",
+        required: false
       },
       disabled: {
         type: "boolean",
@@ -51,27 +53,32 @@ module.exports = {
       onChange: {
         title: "Enable onChange",
         type: "boolean",
-        name: "onChange"
+        name: "onChange",
+        required: false
       },
       onDismiss: {
         title: "Enable onDismiss",
         type: "boolean",
-        name: "onDismiss"
+        name: "onDismiss",
+        required: false
       },
       onFocus: {
         title: "Enable onFocus",
         type: "boolean",
-        name: "onFocus"
+        name: "onFocus",
+        required: false
       },
       onShow: {
         title: "Enable onShow",
         type: "boolean",
-        name: "onShow"
+        name: "onShow",
+        required: false
       },
       onTouchTap: {
         title: "Enable onTouchTap",
         type: "boolean",
-        name: "onTouchTap"
+        name: "onTouchTap",
+        required: false
       },
       pedantic: {
         type: "boolean",
@@ -85,7 +92,8 @@ module.exports = {
       },
       textFieldStyle: {
         type: "object",
-        name: "textFieldStyle"
+        name: "textFieldStyle",
+        required: false
       },
       value: {
         type: "object",

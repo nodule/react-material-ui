@@ -12,15 +12,18 @@ module.exports = {
     input: {
       color: {
         type: "string",
-        name: "color"
+        name: "color",
+        required: false
       },
       left: {
         type: "number",
-        name: "left"
+        name: "left",
+        required: true
       },
       loadingColor: {
         type: "string",
-        name: "loadingColor"
+        name: "loadingColor",
+        required: false
       },
       percentage: {
         type: "number",
@@ -39,11 +42,13 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       top: {
         type: "number",
-        name: "top"
+        name: "top",
+        required: true
       }
     },
     output: {

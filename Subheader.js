@@ -12,7 +12,8 @@ module.exports = {
     input: {
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       inset: {
         type: "boolean",
@@ -21,7 +22,8 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

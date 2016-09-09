@@ -17,11 +17,13 @@
       },
       "children": {
         "type": "node",
-        "name": "children"
+        "name": "children",
+        "required": false
       },
       "className": {
         "type": "string",
-        "name": "className"
+        "name": "className",
+        "required": false
       },
       "deselectOnClickaway": {
         "type": "boolean",
@@ -41,32 +43,38 @@
       "onCellClick": {
         "title": "Enable onCellClick",
         "type": "boolean",
-        "name": "onCellClick"
+        "name": "onCellClick",
+        "required": false
       },
       "onCellHover": {
         "title": "Enable onCellHover",
         "type": "boolean",
-        "name": "onCellHover"
+        "name": "onCellHover",
+        "required": false
       },
       "onCellHoverExit": {
         "title": "Enable onCellHoverExit",
         "type": "boolean",
-        "name": "onCellHoverExit"
+        "name": "onCellHoverExit",
+        "required": false
       },
       "onRowHover": {
         "title": "Enable onRowHover",
         "type": "boolean",
-        "name": "onRowHover"
+        "name": "onRowHover",
+        "required": false
       },
       "onRowHoverExit": {
         "title": "Enable onRowHoverExit",
         "type": "boolean",
-        "name": "onRowHoverExit"
+        "name": "onRowHoverExit",
+        "required": false
       },
       "onRowSelection": {
         "title": "Enable onRowSelection",
         "type": "boolean",
-        "name": "onRowSelection"
+        "name": "onRowSelection",
+        "required": false
       },
       "preScanRows": {
         "type": "boolean",
@@ -80,11 +88,13 @@
       },
       "showRowHover": {
         "type": "boolean",
-        "name": "showRowHover"
+        "name": "showRowHover",
+        "required": false
       },
       "stripedRows": {
         "type": "boolean",
-        "name": "stripedRows"
+        "name": "stripedRows",
+        "required": false
       },
       "style": {
         "type": "object",

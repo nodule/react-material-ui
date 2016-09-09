@@ -13,7 +13,8 @@ module.exports = {
       DateTimeFormat: {
         title: "Enable DateTimeFormat",
         type: "boolean",
-        name: "DateTimeFormat"
+        name: "DateTimeFormat",
+        required: false
       },
       autoOk: {
         type: "boolean",
@@ -22,11 +23,13 @@ module.exports = {
       },
       cancelLabel: {
         type: "node",
-        name: "cancelLabel"
+        name: "cancelLabel",
+        required: false
       },
       className: {
         type: "string",
-        name: "className"
+        name: "className",
+        required: false
       },
       container: {
         type: "enum",
@@ -35,11 +38,13 @@ module.exports = {
       },
       defaultDate: {
         type: "object",
-        name: "defaultDate"
+        name: "defaultDate",
+        required: false
       },
       dialogContainerStyle: {
         type: "object",
-        name: "dialogContainerStyle"
+        name: "dialogContainerStyle",
+        required: false
       },
       disableYearSelection: {
         type: "boolean",
@@ -59,57 +64,69 @@ module.exports = {
       formatDate: {
         title: "Enable formatDate",
         type: "boolean",
-        name: "formatDate"
+        name: "formatDate",
+        required: false
       },
       locale: {
         type: "string",
-        name: "locale"
+        name: "locale",
+        required: false
       },
       maxDate: {
         type: "object",
-        name: "maxDate"
+        name: "maxDate",
+        required: false
       },
       minDate: {
         type: "object",
-        name: "minDate"
+        name: "minDate",
+        required: false
       },
       mode: {
         type: "enum",
-        name: "mode"
+        name: "mode",
+        required: false
       },
       okLabel: {
         type: "node",
-        name: "okLabel"
+        name: "okLabel",
+        required: false
       },
       onChange: {
         title: "Enable onChange",
         type: "boolean",
-        name: "onChange"
+        name: "onChange",
+        required: false
       },
       onDismiss: {
         title: "Enable onDismiss",
         type: "boolean",
-        name: "onDismiss"
+        name: "onDismiss",
+        required: false
       },
       onFocus: {
         title: "Enable onFocus",
         type: "boolean",
-        name: "onFocus"
+        name: "onFocus",
+        required: false
       },
       onShow: {
         title: "Enable onShow",
         type: "boolean",
-        name: "onShow"
+        name: "onShow",
+        required: false
       },
       onTouchTap: {
         title: "Enable onTouchTap",
         type: "boolean",
-        name: "onTouchTap"
+        name: "onTouchTap",
+        required: false
       },
       shouldDisableDate: {
         title: "Enable shouldDisableDate",
         type: "boolean",
-        name: "shouldDisableDate"
+        name: "shouldDisableDate",
+        required: false
       },
       style: {
         type: "object",
@@ -118,11 +135,13 @@ module.exports = {
       },
       textFieldStyle: {
         type: "object",
-        name: "textFieldStyle"
+        name: "textFieldStyle",
+        required: false
       },
       value: {
         type: "object",
-        name: "value"
+        name: "value",
+        required: false
       }
     },
     output: {

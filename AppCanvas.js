@@ -12,7 +12,8 @@ module.exports = {
     input: {
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       }
     },
     output: {

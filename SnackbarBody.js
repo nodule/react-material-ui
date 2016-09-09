@@ -12,28 +12,34 @@ module.exports = {
     input: {
       action: {
         type: "node",
-        name: "action"
+        name: "action",
+        required: false
       },
       message: {
         type: "node",
-        name: "message"
+        name: "message",
+        required: true
       },
       onActionTouchTap: {
         title: "Enable onActionTouchTap",
         type: "boolean",
-        name: "onActionTouchTap"
+        name: "onActionTouchTap",
+        required: false
       },
       open: {
         type: "boolean",
-        name: "open"
+        name: "open",
+        required: true
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       width: {
         type: "number",
-        name: "width"
+        name: "width",
+        required: true
       }
     },
     output: {

@@ -12,47 +12,58 @@ module.exports = {
     input: {
       actAsExpander: {
         type: "boolean",
-        name: "actAsExpander"
+        name: "actAsExpander",
+        required: false
       },
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       expandable: {
         type: "boolean",
-        name: "expandable"
+        name: "expandable",
+        required: false
       },
       showExpandableButton: {
         type: "boolean",
-        name: "showExpandableButton"
+        name: "showExpandableButton",
+        required: false
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       subtitle: {
         type: "node",
-        name: "subtitle"
+        name: "subtitle",
+        required: false
       },
       subtitleColor: {
         type: "string",
-        name: "subtitleColor"
+        name: "subtitleColor",
+        required: false
       },
       subtitleStyle: {
         type: "object",
-        name: "subtitleStyle"
+        name: "subtitleStyle",
+        required: false
       },
       title: {
         type: "node",
-        name: "title"
+        name: "title",
+        required: false
       },
       titleColor: {
         type: "string",
-        name: "titleColor"
+        name: "titleColor",
+        required: false
       },
       titleStyle: {
         type: "object",
-        name: "titleStyle"
+        name: "titleStyle",
+        required: false
       }
     },
     output: {

@@ -13,16 +13,19 @@ module.exports = {
       componentClickAway: {
         title: "Enable componentClickAway",
         type: "boolean",
-        name: "componentClickAway"
+        name: "componentClickAway",
+        required: false
       },
       open: {
         type: "boolean",
-        name: "open"
+        name: "open",
+        required: true
       },
       render: {
         title: "Enable render",
         type: "boolean",
-        name: "render"
+        name: "render",
+        required: true
       },
       useLayerForClickAway: {
         type: "boolean",

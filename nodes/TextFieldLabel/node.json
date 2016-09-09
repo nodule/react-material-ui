@@ -12,11 +12,13 @@
     "input": {
       "children": {
         "type": "node",
-        "name": "children"
+        "name": "children",
+        "required": false
       },
       "className": {
         "type": "string",
-        "name": "className"
+        "name": "className",
+        "required": false
       },
       "disabled": {
         "type": "boolean",
@@ -25,16 +27,19 @@
       },
       "htmlFor": {
         "type": "string",
-        "name": "htmlFor"
+        "name": "htmlFor",
+        "required": false
       },
       "muiTheme": {
         "type": "object",
-        "name": "muiTheme"
+        "name": "muiTheme",
+        "required": true
       },
       "onTouchTap": {
         "title": "Enable onTouchTap",
         "type": "boolean",
-        "name": "onTouchTap"
+        "name": "onTouchTap",
+        "required": false
       },
       "shrink": {
         "type": "boolean",
@@ -43,11 +48,13 @@
       },
       "shrinkStyle": {
         "type": "object",
-        "name": "shrinkStyle"
+        "name": "shrinkStyle",
+        "required": false
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       }
     },
     "output": {

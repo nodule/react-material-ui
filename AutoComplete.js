@@ -29,7 +29,7 @@ module.exports = {
       dataSource: {
         type: "array",
         name: "dataSource",
-        required: false
+        required: true
       },
       dataSourceConfig: {
         type: "object",

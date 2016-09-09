@@ -12,23 +12,28 @@ module.exports = {
     input: {
       actAsExpander: {
         type: "boolean",
-        name: "actAsExpander"
+        name: "actAsExpander",
+        required: false
       },
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       expandable: {
         type: "boolean",
-        name: "expandable"
+        name: "expandable",
+        required: false
       },
       showExpandableButton: {
         type: "boolean",
-        name: "showExpandableButton"
+        name: "showExpandableButton",
+        required: false
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

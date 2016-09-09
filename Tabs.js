@@ -12,19 +12,23 @@ module.exports = {
     input: {
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       className: {
         type: "string",
-        name: "className"
+        name: "className",
+        required: false
       },
       contentContainerClassName: {
         type: "string",
-        name: "contentContainerClassName"
+        name: "contentContainerClassName",
+        required: false
       },
       contentContainerStyle: {
         type: "object",
-        name: "contentContainerStyle"
+        name: "contentContainerStyle",
+        required: false
       },
       initialSelectedIndex: {
         type: "number",
@@ -33,7 +37,8 @@ module.exports = {
       },
       inkBarStyle: {
         type: "object",
-        name: "inkBarStyle"
+        name: "inkBarStyle",
+        required: false
       },
       onChange: {
         title: "Enable onChange",
@@ -43,20 +48,24 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       tabItemContainerStyle: {
         type: "object",
-        name: "tabItemContainerStyle"
+        name: "tabItemContainerStyle",
+        required: false
       },
       tabTemplate: {
         title: "Enable tabTemplate",
         type: "boolean",
-        name: "tabTemplate"
+        name: "tabTemplate",
+        required: false
       },
       value: {
         type: "any",
-        name: "value"
+        name: "value",
+        required: false
       }
     },
     output: {

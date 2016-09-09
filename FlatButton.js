@@ -12,11 +12,13 @@ module.exports = {
     input: {
       backgroundColor: {
         type: "string",
-        name: "backgroundColor"
+        name: "backgroundColor",
+        required: false
       },
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       disabled: {
         type: "boolean",
@@ -25,19 +27,23 @@ module.exports = {
       },
       hoverColor: {
         type: "string",
-        name: "hoverColor"
+        name: "hoverColor",
+        required: false
       },
       href: {
         type: "string",
-        name: "href"
+        name: "href",
+        required: false
       },
       icon: {
         type: "node",
-        name: "icon"
+        name: "icon",
+        required: false
       },
       label: {
         type: "custom",
-        name: "label"
+        name: "label",
+        required: false
       },
       labelPosition: {
         type: "enum",
@@ -80,7 +86,8 @@ module.exports = {
       },
       rippleColor: {
         type: "string",
-        name: "rippleColor"
+        name: "rippleColor",
+        required: false
       },
       secondary: {
         type: "boolean",
@@ -89,7 +96,8 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

@@ -12,7 +12,8 @@ module.exports = {
     input: {
       color: {
         type: "string",
-        name: "color"
+        name: "color",
+        required: false
       },
       max: {
         type: "number",
@@ -31,7 +32,8 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       value: {
         type: "number",

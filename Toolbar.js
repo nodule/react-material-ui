@@ -12,11 +12,13 @@ module.exports = {
     input: {
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       className: {
         type: "string",
-        name: "className"
+        name: "className",
+        required: false
       },
       noGutter: {
         type: "boolean",
@@ -25,7 +27,8 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

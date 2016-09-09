@@ -12,15 +12,18 @@ module.exports = {
     input: {
       className: {
         type: "string",
-        name: "className"
+        name: "className",
+        required: false
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       text: {
         type: "string",
-        name: "text"
+        name: "text",
+        required: false
       }
     },
     output: {

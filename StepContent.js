@@ -12,23 +12,28 @@ module.exports = {
     input: {
       active: {
         type: "boolean",
-        name: "active"
+        name: "active",
+        required: false
       },
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       completed: {
         type: "boolean",
-        name: "completed"
+        name: "completed",
+        required: false
       },
       last: {
         type: "boolean",
-        name: "last"
+        name: "last",
+        required: false
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       transition: {
         title: "Enable transition",

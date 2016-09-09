@@ -12,11 +12,13 @@ module.exports = {
     input: {
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       containerStyle: {
         type: "object",
-        name: "containerStyle"
+        name: "containerStyle",
+        required: false
       },
       expandable: {
         type: "boolean",
@@ -36,15 +38,18 @@ module.exports = {
       onExpandChange: {
         title: "Enable onExpandChange",
         type: "boolean",
-        name: "onExpandChange"
+        name: "onExpandChange",
+        required: false
       },
       showExpandableButton: {
         type: "boolean",
-        name: "showExpandableButton"
+        name: "showExpandableButton",
+        required: false
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

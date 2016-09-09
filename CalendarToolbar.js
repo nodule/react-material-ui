@@ -13,15 +13,18 @@ module.exports = {
       DateTimeFormat: {
         title: "Enable DateTimeFormat",
         type: "boolean",
-        name: "DateTimeFormat"
+        name: "DateTimeFormat",
+        required: true
       },
       displayDate: {
         type: "object",
-        name: "displayDate"
+        name: "displayDate",
+        required: true
       },
       locale: {
         type: "string",
-        name: "locale"
+        name: "locale",
+        required: true
       },
       nextMonth: {
         type: "boolean",
@@ -31,7 +34,8 @@ module.exports = {
       onMonthChange: {
         title: "Enable onMonthChange",
         type: "boolean",
-        name: "onMonthChange"
+        name: "onMonthChange",
+        required: false
       },
       prevMonth: {
         type: "boolean",

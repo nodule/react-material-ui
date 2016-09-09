@@ -17,7 +17,8 @@
       },
       "checkedIcon": {
         "type": "element",
-        "name": "checkedIcon"
+        "name": "checkedIcon",
+        "required": false
       },
       "disabled": {
         "type": "boolean",
@@ -26,11 +27,13 @@
       },
       "iconStyle": {
         "type": "object",
-        "name": "iconStyle"
+        "name": "iconStyle",
+        "required": false
       },
       "inputStyle": {
         "type": "object",
-        "name": "inputStyle"
+        "name": "inputStyle",
+        "required": false
       },
       "labelPosition": {
         "type": "enum",
@@ -39,24 +42,29 @@
       },
       "labelStyle": {
         "type": "object",
-        "name": "labelStyle"
+        "name": "labelStyle",
+        "required": false
       },
       "onCheck": {
         "title": "Enable onCheck",
         "type": "boolean",
-        "name": "onCheck"
+        "name": "onCheck",
+        "required": false
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       },
       "uncheckedIcon": {
         "type": "element",
-        "name": "uncheckedIcon"
+        "name": "uncheckedIcon",
+        "required": false
       },
       "value": {
         "type": "any",
-        "name": "value"
+        "name": "value",
+        "required": false
       }
     },
     "output": {

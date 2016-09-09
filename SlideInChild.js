@@ -12,11 +12,13 @@ module.exports = {
     input: {
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       direction: {
         type: "string",
-        name: "direction"
+        name: "direction",
+        required: false
       },
       enterDelay: {
         type: "number",
@@ -26,11 +28,13 @@ module.exports = {
       getLeaveDirection: {
         title: "Enable getLeaveDirection",
         type: "boolean",
-        name: "getLeaveDirection"
+        name: "getLeaveDirection",
+        required: true
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

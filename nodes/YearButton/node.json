@@ -12,12 +12,14 @@
     "input": {
       "className": {
         "type": "string",
-        "name": "className"
+        "name": "className",
+        "required": false
       },
       "onTouchTap": {
         "title": "Enable onTouchTap",
         "type": "boolean",
-        "name": "onTouchTap"
+        "name": "onTouchTap",
+        "required": false
       },
       "selected": {
         "type": "boolean",
@@ -26,7 +28,8 @@
       },
       "year": {
         "type": "number",
-        "name": "year"
+        "name": "year",
+        "required": false
       }
     },
     "output": {

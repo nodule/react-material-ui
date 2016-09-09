@@ -12,15 +12,18 @@
     "input": {
       "backgroundColor": {
         "type": "string",
-        "name": "backgroundColor"
+        "name": "backgroundColor",
+        "required": false
       },
       "children": {
         "type": "node",
-        "name": "children"
+        "name": "children",
+        "required": false
       },
       "className": {
         "type": "string",
-        "name": "className"
+        "name": "className",
+        "required": false
       },
       "disabled": {
         "type": "boolean",
@@ -29,11 +32,13 @@
       },
       "disabledBackgroundColor": {
         "type": "string",
-        "name": "disabledBackgroundColor"
+        "name": "disabledBackgroundColor",
+        "required": false
       },
       "disabledLabelColor": {
         "type": "string",
-        "name": "disabledLabelColor"
+        "name": "disabledLabelColor",
+        "required": false
       },
       "fullWidth": {
         "type": "boolean",
@@ -42,19 +47,23 @@
       },
       "href": {
         "type": "string",
-        "name": "href"
+        "name": "href",
+        "required": false
       },
       "icon": {
         "type": "node",
-        "name": "icon"
+        "name": "icon",
+        "required": false
       },
       "label": {
         "type": "custom",
-        "name": "label"
+        "name": "label",
+        "required": false
       },
       "labelColor": {
         "type": "string",
-        "name": "labelColor"
+        "name": "labelColor",
+        "required": false
       },
       "labelPosition": {
         "type": "enum",
@@ -63,37 +72,44 @@
       },
       "labelStyle": {
         "type": "object",
-        "name": "labelStyle"
+        "name": "labelStyle",
+        "required": false
       },
       "onMouseDown": {
         "title": "Enable onMouseDown",
         "type": "boolean",
-        "name": "onMouseDown"
+        "name": "onMouseDown",
+        "required": false
       },
       "onMouseEnter": {
         "title": "Enable onMouseEnter",
         "type": "boolean",
-        "name": "onMouseEnter"
+        "name": "onMouseEnter",
+        "required": false
       },
       "onMouseLeave": {
         "title": "Enable onMouseLeave",
         "type": "boolean",
-        "name": "onMouseLeave"
+        "name": "onMouseLeave",
+        "required": false
       },
       "onMouseUp": {
         "title": "Enable onMouseUp",
         "type": "boolean",
-        "name": "onMouseUp"
+        "name": "onMouseUp",
+        "required": false
       },
       "onTouchEnd": {
         "title": "Enable onTouchEnd",
         "type": "boolean",
-        "name": "onTouchEnd"
+        "name": "onTouchEnd",
+        "required": false
       },
       "onTouchStart": {
         "title": "Enable onTouchStart",
         "type": "boolean",
-        "name": "onTouchStart"
+        "name": "onTouchStart",
+        "required": false
       },
       "primary": {
         "type": "boolean",
@@ -102,7 +118,8 @@
       },
       "rippleStyle": {
         "type": "object",
-        "name": "rippleStyle"
+        "name": "rippleStyle",
+        "required": false
       },
       "secondary": {
         "type": "boolean",
@@ -111,7 +128,8 @@
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       }
     },
     "output": {

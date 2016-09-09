@@ -12,21 +12,25 @@ module.exports = {
     input: {
       defaultValue: {
         type: "any",
-        name: "defaultValue"
+        name: "defaultValue",
+        required: false
       },
       disabled: {
         type: "boolean",
-        name: "disabled"
+        name: "disabled",
+        required: false
       },
       onChange: {
         title: "Enable onChange",
         type: "boolean",
-        name: "onChange"
+        name: "onChange",
+        required: false
       },
       onHeightChange: {
         title: "Enable onHeightChange",
         type: "boolean",
-        name: "onHeightChange"
+        name: "onHeightChange",
+        required: false
       },
       rows: {
         type: "number",
@@ -35,27 +39,33 @@ module.exports = {
       },
       rowsMax: {
         type: "number",
-        name: "rowsMax"
+        name: "rowsMax",
+        required: false
       },
       shadowStyle: {
         type: "object",
-        name: "shadowStyle"
+        name: "shadowStyle",
+        required: false
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       textareaStyle: {
         type: "object",
-        name: "textareaStyle"
+        name: "textareaStyle",
+        required: false
       },
       value: {
         type: "string",
-        name: "value"
+        name: "value",
+        required: false
       },
       valueLink: {
         type: "object",
-        name: "valueLink"
+        name: "valueLink",
+        required: false
       }
     },
     output: {

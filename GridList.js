@@ -17,7 +17,8 @@ module.exports = {
       },
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       cols: {
         type: "number",
@@ -31,7 +32,8 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

@@ -12,7 +12,8 @@ module.exports = {
     input: {
       date: {
         type: "object",
-        name: "date"
+        name: "date",
+        required: false
       },
       disabled: {
         type: "boolean",
@@ -22,12 +23,14 @@ module.exports = {
       onKeyboardFocus: {
         title: "Enable onKeyboardFocus",
         type: "boolean",
-        name: "onKeyboardFocus"
+        name: "onKeyboardFocus",
+        required: false
       },
       onTouchTap: {
         title: "Enable onTouchTap",
         type: "boolean",
-        name: "onTouchTap"
+        name: "onTouchTap",
+        required: false
       },
       selected: {
         type: "boolean",

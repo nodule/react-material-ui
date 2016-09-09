@@ -4406,50 +4406,61 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "iconClassNameLeft": {
             "type": "string",
-            "name": "iconClassNameLeft"
+            "name": "iconClassNameLeft",
+            "required": false
           },
           "iconClassNameRight": {
             "type": "string",
-            "name": "iconClassNameRight"
+            "name": "iconClassNameRight",
+            "required": false
           },
           "iconElementLeft": {
             "type": "element",
-            "name": "iconElementLeft"
+            "name": "iconElementLeft",
+            "required": false
           },
           "iconElementRight": {
             "type": "element",
-            "name": "iconElementRight"
+            "name": "iconElementRight",
+            "required": false
           },
           "iconStyleLeft": {
             "type": "object",
-            "name": "iconStyleLeft"
+            "name": "iconStyleLeft",
+            "required": false
           },
           "iconStyleRight": {
             "type": "object",
-            "name": "iconStyleRight"
+            "name": "iconStyleRight",
+            "required": false
           },
           "onLeftIconButtonTouchTap": {
             "title": "Enable onLeftIconButtonTouchTap",
             "type": "boolean",
-            "name": "onLeftIconButtonTouchTap"
+            "name": "onLeftIconButtonTouchTap",
+            "required": false
           },
           "onRightIconButtonTouchTap": {
             "title": "Enable onRightIconButtonTouchTap",
             "type": "boolean",
-            "name": "onRightIconButtonTouchTap"
+            "name": "onRightIconButtonTouchTap",
+            "required": false
           },
           "onTitleTouchTap": {
             "title": "Enable onTitleTouchTap",
             "type": "boolean",
-            "name": "onTitleTouchTap"
+            "name": "onTitleTouchTap",
+            "required": false
           },
           "showMenuIconButton": {
             "type": "boolean",
@@ -4458,7 +4469,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "title": {
             "type": "node",
@@ -4467,7 +4479,8 @@
           },
           "titleStyle": {
             "type": "object",
-            "name": "titleStyle"
+            "name": "titleStyle",
+            "required": false
           },
           "zDepth": {
             "type": "custom",
@@ -4506,7 +4519,8 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           }
         },
         "output": {
@@ -4548,7 +4562,7 @@
           "dataSource": {
             "type": "array",
             "name": "dataSource",
-            "required": false
+            "required": true
           },
           "dataSourceConfig": {
             "type": "object",
@@ -4720,7 +4734,8 @@
         "input": {
           "lock": {
             "type": "boolean",
-            "name": "lock"
+            "name": "lock",
+            "required": true
           }
         },
         "output": {
@@ -4825,23 +4840,28 @@
         "input": {
           "backgroundColor": {
             "type": "string",
-            "name": "backgroundColor"
+            "name": "backgroundColor",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "color": {
             "type": "string",
-            "name": "color"
+            "name": "color",
+            "required": false
           },
           "icon": {
             "type": "element",
-            "name": "icon"
+            "name": "icon",
+            "required": false
           },
           "size": {
             "type": "number",
@@ -4850,11 +4870,13 @@
           },
           "src": {
             "type": "string",
-            "name": "src"
+            "name": "src",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -6399,19 +6421,23 @@
         "input": {
           "badgeContent": {
             "type": "node",
-            "name": "badgeContent"
+            "name": "badgeContent",
+            "required": true
           },
           "badgeStyle": {
             "type": "object",
-            "name": "badgeStyle"
+            "name": "badgeStyle",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "primary": {
             "type": "boolean",
@@ -6425,7 +6451,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -6455,7 +6482,8 @@
           },
           "afterStyle": {
             "type": "object",
-            "name": "afterStyle"
+            "name": "afterStyle",
+            "required": false
           },
           "beforeElementType": {
             "type": "string",
@@ -6464,11 +6492,13 @@
           },
           "beforeStyle": {
             "type": "object",
-            "name": "beforeStyle"
+            "name": "beforeStyle",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "elementType": {
             "type": "string",
@@ -6477,7 +6507,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -6502,15 +6533,18 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "selectedIndex": {
             "type": "number",
-            "name": "selectedIndex"
+            "name": "selectedIndex",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -6535,15 +6569,18 @@
         "input": {
           "icon": {
             "type": "node",
-            "name": "icon"
+            "name": "icon",
+            "required": false
           },
           "label": {
             "type": "node",
-            "name": "label"
+            "name": "label",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -6574,11 +6611,13 @@
           },
           "autoOk": {
             "type": "boolean",
-            "name": "autoOk"
+            "name": "autoOk",
+            "required": false
           },
           "cancelLabel": {
             "type": "node",
-            "name": "cancelLabel"
+            "name": "cancelLabel",
+            "required": false
           },
           "disableYearSelection": {
             "type": "boolean",
@@ -6587,7 +6626,8 @@
           },
           "firstDayOfWeek": {
             "type": "number",
-            "name": "firstDayOfWeek"
+            "name": "firstDayOfWeek",
+            "required": false
           },
           "initialDate": {
             "type": "object",
@@ -6611,35 +6651,42 @@
           },
           "mode": {
             "type": "enum",
-            "name": "mode"
+            "name": "mode",
+            "required": false
           },
           "okLabel": {
             "type": "node",
-            "name": "okLabel"
+            "name": "okLabel",
+            "required": false
           },
           "onTouchTapCancel": {
             "title": "Enable onTouchTapCancel",
             "type": "boolean",
-            "name": "onTouchTapCancel"
+            "name": "onTouchTapCancel",
+            "required": false
           },
           "onTouchTapDay": {
             "title": "Enable onTouchTapDay",
             "type": "boolean",
-            "name": "onTouchTapDay"
+            "name": "onTouchTapDay",
+            "required": false
           },
           "onTouchTapOk": {
             "title": "Enable onTouchTapOk",
             "type": "boolean",
-            "name": "onTouchTapOk"
+            "name": "onTouchTapOk",
+            "required": false
           },
           "open": {
             "type": "boolean",
-            "name": "open"
+            "name": "open",
+            "required": false
           },
           "shouldDisableDate": {
             "title": "Enable shouldDisableDate",
             "type": "boolean",
-            "name": "shouldDisableDate"
+            "name": "shouldDisableDate",
+            "required": false
           }
         },
         "output": {
@@ -6679,25 +6726,30 @@
         "input": {
           "autoOk": {
             "type": "boolean",
-            "name": "autoOk"
+            "name": "autoOk",
+            "required": false
           },
           "cancelLabel": {
             "type": "node",
-            "name": "cancelLabel"
+            "name": "cancelLabel",
+            "required": false
           },
           "okLabel": {
             "type": "node",
-            "name": "okLabel"
+            "name": "okLabel",
+            "required": false
           },
           "onTouchTapCancel": {
             "title": "Enable onTouchTapCancel",
             "type": "boolean",
-            "name": "onTouchTapCancel"
+            "name": "onTouchTapCancel",
+            "required": false
           },
           "onTouchTapOk": {
             "title": "Enable onTouchTapOk",
             "type": "boolean",
-            "name": "onTouchTapOk"
+            "name": "onTouchTapOk",
+            "required": false
           }
         },
         "output": {
@@ -6728,37 +6780,45 @@
         "input": {
           "autoOk": {
             "type": "boolean",
-            "name": "autoOk"
+            "name": "autoOk",
+            "required": false
           },
           "displayDate": {
             "type": "object",
-            "name": "displayDate"
+            "name": "displayDate",
+            "required": true
           },
           "firstDayOfWeek": {
             "type": "number",
-            "name": "firstDayOfWeek"
+            "name": "firstDayOfWeek",
+            "required": false
           },
           "maxDate": {
             "type": "object",
-            "name": "maxDate"
+            "name": "maxDate",
+            "required": false
           },
           "minDate": {
             "type": "object",
-            "name": "minDate"
+            "name": "minDate",
+            "required": false
           },
           "onTouchTapDay": {
             "title": "Enable onTouchTapDay",
             "type": "boolean",
-            "name": "onTouchTapDay"
+            "name": "onTouchTapDay",
+            "required": false
           },
           "selectedDate": {
             "type": "object",
-            "name": "selectedDate"
+            "name": "selectedDate",
+            "required": true
           },
           "shouldDisableDate": {
             "title": "Enable shouldDisableDate",
             "type": "boolean",
-            "name": "shouldDisableDate"
+            "name": "shouldDisableDate",
+            "required": false
           }
         },
         "output": {
@@ -6790,15 +6850,18 @@
           "DateTimeFormat": {
             "title": "Enable DateTimeFormat",
             "type": "boolean",
-            "name": "DateTimeFormat"
+            "name": "DateTimeFormat",
+            "required": true
           },
           "displayDate": {
             "type": "object",
-            "name": "displayDate"
+            "name": "displayDate",
+            "required": true
           },
           "locale": {
             "type": "string",
-            "name": "locale"
+            "name": "locale",
+            "required": true
           },
           "nextMonth": {
             "type": "boolean",
@@ -6808,7 +6871,8 @@
           "onMonthChange": {
             "title": "Enable onMonthChange",
             "type": "boolean",
-            "name": "onMonthChange"
+            "name": "onMonthChange",
+            "required": false
           },
           "prevMonth": {
             "type": "boolean",
@@ -6844,28 +6908,34 @@
         "input": {
           "displayDate": {
             "type": "object",
-            "name": "displayDate"
+            "name": "displayDate",
+            "required": true
           },
           "maxDate": {
             "type": "object",
-            "name": "maxDate"
+            "name": "maxDate",
+            "required": false
           },
           "minDate": {
             "type": "object",
-            "name": "minDate"
+            "name": "minDate",
+            "required": false
           },
           "onTouchTapYear": {
             "title": "Enable onTouchTapYear",
             "type": "boolean",
-            "name": "onTouchTapYear"
+            "name": "onTouchTapYear",
+            "required": false
           },
           "selectedDate": {
             "type": "object",
-            "name": "selectedDate"
+            "name": "selectedDate",
+            "required": true
           },
           "wordings": {
             "type": "object",
-            "name": "wordings"
+            "name": "wordings",
+            "required": false
           }
         },
         "output": {
@@ -6893,11 +6963,13 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "containerStyle": {
             "type": "object",
-            "name": "containerStyle"
+            "name": "containerStyle",
+            "required": false
           },
           "expandable": {
             "type": "boolean",
@@ -6917,15 +6989,18 @@
           "onExpandChange": {
             "title": "Enable onExpandChange",
             "type": "boolean",
-            "name": "onExpandChange"
+            "name": "onExpandChange",
+            "required": false
           },
           "showExpandableButton": {
             "type": "boolean",
-            "name": "showExpandableButton"
+            "name": "showExpandableButton",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -6953,23 +7028,28 @@
         "input": {
           "actAsExpander": {
             "type": "boolean",
-            "name": "actAsExpander"
+            "name": "actAsExpander",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "expandable": {
             "type": "boolean",
-            "name": "expandable"
+            "name": "expandable",
+            "required": false
           },
           "showExpandableButton": {
             "type": "boolean",
-            "name": "showExpandableButton"
+            "name": "showExpandableButton",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -6994,16 +7074,19 @@
         "input": {
           "expanded": {
             "type": "boolean",
-            "name": "expanded"
+            "name": "expanded",
+            "required": false
           },
           "onExpanding": {
             "title": "Enable onExpanding",
             "type": "boolean",
-            "name": "onExpanding"
+            "name": "onExpanding",
+            "required": true
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -7031,7 +7114,8 @@
         "input": {
           "actAsExpander": {
             "type": "boolean",
-            "name": "actAsExpander"
+            "name": "actAsExpander",
+            "required": false
           },
           "avatar": {
             "type": "node",
@@ -7040,47 +7124,58 @@
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "expandable": {
             "type": "boolean",
-            "name": "expandable"
+            "name": "expandable",
+            "required": false
           },
           "showExpandableButton": {
             "type": "boolean",
-            "name": "showExpandableButton"
+            "name": "showExpandableButton",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "subtitle": {
             "type": "node",
-            "name": "subtitle"
+            "name": "subtitle",
+            "required": false
           },
           "subtitleColor": {
             "type": "string",
-            "name": "subtitleColor"
+            "name": "subtitleColor",
+            "required": false
           },
           "subtitleStyle": {
             "type": "object",
-            "name": "subtitleStyle"
+            "name": "subtitleStyle",
+            "required": false
           },
           "textStyle": {
             "type": "object",
-            "name": "textStyle"
+            "name": "textStyle",
+            "required": false
           },
           "title": {
             "type": "node",
-            "name": "title"
+            "name": "title",
+            "required": false
           },
           "titleColor": {
             "type": "string",
-            "name": "titleColor"
+            "name": "titleColor",
+            "required": false
           },
           "titleStyle": {
             "type": "object",
-            "name": "titleStyle"
+            "name": "titleStyle",
+            "required": false
           }
         },
         "output": {
@@ -7105,39 +7200,48 @@
         "input": {
           "actAsExpander": {
             "type": "boolean",
-            "name": "actAsExpander"
+            "name": "actAsExpander",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "expandable": {
             "type": "boolean",
-            "name": "expandable"
+            "name": "expandable",
+            "required": false
           },
           "mediaStyle": {
             "type": "object",
-            "name": "mediaStyle"
+            "name": "mediaStyle",
+            "required": false
           },
           "overlay": {
             "type": "node",
-            "name": "overlay"
+            "name": "overlay",
+            "required": false
           },
           "overlayContainerStyle": {
             "type": "object",
-            "name": "overlayContainerStyle"
+            "name": "overlayContainerStyle",
+            "required": false
           },
           "overlayContentStyle": {
             "type": "object",
-            "name": "overlayContentStyle"
+            "name": "overlayContentStyle",
+            "required": false
           },
           "overlayStyle": {
             "type": "object",
-            "name": "overlayStyle"
+            "name": "overlayStyle",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -7162,23 +7266,28 @@
         "input": {
           "actAsExpander": {
             "type": "boolean",
-            "name": "actAsExpander"
+            "name": "actAsExpander",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "color": {
             "type": "string",
-            "name": "color"
+            "name": "color",
+            "required": false
           },
           "expandable": {
             "type": "boolean",
-            "name": "expandable"
+            "name": "expandable",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -7203,47 +7312,58 @@
         "input": {
           "actAsExpander": {
             "type": "boolean",
-            "name": "actAsExpander"
+            "name": "actAsExpander",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "expandable": {
             "type": "boolean",
-            "name": "expandable"
+            "name": "expandable",
+            "required": false
           },
           "showExpandableButton": {
             "type": "boolean",
-            "name": "showExpandableButton"
+            "name": "showExpandableButton",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "subtitle": {
             "type": "node",
-            "name": "subtitle"
+            "name": "subtitle",
+            "required": false
           },
           "subtitleColor": {
             "type": "string",
-            "name": "subtitleColor"
+            "name": "subtitleColor",
+            "required": false
           },
           "subtitleStyle": {
             "type": "object",
-            "name": "subtitleStyle"
+            "name": "subtitleStyle",
+            "required": false
           },
           "title": {
             "type": "node",
-            "name": "title"
+            "name": "title",
+            "required": false
           },
           "titleColor": {
             "type": "string",
-            "name": "titleColor"
+            "name": "titleColor",
+            "required": false
           },
           "titleStyle": {
             "type": "object",
-            "name": "titleStyle"
+            "name": "titleStyle",
+            "required": false
           }
         },
         "output": {
@@ -7268,15 +7388,18 @@
         "input": {
           "checked": {
             "type": "boolean",
-            "name": "checked"
+            "name": "checked",
+            "required": false
           },
           "checkedIcon": {
             "type": "element",
-            "name": "checkedIcon"
+            "name": "checkedIcon",
+            "required": false
           },
           "defaultChecked": {
             "type": "boolean",
-            "name": "defaultChecked"
+            "name": "defaultChecked",
+            "required": false
           },
           "disabled": {
             "type": "boolean",
@@ -7285,11 +7408,13 @@
           },
           "iconStyle": {
             "type": "object",
-            "name": "iconStyle"
+            "name": "iconStyle",
+            "required": false
           },
           "inputStyle": {
             "type": "object",
-            "name": "inputStyle"
+            "name": "inputStyle",
+            "required": false
           },
           "labelPosition": {
             "type": "enum",
@@ -7298,24 +7423,29 @@
           },
           "labelStyle": {
             "type": "object",
-            "name": "labelStyle"
+            "name": "labelStyle",
+            "required": false
           },
           "onCheck": {
             "title": "Enable onCheck",
             "type": "boolean",
-            "name": "onCheck"
+            "name": "onCheck",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "uncheckedIcon": {
             "type": "element",
-            "name": "uncheckedIcon"
+            "name": "uncheckedIcon",
+            "required": false
           },
           "valueLink": {
             "type": "object",
-            "name": "valueLink"
+            "name": "valueLink",
+            "required": false
           }
         },
         "output": {
@@ -7343,23 +7473,28 @@
         "input": {
           "backgroundColor": {
             "type": "string",
-            "name": "backgroundColor"
+            "name": "backgroundColor",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "node",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "labelColor": {
             "type": "string",
-            "name": "labelColor"
+            "name": "labelColor",
+            "required": false
           },
           "labelStyle": {
             "type": "object",
-            "name": "labelStyle"
+            "name": "labelStyle",
+            "required": false
           },
           "onBlur": {
             "title": "Enable onBlur",
@@ -7412,7 +7547,8 @@
           "onRequestDelete": {
             "title": "Enable onRequestDelete",
             "type": "boolean",
-            "name": "onRequestDelete"
+            "name": "onRequestDelete",
+            "required": false
           },
           "onTouchEnd": {
             "title": "Enable onTouchEnd",
@@ -7429,11 +7565,13 @@
           "onTouchTap": {
             "title": "Enable onTouchTap",
             "type": "boolean",
-            "name": "onTouchTap"
+            "name": "onTouchTap",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -7499,7 +7637,8 @@
           },
           "color": {
             "type": "string",
-            "name": "color"
+            "name": "color",
+            "required": false
           },
           "opacity": {
             "type": "number",
@@ -7508,11 +7647,13 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "touchGenerated": {
             "type": "boolean",
-            "name": "touchGenerated"
+            "name": "touchGenerated",
+            "required": false
           }
         },
         "output": {
@@ -7537,11 +7678,13 @@
         "input": {
           "color": {
             "type": "string",
-            "name": "color"
+            "name": "color",
+            "required": false
           },
           "innerStyle": {
             "type": "object",
-            "name": "innerStyle"
+            "name": "innerStyle",
+            "required": false
           },
           "max": {
             "type": "number",
@@ -7565,7 +7708,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "thickness": {
             "type": "number",
@@ -7600,11 +7744,13 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -7629,11 +7775,13 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "onClickAway": {
             "type": "any",
-            "name": "onClickAway"
+            "name": "onClickAway",
+            "required": false
           }
         },
         "output": {
@@ -7658,7 +7806,8 @@
         "input": {
           "format": {
             "type": "enum",
-            "name": "format"
+            "name": "format",
+            "required": false
           },
           "initialTime": {
             "type": "object",
@@ -7668,12 +7817,14 @@
           "onChangeHours": {
             "title": "Enable onChangeHours",
             "type": "boolean",
-            "name": "onChangeHours"
+            "name": "onChangeHours",
+            "required": false
           },
           "onChangeMinutes": {
             "title": "Enable onChangeMinutes",
             "type": "boolean",
-            "name": "onChangeMinutes"
+            "name": "onChangeMinutes",
+            "required": false
           }
         },
         "output": {
@@ -7785,7 +7936,8 @@
           "onSelected": {
             "title": "Enable onSelected",
             "type": "boolean",
-            "name": "onSelected"
+            "name": "onSelected",
+            "required": false
           },
           "type": {
             "type": "enum",
@@ -9680,7 +9832,8 @@
           "DateTimeFormat": {
             "title": "Enable DateTimeFormat",
             "type": "boolean",
-            "name": "DateTimeFormat"
+            "name": "DateTimeFormat",
+            "required": true
           },
           "disableYearSelection": {
             "type": "boolean",
@@ -9689,11 +9842,13 @@
           },
           "locale": {
             "type": "string",
-            "name": "locale"
+            "name": "locale",
+            "required": true
           },
           "mode": {
             "type": "enum",
-            "name": "mode"
+            "name": "mode",
+            "required": false
           },
           "monthDaySelected": {
             "type": "boolean",
@@ -9703,20 +9858,24 @@
           "onTouchTapMonthDay": {
             "title": "Enable onTouchTapMonthDay",
             "type": "boolean",
-            "name": "onTouchTapMonthDay"
+            "name": "onTouchTapMonthDay",
+            "required": false
           },
           "onTouchTapYear": {
             "title": "Enable onTouchTapYear",
             "type": "boolean",
-            "name": "onTouchTapYear"
+            "name": "onTouchTapYear",
+            "required": false
           },
           "selectedDate": {
             "type": "object",
-            "name": "selectedDate"
+            "name": "selectedDate",
+            "required": true
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "weekCount": {
             "type": "number",
@@ -9756,7 +9915,8 @@
           "DateTimeFormat": {
             "title": "Enable DateTimeFormat",
             "type": "boolean",
-            "name": "DateTimeFormat"
+            "name": "DateTimeFormat",
+            "required": false
           },
           "autoOk": {
             "type": "boolean",
@@ -9765,11 +9925,13 @@
           },
           "cancelLabel": {
             "type": "node",
-            "name": "cancelLabel"
+            "name": "cancelLabel",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "container": {
             "type": "enum",
@@ -9778,11 +9940,13 @@
           },
           "defaultDate": {
             "type": "object",
-            "name": "defaultDate"
+            "name": "defaultDate",
+            "required": false
           },
           "dialogContainerStyle": {
             "type": "object",
-            "name": "dialogContainerStyle"
+            "name": "dialogContainerStyle",
+            "required": false
           },
           "disableYearSelection": {
             "type": "boolean",
@@ -9802,57 +9966,69 @@
           "formatDate": {
             "title": "Enable formatDate",
             "type": "boolean",
-            "name": "formatDate"
+            "name": "formatDate",
+            "required": false
           },
           "locale": {
             "type": "string",
-            "name": "locale"
+            "name": "locale",
+            "required": false
           },
           "maxDate": {
             "type": "object",
-            "name": "maxDate"
+            "name": "maxDate",
+            "required": false
           },
           "minDate": {
             "type": "object",
-            "name": "minDate"
+            "name": "minDate",
+            "required": false
           },
           "mode": {
             "type": "enum",
-            "name": "mode"
+            "name": "mode",
+            "required": false
           },
           "okLabel": {
             "type": "node",
-            "name": "okLabel"
+            "name": "okLabel",
+            "required": false
           },
           "onChange": {
             "title": "Enable onChange",
             "type": "boolean",
-            "name": "onChange"
+            "name": "onChange",
+            "required": false
           },
           "onDismiss": {
             "title": "Enable onDismiss",
             "type": "boolean",
-            "name": "onDismiss"
+            "name": "onDismiss",
+            "required": false
           },
           "onFocus": {
             "title": "Enable onFocus",
             "type": "boolean",
-            "name": "onFocus"
+            "name": "onFocus",
+            "required": false
           },
           "onShow": {
             "title": "Enable onShow",
             "type": "boolean",
-            "name": "onShow"
+            "name": "onShow",
+            "required": false
           },
           "onTouchTap": {
             "title": "Enable onTouchTap",
             "type": "boolean",
-            "name": "onTouchTap"
+            "name": "onTouchTap",
+            "required": false
           },
           "shouldDisableDate": {
             "title": "Enable shouldDisableDate",
             "type": "boolean",
-            "name": "shouldDisableDate"
+            "name": "shouldDisableDate",
+            "required": false
           },
           "style": {
             "type": "object",
@@ -9861,11 +10037,13 @@
           },
           "textFieldStyle": {
             "type": "object",
-            "name": "textFieldStyle"
+            "name": "textFieldStyle",
+            "required": false
           },
           "value": {
             "type": "object",
-            "name": "value"
+            "name": "value",
+            "required": false
           }
         },
         "output": {
@@ -9921,11 +10099,13 @@
           "animation": {
             "title": "Enable animation",
             "type": "boolean",
-            "name": "animation"
+            "name": "animation",
+            "required": false
           },
           "autoOk": {
             "type": "boolean",
-            "name": "autoOk"
+            "name": "autoOk",
+            "required": false
           },
           "cancelLabel": {
             "type": "node",
@@ -9939,19 +10119,23 @@
           },
           "containerStyle": {
             "type": "object",
-            "name": "containerStyle"
+            "name": "containerStyle",
+            "required": false
           },
           "disableYearSelection": {
             "type": "boolean",
-            "name": "disableYearSelection"
+            "name": "disableYearSelection",
+            "required": false
           },
           "firstDayOfWeek": {
             "type": "number",
-            "name": "firstDayOfWeek"
+            "name": "firstDayOfWeek",
+            "required": false
           },
           "initialDate": {
             "type": "object",
-            "name": "initialDate"
+            "name": "initialDate",
+            "required": false
           },
           "locale": {
             "type": "string",
@@ -9960,15 +10144,18 @@
           },
           "maxDate": {
             "type": "object",
-            "name": "maxDate"
+            "name": "maxDate",
+            "required": false
           },
           "minDate": {
             "type": "object",
-            "name": "minDate"
+            "name": "minDate",
+            "required": false
           },
           "mode": {
             "type": "enum",
-            "name": "mode"
+            "name": "mode",
+            "required": false
           },
           "okLabel": {
             "type": "node",
@@ -9978,30 +10165,36 @@
           "onAccept": {
             "title": "Enable onAccept",
             "type": "boolean",
-            "name": "onAccept"
+            "name": "onAccept",
+            "required": false
           },
           "onDismiss": {
             "title": "Enable onDismiss",
             "type": "boolean",
-            "name": "onDismiss"
+            "name": "onDismiss",
+            "required": false
           },
           "onShow": {
             "title": "Enable onShow",
             "type": "boolean",
-            "name": "onShow"
+            "name": "onShow",
+            "required": false
           },
           "open": {
             "type": "boolean",
-            "name": "open"
+            "name": "open",
+            "required": false
           },
           "shouldDisableDate": {
             "title": "Enable shouldDisableDate",
             "type": "boolean",
-            "name": "shouldDisableDate"
+            "name": "shouldDisableDate",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -10044,7 +10237,8 @@
         "input": {
           "date": {
             "type": "object",
-            "name": "date"
+            "name": "date",
+            "required": false
           },
           "disabled": {
             "type": "boolean",
@@ -10054,12 +10248,14 @@
           "onKeyboardFocus": {
             "title": "Enable onKeyboardFocus",
             "type": "boolean",
-            "name": "onKeyboardFocus"
+            "name": "onKeyboardFocus",
+            "required": false
           },
           "onTouchTap": {
             "title": "Enable onTouchTap",
             "type": "boolean",
-            "name": "onTouchTap"
+            "name": "onTouchTap",
+            "required": false
           },
           "selected": {
             "type": "boolean",
@@ -11675,15 +11871,18 @@
         "input": {
           "actions": {
             "type": "node",
-            "name": "actions"
+            "name": "actions",
+            "required": false
           },
           "actionsContainerClassName": {
             "type": "string",
-            "name": "actionsContainerClassName"
+            "name": "actionsContainerClassName",
+            "required": false
           },
           "actionsContainerStyle": {
             "type": "object",
-            "name": "actionsContainerStyle"
+            "name": "actionsContainerStyle",
+            "required": false
           },
           "autoDetectWindowHeight": {
             "type": "boolean",
@@ -11697,27 +11896,33 @@
           },
           "bodyClassName": {
             "type": "string",
-            "name": "bodyClassName"
+            "name": "bodyClassName",
+            "required": false
           },
           "bodyStyle": {
             "type": "object",
-            "name": "bodyStyle"
+            "name": "bodyStyle",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "contentClassName": {
             "type": "string",
-            "name": "contentClassName"
+            "name": "contentClassName",
+            "required": false
           },
           "contentStyle": {
             "type": "object",
-            "name": "contentStyle"
+            "name": "contentStyle",
+            "required": false
           },
           "modal": {
             "type": "boolean",
@@ -11727,19 +11932,23 @@
           "onRequestClose": {
             "title": "Enable onRequestClose",
             "type": "boolean",
-            "name": "onRequestClose"
+            "name": "onRequestClose",
+            "required": false
           },
           "open": {
             "type": "boolean",
-            "name": "open"
+            "name": "open",
+            "required": true
           },
           "overlayClassName": {
             "type": "string",
-            "name": "overlayClassName"
+            "name": "overlayClassName",
+            "required": false
           },
           "overlayStyle": {
             "type": "object",
-            "name": "overlayStyle"
+            "name": "overlayStyle",
+            "required": false
           },
           "repositionOnUpdate": {
             "type": "boolean",
@@ -11748,19 +11957,23 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "title": {
             "type": "node",
-            "name": "title"
+            "name": "title",
+            "required": false
           },
           "titleClassName": {
             "type": "string",
-            "name": "titleClassName"
+            "name": "titleClassName",
+            "required": false
           },
           "titleStyle": {
             "type": "object",
-            "name": "titleStyle"
+            "name": "titleStyle",
+            "required": false
           }
         },
         "output": {
@@ -11788,7 +12001,8 @@
         "input": {
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "inset": {
             "type": "boolean",
@@ -11797,7 +12011,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -11822,19 +12037,23 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "containerClassName": {
             "type": "string",
-            "name": "containerClassName"
+            "name": "containerClassName",
+            "required": false
           },
           "containerStyle": {
             "type": "object",
-            "name": "containerStyle"
+            "name": "containerStyle",
+            "required": false
           },
           "disableSwipeToOpen": {
             "type": "boolean",
@@ -11849,7 +12068,8 @@
           "onRequestChange": {
             "title": "Enable onRequestChange",
             "type": "boolean",
-            "name": "onRequestChange"
+            "name": "onRequestChange",
+            "required": false
           },
           "open": {
             "type": "boolean",
@@ -11863,15 +12083,18 @@
           },
           "overlayClassName": {
             "type": "string",
-            "name": "overlayClassName"
+            "name": "overlayClassName",
+            "required": false
           },
           "overlayStyle": {
             "type": "object",
-            "name": "overlayStyle"
+            "name": "overlayStyle",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "swipeAreaWidth": {
             "type": "number",
@@ -11920,7 +12143,8 @@
           "animation": {
             "title": "Enable animation",
             "type": "boolean",
-            "name": "animation"
+            "name": "animation",
+            "required": false
           },
           "autoWidth": {
             "type": "boolean",
@@ -11929,11 +12153,13 @@
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "disabled": {
             "type": "boolean",
@@ -11942,15 +12168,18 @@
           },
           "iconStyle": {
             "type": "object",
-            "name": "iconStyle"
+            "name": "iconStyle",
+            "required": false
           },
           "labelStyle": {
             "type": "object",
-            "name": "labelStyle"
+            "name": "labelStyle",
+            "required": false
           },
           "listStyle": {
             "type": "object",
-            "name": "listStyle"
+            "name": "listStyle",
+            "required": false
           },
           "maxHeight": {
             "type": "number",
@@ -11959,12 +12188,14 @@
           },
           "menuStyle": {
             "type": "object",
-            "name": "menuStyle"
+            "name": "menuStyle",
+            "required": false
           },
           "onChange": {
             "title": "Enable onChange",
             "type": "boolean",
-            "name": "onChange"
+            "name": "onChange",
+            "required": false
           },
           "openImmediately": {
             "type": "boolean",
@@ -11973,15 +12204,18 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "underlineStyle": {
             "type": "object",
-            "name": "underlineStyle"
+            "name": "underlineStyle",
+            "required": false
           },
           "value": {
             "type": "any",
-            "name": "value"
+            "name": "value",
+            "required": false
           }
         },
         "output": {
@@ -13372,11 +13606,13 @@
         "input": {
           "centerRipple": {
             "type": "boolean",
-            "name": "centerRipple"
+            "name": "centerRipple",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "containerElement": {
             "type": "union",
@@ -13385,35 +13621,43 @@
           },
           "disableFocusRipple": {
             "type": "boolean",
-            "name": "disableFocusRipple"
+            "name": "disableFocusRipple",
+            "required": false
           },
           "disableKeyboardFocus": {
             "type": "boolean",
-            "name": "disableKeyboardFocus"
+            "name": "disableKeyboardFocus",
+            "required": false
           },
           "disableTouchRipple": {
             "type": "boolean",
-            "name": "disableTouchRipple"
+            "name": "disableTouchRipple",
+            "required": false
           },
           "disabled": {
             "type": "boolean",
-            "name": "disabled"
+            "name": "disabled",
+            "required": false
           },
           "focusRippleColor": {
             "type": "string",
-            "name": "focusRippleColor"
+            "name": "focusRippleColor",
+            "required": false
           },
           "focusRippleOpacity": {
             "type": "number",
-            "name": "focusRippleOpacity"
+            "name": "focusRippleOpacity",
+            "required": false
           },
           "href": {
             "type": "string",
-            "name": "href"
+            "name": "href",
+            "required": false
           },
           "keyboardFocused": {
             "type": "boolean",
-            "name": "keyboardFocused"
+            "name": "keyboardFocused",
+            "required": false
           },
           "onBlur": {
             "title": "Enable onBlur",
@@ -13495,7 +13739,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "tabIndex": {
             "type": "number",
@@ -13504,11 +13749,13 @@
           },
           "touchRippleColor": {
             "type": "string",
-            "name": "touchRippleColor"
+            "name": "touchRippleColor",
+            "required": false
           },
           "touchRippleOpacity": {
             "type": "number",
-            "name": "touchRippleOpacity"
+            "name": "touchRippleOpacity",
+            "required": false
           },
           "type": {
             "type": "string",
@@ -13577,132 +13824,162 @@
         "input": {
           "checked": {
             "type": "boolean",
-            "name": "checked"
+            "name": "checked",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "defaultChecked": {
             "type": "boolean",
-            "name": "defaultChecked"
+            "name": "defaultChecked",
+            "required": false
           },
           "disableFocusRipple": {
             "type": "boolean",
-            "name": "disableFocusRipple"
+            "name": "disableFocusRipple",
+            "required": false
           },
           "disableTouchRipple": {
             "type": "boolean",
-            "name": "disableTouchRipple"
+            "name": "disableTouchRipple",
+            "required": false
           },
           "disabled": {
             "type": "boolean",
-            "name": "disabled"
+            "name": "disabled",
+            "required": false
           },
           "iconStyle": {
             "type": "object",
-            "name": "iconStyle"
+            "name": "iconStyle",
+            "required": false
           },
           "inputStyle": {
             "type": "object",
-            "name": "inputStyle"
+            "name": "inputStyle",
+            "required": false
           },
           "inputType": {
             "type": "string",
-            "name": "inputType"
+            "name": "inputType",
+            "required": true
           },
           "label": {
             "type": "node",
-            "name": "label"
+            "name": "label",
+            "required": false
           },
           "labelPosition": {
             "type": "enum",
-            "name": "labelPosition"
+            "name": "labelPosition",
+            "required": false
           },
           "labelStyle": {
             "type": "object",
-            "name": "labelStyle"
+            "name": "labelStyle",
+            "required": false
           },
           "name": {
             "type": "string",
-            "name": "name"
+            "name": "name",
+            "required": false
           },
           "onBlur": {
             "title": "Enable onBlur",
             "type": "boolean",
-            "name": "onBlur"
+            "name": "onBlur",
+            "required": false
           },
           "onFocus": {
             "title": "Enable onFocus",
             "type": "boolean",
-            "name": "onFocus"
+            "name": "onFocus",
+            "required": false
           },
           "onMouseDown": {
             "title": "Enable onMouseDown",
             "type": "boolean",
-            "name": "onMouseDown"
+            "name": "onMouseDown",
+            "required": false
           },
           "onMouseLeave": {
             "title": "Enable onMouseLeave",
             "type": "boolean",
-            "name": "onMouseLeave"
+            "name": "onMouseLeave",
+            "required": false
           },
           "onMouseUp": {
             "title": "Enable onMouseUp",
             "type": "boolean",
-            "name": "onMouseUp"
+            "name": "onMouseUp",
+            "required": false
           },
           "onParentShouldUpdate": {
             "title": "Enable onParentShouldUpdate",
             "type": "boolean",
-            "name": "onParentShouldUpdate"
+            "name": "onParentShouldUpdate",
+            "required": false
           },
           "onSwitch": {
             "title": "Enable onSwitch",
             "type": "boolean",
-            "name": "onSwitch"
+            "name": "onSwitch",
+            "required": false
           },
           "onTouchEnd": {
             "title": "Enable onTouchEnd",
             "type": "boolean",
-            "name": "onTouchEnd"
+            "name": "onTouchEnd",
+            "required": false
           },
           "onTouchStart": {
             "title": "Enable onTouchStart",
             "type": "boolean",
-            "name": "onTouchStart"
+            "name": "onTouchStart",
+            "required": false
           },
           "rippleColor": {
             "type": "string",
-            "name": "rippleColor"
+            "name": "rippleColor",
+            "required": false
           },
           "rippleStyle": {
             "type": "object",
-            "name": "rippleStyle"
+            "name": "rippleStyle",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "switchElement": {
             "type": "element",
-            "name": "switchElement"
+            "name": "switchElement",
+            "required": true
           },
           "switched": {
             "type": "boolean",
-            "name": "switched"
+            "name": "switched",
+            "required": true
           },
           "thumbStyle": {
             "type": "object",
-            "name": "thumbStyle"
+            "name": "thumbStyle",
+            "required": false
           },
           "trackStyle": {
             "type": "object",
-            "name": "trackStyle"
+            "name": "trackStyle",
+            "required": false
           },
           "value": {
             "type": "any",
-            "name": "value"
+            "name": "value",
+            "required": false
           }
         },
         "output": {
@@ -13754,21 +14031,25 @@
         "input": {
           "defaultValue": {
             "type": "any",
-            "name": "defaultValue"
+            "name": "defaultValue",
+            "required": false
           },
           "disabled": {
             "type": "boolean",
-            "name": "disabled"
+            "name": "disabled",
+            "required": false
           },
           "onChange": {
             "title": "Enable onChange",
             "type": "boolean",
-            "name": "onChange"
+            "name": "onChange",
+            "required": false
           },
           "onHeightChange": {
             "title": "Enable onHeightChange",
             "type": "boolean",
-            "name": "onHeightChange"
+            "name": "onHeightChange",
+            "required": false
           },
           "rows": {
             "type": "number",
@@ -13777,27 +14058,33 @@
           },
           "rowsMax": {
             "type": "number",
-            "name": "rowsMax"
+            "name": "rowsMax",
+            "required": false
           },
           "shadowStyle": {
             "type": "object",
-            "name": "shadowStyle"
+            "name": "shadowStyle",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "textareaStyle": {
             "type": "object",
-            "name": "textareaStyle"
+            "name": "textareaStyle",
+            "required": false
           },
           "value": {
             "type": "string",
-            "name": "value"
+            "name": "value",
+            "required": false
           },
           "valueLink": {
             "type": "object",
-            "name": "valueLink"
+            "name": "valueLink",
+            "required": false
           }
         },
         "output": {
@@ -13828,7 +14115,8 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "enterDelay": {
             "type": "number",
@@ -13847,7 +14135,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "transitionDelay": {
             "type": "number",
@@ -13882,7 +14171,8 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "enterDelay": {
             "type": "number",
@@ -13891,7 +14181,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "transitionDelay": {
             "type": "number",
@@ -14206,11 +14497,13 @@
         "input": {
           "backgroundColor": {
             "type": "string",
-            "name": "backgroundColor"
+            "name": "backgroundColor",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "disabled": {
             "type": "boolean",
@@ -14219,19 +14512,23 @@
           },
           "hoverColor": {
             "type": "string",
-            "name": "hoverColor"
+            "name": "hoverColor",
+            "required": false
           },
           "href": {
             "type": "string",
-            "name": "href"
+            "name": "href",
+            "required": false
           },
           "icon": {
             "type": "node",
-            "name": "icon"
+            "name": "icon",
+            "required": false
           },
           "label": {
             "type": "custom",
-            "name": "label"
+            "name": "label",
+            "required": false
           },
           "labelPosition": {
             "type": "enum",
@@ -14274,7 +14571,8 @@
           },
           "rippleColor": {
             "type": "string",
-            "name": "rippleColor"
+            "name": "rippleColor",
+            "required": false
           },
           "secondary": {
             "type": "boolean",
@@ -14283,7 +14581,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -14320,11 +14619,13 @@
         "input": {
           "label": {
             "type": "node",
-            "name": "label"
+            "name": "label",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -14349,15 +14650,18 @@
         "input": {
           "backgroundColor": {
             "type": "string",
-            "name": "backgroundColor"
+            "name": "backgroundColor",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "disabled": {
             "type": "boolean",
@@ -14366,19 +14670,23 @@
           },
           "disabledColor": {
             "type": "string",
-            "name": "disabledColor"
+            "name": "disabledColor",
+            "required": false
           },
           "href": {
             "type": "string",
-            "name": "href"
+            "name": "href",
+            "required": false
           },
           "iconClassName": {
             "type": "string",
-            "name": "iconClassName"
+            "name": "iconClassName",
+            "required": false
           },
           "iconStyle": {
             "type": "object",
-            "name": "iconStyle"
+            "name": "iconStyle",
+            "required": false
           },
           "mini": {
             "type": "boolean",
@@ -14388,32 +14696,38 @@
           "onMouseDown": {
             "title": "Enable onMouseDown",
             "type": "boolean",
-            "name": "onMouseDown"
+            "name": "onMouseDown",
+            "required": false
           },
           "onMouseEnter": {
             "title": "Enable onMouseEnter",
             "type": "boolean",
-            "name": "onMouseEnter"
+            "name": "onMouseEnter",
+            "required": false
           },
           "onMouseLeave": {
             "title": "Enable onMouseLeave",
             "type": "boolean",
-            "name": "onMouseLeave"
+            "name": "onMouseLeave",
+            "required": false
           },
           "onMouseUp": {
             "title": "Enable onMouseUp",
             "type": "boolean",
-            "name": "onMouseUp"
+            "name": "onMouseUp",
+            "required": false
           },
           "onTouchEnd": {
             "title": "Enable onTouchEnd",
             "type": "boolean",
-            "name": "onTouchEnd"
+            "name": "onTouchEnd",
+            "required": false
           },
           "onTouchStart": {
             "title": "Enable onTouchStart",
             "type": "boolean",
-            "name": "onTouchStart"
+            "name": "onTouchStart",
+            "required": false
           },
           "secondary": {
             "type": "boolean",
@@ -14422,7 +14736,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "zDepth": {
             "type": "custom",
@@ -14470,23 +14785,28 @@
         "input": {
           "color": {
             "type": "string",
-            "name": "color"
+            "name": "color",
+            "required": false
           },
           "innerStyle": {
             "type": "object",
-            "name": "innerStyle"
+            "name": "innerStyle",
+            "required": false
           },
           "opacity": {
             "type": "number",
-            "name": "opacity"
+            "name": "opacity",
+            "required": false
           },
           "show": {
             "type": "boolean",
-            "name": "show"
+            "name": "show",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -14511,11 +14831,13 @@
         "input": {
           "color": {
             "type": "string",
-            "name": "color"
+            "name": "color",
+            "required": false
           },
           "hoverColor": {
             "type": "string",
-            "name": "hoverColor"
+            "name": "hoverColor",
+            "required": false
           },
           "onMouseEnter": {
             "title": "Enable onMouseEnter",
@@ -14531,7 +14853,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -14567,7 +14890,8 @@
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "cols": {
             "type": "number",
@@ -14581,7 +14905,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -14606,7 +14931,8 @@
         "input": {
           "actionIcon": {
             "type": "element",
-            "name": "actionIcon"
+            "name": "actionIcon",
+            "required": false
           },
           "actionPosition": {
             "type": "enum",
@@ -14615,7 +14941,8 @@
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "cols": {
             "type": "number",
@@ -14634,15 +14961,18 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "subtitle": {
             "type": "node",
-            "name": "subtitle"
+            "name": "subtitle",
+            "required": false
           },
           "title": {
             "type": "node",
-            "name": "title"
+            "name": "title",
+            "required": false
           },
           "titleBackground": {
             "type": "string",
@@ -15637,11 +15967,13 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "disableTouchRipple": {
             "type": "boolean",
@@ -15655,11 +15987,13 @@
           },
           "href": {
             "type": "string",
-            "name": "href"
+            "name": "href",
+            "required": false
           },
           "iconClassName": {
             "type": "string",
-            "name": "iconClassName"
+            "name": "iconClassName",
+            "required": false
           },
           "iconStyle": {
             "type": "object",
@@ -15669,40 +16003,48 @@
           "onBlur": {
             "title": "Enable onBlur",
             "type": "boolean",
-            "name": "onBlur"
+            "name": "onBlur",
+            "required": false
           },
           "onFocus": {
             "title": "Enable onFocus",
             "type": "boolean",
-            "name": "onFocus"
+            "name": "onFocus",
+            "required": false
           },
           "onKeyboardFocus": {
             "title": "Enable onKeyboardFocus",
             "type": "boolean",
-            "name": "onKeyboardFocus"
+            "name": "onKeyboardFocus",
+            "required": false
           },
           "onMouseEnter": {
             "title": "Enable onMouseEnter",
             "type": "boolean",
-            "name": "onMouseEnter"
+            "name": "onMouseEnter",
+            "required": false
           },
           "onMouseLeave": {
             "title": "Enable onMouseLeave",
             "type": "boolean",
-            "name": "onMouseLeave"
+            "name": "onMouseLeave",
+            "required": false
           },
           "onMouseOut": {
             "title": "Enable onMouseOut",
             "type": "boolean",
-            "name": "onMouseOut"
+            "name": "onMouseOut",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "tooltip": {
             "type": "node",
-            "name": "tooltip"
+            "name": "tooltip",
+            "required": false
           },
           "tooltipPosition": {
             "type": "custom",
@@ -15711,7 +16053,8 @@
           },
           "tooltipStyles": {
             "type": "object",
-            "name": "tooltipStyles"
+            "name": "tooltipStyles",
+            "required": false
           },
           "touch": {
             "type": "boolean",
@@ -15770,27 +16113,33 @@
           "animation": {
             "title": "Enable animation",
             "type": "boolean",
-            "name": "animation"
+            "name": "animation",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "iconButtonElement": {
             "type": "element",
-            "name": "iconButtonElement"
+            "name": "iconButtonElement",
+            "required": true
           },
           "iconStyle": {
             "type": "object",
-            "name": "iconStyle"
+            "name": "iconStyle",
+            "required": false
           },
           "menuStyle": {
             "type": "object",
-            "name": "menuStyle"
+            "name": "menuStyle",
+            "required": false
           },
           "multiple": {
             "type": "boolean",
@@ -15852,7 +16201,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "targetOrigin": {
             "type": "custom",
@@ -19019,19 +19369,23 @@
         "input": {
           "color": {
             "type": "string",
-            "name": "color"
+            "name": "color",
+            "required": false
           },
           "left": {
             "type": "string",
-            "name": "left"
+            "name": "left",
+            "required": true
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "width": {
             "type": "string",
-            "name": "width"
+            "name": "width",
+            "required": true
           }
         },
         "output": {
@@ -19056,7 +19410,8 @@
         "input": {
           "color": {
             "type": "string",
-            "name": "color"
+            "name": "color",
+            "required": false
           },
           "max": {
             "type": "number",
@@ -19075,7 +19430,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "value": {
             "type": "number",
@@ -19105,11 +19461,13 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -19139,7 +19497,8 @@
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "disableKeyboardFocus": {
             "type": "boolean",
@@ -19158,7 +19517,8 @@
           },
           "innerDivStyle": {
             "type": "object",
-            "name": "innerDivStyle"
+            "name": "innerDivStyle",
+            "required": false
           },
           "insetChildren": {
             "type": "boolean",
@@ -19167,15 +19527,18 @@
           },
           "leftAvatar": {
             "type": "element",
-            "name": "leftAvatar"
+            "name": "leftAvatar",
+            "required": false
           },
           "leftCheckbox": {
             "type": "element",
-            "name": "leftCheckbox"
+            "name": "leftCheckbox",
+            "required": false
           },
           "leftIcon": {
             "type": "element",
-            "name": "leftIcon"
+            "name": "leftIcon",
+            "required": false
           },
           "nestedItems": {
             "type": "arrayOf",
@@ -19189,7 +19552,8 @@
           },
           "nestedListStyle": {
             "type": "object",
-            "name": "nestedListStyle"
+            "name": "nestedListStyle",
+            "required": false
           },
           "onKeyboardFocus": {
             "title": "Enable onKeyboardFocus",
@@ -19224,7 +19588,8 @@
           "onTouchTap": {
             "title": "Enable onTouchTap",
             "type": "boolean",
-            "name": "onTouchTap"
+            "name": "onTouchTap",
+            "required": false
           },
           "open": {
             "type": "boolean",
@@ -19233,7 +19598,8 @@
           },
           "primaryText": {
             "type": "node",
-            "name": "primaryText"
+            "name": "primaryText",
+            "required": false
           },
           "primaryTogglesNestedList": {
             "type": "boolean",
@@ -19242,23 +19608,28 @@
           },
           "rightAvatar": {
             "type": "element",
-            "name": "rightAvatar"
+            "name": "rightAvatar",
+            "required": false
           },
           "rightIcon": {
             "type": "element",
-            "name": "rightIcon"
+            "name": "rightIcon",
+            "required": false
           },
           "rightIconButton": {
             "type": "element",
-            "name": "rightIconButton"
+            "name": "rightIconButton",
+            "required": false
           },
           "rightToggle": {
             "type": "element",
-            "name": "rightToggle"
+            "name": "rightToggle",
+            "required": false
           },
           "secondaryText": {
             "type": "node",
-            "name": "secondaryText"
+            "name": "secondaryText",
+            "required": false
           },
           "secondaryTextLines": {
             "type": "enum",
@@ -19267,7 +19638,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -20675,7 +21047,8 @@
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "desktop": {
             "type": "boolean",
@@ -20694,7 +21067,8 @@
           },
           "listStyle": {
             "type": "object",
-            "name": "listStyle"
+            "name": "listStyle",
+            "required": false
           },
           "maxHeight": {
             "type": "number",
@@ -20732,23 +21106,28 @@
           },
           "selectedMenuItemStyle": {
             "type": "object",
-            "name": "selectedMenuItemStyle"
+            "name": "selectedMenuItemStyle",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "value": {
             "type": "any",
-            "name": "value"
+            "name": "value",
+            "required": false
           },
           "valueLink": {
             "type": "object",
-            "name": "valueLink"
+            "name": "valueLink",
+            "required": false
           },
           "width": {
             "type": "custom",
-            "name": "width"
+            "name": "width",
+            "required": false
           }
         },
         "output": {
@@ -20786,7 +21165,8 @@
           "animation": {
             "title": "Enable animation",
             "type": "boolean",
-            "name": "animation"
+            "name": "animation",
+            "required": false
           },
           "checked": {
             "type": "boolean",
@@ -20795,7 +21175,8 @@
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "desktop": {
             "type": "boolean",
@@ -20814,7 +21195,8 @@
           },
           "innerDivStyle": {
             "type": "object",
-            "name": "innerDivStyle"
+            "name": "innerDivStyle",
+            "required": false
           },
           "insetChildren": {
             "type": "boolean",
@@ -20823,36 +21205,44 @@
           },
           "leftIcon": {
             "type": "element",
-            "name": "leftIcon"
+            "name": "leftIcon",
+            "required": false
           },
           "menuItems": {
             "type": "node",
-            "name": "menuItems"
+            "name": "menuItems",
+            "required": false
           },
           "onTouchTap": {
             "title": "Enable onTouchTap",
             "type": "boolean",
-            "name": "onTouchTap"
+            "name": "onTouchTap",
+            "required": false
           },
           "primaryText": {
             "type": "node",
-            "name": "primaryText"
+            "name": "primaryText",
+            "required": false
           },
           "rightIcon": {
             "type": "element",
-            "name": "rightIcon"
+            "name": "rightIcon",
+            "required": false
           },
           "secondaryText": {
             "type": "node",
-            "name": "secondaryText"
+            "name": "secondaryText",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "value": {
             "type": "any",
-            "name": "value"
+            "name": "value",
+            "required": false
           }
         },
         "output": {
@@ -20883,11 +21273,13 @@
         "input": {
           "children": {
             "type": "element",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "muiTheme": {
             "type": "object",
-            "name": "muiTheme"
+            "name": "muiTheme",
+            "required": false
           }
         },
         "output": {
@@ -21472,19 +21864,23 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "nestedLevel": {
             "type": "number",
-            "name": "nestedLevel"
+            "name": "nestedLevel",
+            "required": true
           },
           "open": {
             "type": "boolean",
-            "name": "open"
+            "name": "open",
+            "required": true
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -22594,7 +22990,8 @@
           },
           "show": {
             "type": "boolean",
-            "name": "show"
+            "name": "show",
+            "required": true
           },
           "style": {
             "type": "object",
@@ -22629,7 +23026,8 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "circle": {
             "type": "boolean",
@@ -22643,7 +23041,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "transitionEnabled": {
             "type": "boolean",
@@ -23058,7 +23457,8 @@
         "input": {
           "anchorEl": {
             "type": "object",
-            "name": "anchorEl"
+            "name": "anchorEl",
+            "required": false
           },
           "anchorOrigin": {
             "type": "custom",
@@ -23073,7 +23473,8 @@
           "animation": {
             "title": "Enable animation",
             "type": "boolean",
-            "name": "animation"
+            "name": "animation",
+            "required": false
           },
           "autoCloseWhenOffScreen": {
             "type": "boolean",
@@ -23087,11 +23488,13 @@
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "onRequestClose": {
             "title": "Enable onRequestClose",
@@ -23153,15 +23556,18 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "open": {
             "type": "boolean",
-            "name": "open"
+            "name": "open",
+            "required": true
           },
           "style": {
             "type": "object",
@@ -23170,7 +23576,8 @@
           },
           "targetOrigin": {
             "type": "custom",
-            "name": "targetOrigin"
+            "name": "targetOrigin",
+            "required": false
           },
           "zDepth": {
             "type": "custom",
@@ -23200,15 +23607,18 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "open": {
             "type": "boolean",
-            "name": "open"
+            "name": "open",
+            "required": true
           },
           "style": {
             "type": "object",
@@ -23217,7 +23627,8 @@
           },
           "targetOrigin": {
             "type": "custom",
-            "name": "targetOrigin"
+            "name": "targetOrigin",
+            "required": false
           },
           "zDepth": {
             "type": "custom",
@@ -23252,7 +23663,8 @@
           },
           "checkedIcon": {
             "type": "element",
-            "name": "checkedIcon"
+            "name": "checkedIcon",
+            "required": false
           },
           "disabled": {
             "type": "boolean",
@@ -23261,11 +23673,13 @@
           },
           "iconStyle": {
             "type": "object",
-            "name": "iconStyle"
+            "name": "iconStyle",
+            "required": false
           },
           "inputStyle": {
             "type": "object",
-            "name": "inputStyle"
+            "name": "inputStyle",
+            "required": false
           },
           "labelPosition": {
             "type": "enum",
@@ -23274,24 +23688,29 @@
           },
           "labelStyle": {
             "type": "object",
-            "name": "labelStyle"
+            "name": "labelStyle",
+            "required": false
           },
           "onCheck": {
             "title": "Enable onCheck",
             "type": "boolean",
-            "name": "onCheck"
+            "name": "onCheck",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "uncheckedIcon": {
             "type": "element",
-            "name": "uncheckedIcon"
+            "name": "uncheckedIcon",
+            "required": false
           },
           "value": {
             "type": "any",
-            "name": "value"
+            "name": "value",
+            "required": false
           }
         },
         "output": {
@@ -23319,28 +23738,34 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "defaultSelected": {
             "type": "any",
-            "name": "defaultSelected"
+            "name": "defaultSelected",
+            "required": false
           },
           "labelPosition": {
             "type": "enum",
-            "name": "labelPosition"
+            "name": "labelPosition",
+            "required": false
           },
           "name": {
             "type": "string",
-            "name": "name"
+            "name": "name",
+            "required": true
           },
           "onChange": {
             "title": "Enable onChange",
             "type": "boolean",
-            "name": "onChange"
+            "name": "onChange",
+            "required": false
           },
           "style": {
             "type": "object",
@@ -23349,7 +23774,8 @@
           },
           "valueSelected": {
             "type": "any",
-            "name": "valueSelected"
+            "name": "valueSelected",
+            "required": false
           }
         },
         "output": {
@@ -23377,15 +23803,18 @@
         "input": {
           "backgroundColor": {
             "type": "string",
-            "name": "backgroundColor"
+            "name": "backgroundColor",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "disabled": {
             "type": "boolean",
@@ -23394,11 +23823,13 @@
           },
           "disabledBackgroundColor": {
             "type": "string",
-            "name": "disabledBackgroundColor"
+            "name": "disabledBackgroundColor",
+            "required": false
           },
           "disabledLabelColor": {
             "type": "string",
-            "name": "disabledLabelColor"
+            "name": "disabledLabelColor",
+            "required": false
           },
           "fullWidth": {
             "type": "boolean",
@@ -23407,19 +23838,23 @@
           },
           "href": {
             "type": "string",
-            "name": "href"
+            "name": "href",
+            "required": false
           },
           "icon": {
             "type": "node",
-            "name": "icon"
+            "name": "icon",
+            "required": false
           },
           "label": {
             "type": "custom",
-            "name": "label"
+            "name": "label",
+            "required": false
           },
           "labelColor": {
             "type": "string",
-            "name": "labelColor"
+            "name": "labelColor",
+            "required": false
           },
           "labelPosition": {
             "type": "enum",
@@ -23428,37 +23863,44 @@
           },
           "labelStyle": {
             "type": "object",
-            "name": "labelStyle"
+            "name": "labelStyle",
+            "required": false
           },
           "onMouseDown": {
             "title": "Enable onMouseDown",
             "type": "boolean",
-            "name": "onMouseDown"
+            "name": "onMouseDown",
+            "required": false
           },
           "onMouseEnter": {
             "title": "Enable onMouseEnter",
             "type": "boolean",
-            "name": "onMouseEnter"
+            "name": "onMouseEnter",
+            "required": false
           },
           "onMouseLeave": {
             "title": "Enable onMouseLeave",
             "type": "boolean",
-            "name": "onMouseLeave"
+            "name": "onMouseLeave",
+            "required": false
           },
           "onMouseUp": {
             "title": "Enable onMouseUp",
             "type": "boolean",
-            "name": "onMouseUp"
+            "name": "onMouseUp",
+            "required": false
           },
           "onTouchEnd": {
             "title": "Enable onTouchEnd",
             "type": "boolean",
-            "name": "onTouchEnd"
+            "name": "onTouchEnd",
+            "required": false
           },
           "onTouchStart": {
             "title": "Enable onTouchStart",
             "type": "boolean",
-            "name": "onTouchStart"
+            "name": "onTouchStart",
+            "required": false
           },
           "primary": {
             "type": "boolean",
@@ -23467,7 +23909,8 @@
           },
           "rippleStyle": {
             "type": "object",
-            "name": "rippleStyle"
+            "name": "rippleStyle",
+            "required": false
           },
           "secondary": {
             "type": "boolean",
@@ -23476,7 +23919,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -23519,15 +23963,18 @@
         "input": {
           "color": {
             "type": "string",
-            "name": "color"
+            "name": "color",
+            "required": false
           },
           "left": {
             "type": "number",
-            "name": "left"
+            "name": "left",
+            "required": true
           },
           "loadingColor": {
             "type": "string",
-            "name": "loadingColor"
+            "name": "loadingColor",
+            "required": false
           },
           "percentage": {
             "type": "number",
@@ -23546,11 +23993,13 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "top": {
             "type": "number",
-            "name": "top"
+            "name": "top",
+            "required": true
           }
         },
         "output": {
@@ -23576,16 +24025,19 @@
           "componentClickAway": {
             "title": "Enable componentClickAway",
             "type": "boolean",
-            "name": "componentClickAway"
+            "name": "componentClickAway",
+            "required": false
           },
           "open": {
             "type": "boolean",
-            "name": "open"
+            "name": "open",
+            "required": true
           },
           "render": {
             "title": "Enable render",
             "type": "boolean",
-            "name": "render"
+            "name": "render",
+            "required": true
           },
           "useLayerForClickAway": {
             "type": "boolean",
@@ -23621,11 +24073,13 @@
         "input": {
           "childStyle": {
             "type": "object",
-            "name": "childStyle"
+            "name": "childStyle",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "enterDelay": {
             "type": "number",
@@ -23634,15 +24088,18 @@
           },
           "maxScale": {
             "type": "number",
-            "name": "maxScale"
+            "name": "maxScale",
+            "required": false
           },
           "minScale": {
             "type": "number",
-            "name": "minScale"
+            "name": "minScale",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -23667,7 +24124,8 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "enterDelay": {
             "type": "number",
@@ -23686,7 +24144,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -23716,7 +24175,8 @@
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "disabled": {
             "type": "boolean",
@@ -23725,23 +24185,28 @@
           },
           "errorStyle": {
             "type": "object",
-            "name": "errorStyle"
+            "name": "errorStyle",
+            "required": false
           },
           "errorText": {
             "type": "node",
-            "name": "errorText"
+            "name": "errorText",
+            "required": false
           },
           "floatingLabelFixed": {
             "type": "boolean",
-            "name": "floatingLabelFixed"
+            "name": "floatingLabelFixed",
+            "required": false
           },
           "floatingLabelStyle": {
             "type": "object",
-            "name": "floatingLabelStyle"
+            "name": "floatingLabelStyle",
+            "required": false
           },
           "floatingLabelText": {
             "type": "node",
-            "name": "floatingLabelText"
+            "name": "floatingLabelText",
+            "required": false
           },
           "fullWidth": {
             "type": "boolean",
@@ -23750,66 +24215,81 @@
           },
           "hintStyle": {
             "type": "object",
-            "name": "hintStyle"
+            "name": "hintStyle",
+            "required": false
           },
           "hintText": {
             "type": "node",
-            "name": "hintText"
+            "name": "hintText",
+            "required": false
           },
           "iconStyle": {
             "type": "object",
-            "name": "iconStyle"
+            "name": "iconStyle",
+            "required": false
           },
           "id": {
             "type": "string",
-            "name": "id"
+            "name": "id",
+            "required": false
           },
           "labelStyle": {
             "type": "object",
-            "name": "labelStyle"
+            "name": "labelStyle",
+            "required": false
           },
           "maxHeight": {
             "type": "number",
-            "name": "maxHeight"
+            "name": "maxHeight",
+            "required": false
           },
           "menuStyle": {
             "type": "object",
-            "name": "menuStyle"
+            "name": "menuStyle",
+            "required": false
           },
           "onBlur": {
             "title": "Enable onBlur",
             "type": "boolean",
-            "name": "onBlur"
+            "name": "onBlur",
+            "required": false
           },
           "onChange": {
             "title": "Enable onChange",
             "type": "boolean",
-            "name": "onChange"
+            "name": "onChange",
+            "required": false
           },
           "onFocus": {
             "title": "Enable onFocus",
             "type": "boolean",
-            "name": "onFocus"
+            "name": "onFocus",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "underlineDisabledStyle": {
             "type": "object",
-            "name": "underlineDisabledStyle"
+            "name": "underlineDisabledStyle",
+            "required": false
           },
           "underlineFocusStyle": {
             "type": "object",
-            "name": "underlineFocusStyle"
+            "name": "underlineFocusStyle",
+            "required": false
           },
           "underlineStyle": {
             "type": "object",
-            "name": "underlineStyle"
+            "name": "underlineStyle",
+            "required": false
           },
           "value": {
             "type": "any",
-            "name": "value"
+            "name": "value",
+            "required": false
           }
         },
         "output": {
@@ -23843,11 +24323,13 @@
         "input": {
           "childStyle": {
             "type": "object",
-            "name": "childStyle"
+            "name": "childStyle",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "direction": {
             "type": "enum",
@@ -23861,7 +24343,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -23886,11 +24369,13 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "direction": {
             "type": "string",
-            "name": "direction"
+            "name": "direction",
+            "required": false
           },
           "enterDelay": {
             "type": "number",
@@ -23900,11 +24385,13 @@
           "getLeaveDirection": {
             "title": "Enable getLeaveDirection",
             "type": "boolean",
-            "name": "getLeaveDirection"
+            "name": "getLeaveDirection",
+            "required": true
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -23937,11 +24424,13 @@
           },
           "defaultValue": {
             "type": "custom",
-            "name": "defaultValue"
+            "name": "defaultValue",
+            "required": false
           },
           "description": {
             "type": "custom",
-            "name": "description"
+            "name": "description",
+            "required": false
           },
           "disableFocusRipple": {
             "type": "boolean",
@@ -23955,7 +24444,8 @@
           },
           "error": {
             "type": "custom",
-            "name": "error"
+            "name": "error",
+            "required": false
           },
           "max": {
             "type": "custom",
@@ -23969,32 +24459,38 @@
           },
           "name": {
             "type": "string",
-            "name": "name"
+            "name": "name",
+            "required": false
           },
           "onBlur": {
             "title": "Enable onBlur",
             "type": "boolean",
-            "name": "onBlur"
+            "name": "onBlur",
+            "required": false
           },
           "onChange": {
             "title": "Enable onChange",
             "type": "boolean",
-            "name": "onChange"
+            "name": "onChange",
+            "required": false
           },
           "onDragStart": {
             "title": "Enable onDragStart",
             "type": "boolean",
-            "name": "onDragStart"
+            "name": "onDragStart",
+            "required": false
           },
           "onDragStop": {
             "title": "Enable onDragStop",
             "type": "boolean",
-            "name": "onDragStop"
+            "name": "onDragStop",
+            "required": false
           },
           "onFocus": {
             "title": "Enable onFocus",
             "type": "boolean",
-            "name": "onFocus"
+            "name": "onFocus",
+            "required": false
           },
           "required": {
             "type": "boolean",
@@ -24003,7 +24499,8 @@
           },
           "sliderStyle": {
             "type": "object",
-            "name": "sliderStyle"
+            "name": "sliderStyle",
+            "required": false
           },
           "step": {
             "type": "number",
@@ -24017,7 +24514,8 @@
           },
           "value": {
             "type": "custom",
-            "name": "value"
+            "name": "value",
+            "required": false
           }
         },
         "output": {
@@ -24057,41 +24555,50 @@
         "input": {
           "action": {
             "type": "node",
-            "name": "action"
+            "name": "action",
+            "required": false
           },
           "autoHideDuration": {
             "type": "number",
-            "name": "autoHideDuration"
+            "name": "autoHideDuration",
+            "required": false
           },
           "bodyStyle": {
             "type": "object",
-            "name": "bodyStyle"
+            "name": "bodyStyle",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "message": {
             "type": "node",
-            "name": "message"
+            "name": "message",
+            "required": true
           },
           "onActionTouchTap": {
             "title": "Enable onActionTouchTap",
             "type": "boolean",
-            "name": "onActionTouchTap"
+            "name": "onActionTouchTap",
+            "required": false
           },
           "onRequestClose": {
             "title": "Enable onRequestClose",
             "type": "boolean",
-            "name": "onRequestClose"
+            "name": "onRequestClose",
+            "required": false
           },
           "open": {
             "type": "boolean",
-            "name": "open"
+            "name": "open",
+            "required": true
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -24122,28 +24629,34 @@
         "input": {
           "action": {
             "type": "node",
-            "name": "action"
+            "name": "action",
+            "required": false
           },
           "message": {
             "type": "node",
-            "name": "message"
+            "name": "message",
+            "required": true
           },
           "onActionTouchTap": {
             "title": "Enable onActionTouchTap",
             "type": "boolean",
-            "name": "onActionTouchTap"
+            "name": "onActionTouchTap",
+            "required": false
           },
           "open": {
             "type": "boolean",
-            "name": "open"
+            "name": "open",
+            "required": true
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "width": {
             "type": "number",
-            "name": "width"
+            "name": "width",
+            "required": true
           }
         },
         "output": {
@@ -24771,31 +25284,38 @@
         "input": {
           "active": {
             "type": "boolean",
-            "name": "active"
+            "name": "active",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "completed": {
             "type": "boolean",
-            "name": "completed"
+            "name": "completed",
+            "required": false
           },
           "disabled": {
             "type": "boolean",
-            "name": "disabled"
+            "name": "disabled",
+            "required": false
           },
           "index": {
             "type": "number",
-            "name": "index"
+            "name": "index",
+            "required": false
           },
           "last": {
             "type": "boolean",
-            "name": "last"
+            "name": "last",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -24820,46 +25340,56 @@
         "input": {
           "active": {
             "type": "boolean",
-            "name": "active"
+            "name": "active",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "completed": {
             "type": "boolean",
-            "name": "completed"
+            "name": "completed",
+            "required": false
           },
           "disabled": {
             "type": "boolean",
-            "name": "disabled"
+            "name": "disabled",
+            "required": false
           },
           "icon": {
             "type": "union",
-            "name": "icon"
+            "name": "icon",
+            "required": false
           },
           "last": {
             "type": "boolean",
-            "name": "last"
+            "name": "last",
+            "required": false
           },
           "onMouseEnter": {
             "title": "Enable onMouseEnter",
             "type": "boolean",
-            "name": "onMouseEnter"
+            "name": "onMouseEnter",
+            "required": false
           },
           "onMouseLeave": {
             "title": "Enable onMouseLeave",
             "type": "boolean",
-            "name": "onMouseLeave"
+            "name": "onMouseLeave",
+            "required": false
           },
           "onTouchStart": {
             "title": "Enable onTouchStart",
             "type": "boolean",
-            "name": "onTouchStart"
+            "name": "onTouchStart",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -24893,7 +25423,8 @@
         "input": {
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -24918,23 +25449,28 @@
         "input": {
           "active": {
             "type": "boolean",
-            "name": "active"
+            "name": "active",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "completed": {
             "type": "boolean",
-            "name": "completed"
+            "name": "completed",
+            "required": false
           },
           "last": {
             "type": "boolean",
-            "name": "last"
+            "name": "last",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "transition": {
             "title": "Enable transition",
@@ -24973,31 +25509,38 @@
         "input": {
           "active": {
             "type": "boolean",
-            "name": "active"
+            "name": "active",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "completed": {
             "type": "boolean",
-            "name": "completed"
+            "name": "completed",
+            "required": false
           },
           "disabled": {
             "type": "boolean",
-            "name": "disabled"
+            "name": "disabled",
+            "required": false
           },
           "icon": {
             "type": "union",
-            "name": "icon"
+            "name": "icon",
+            "required": false
           },
           "last": {
             "type": "boolean",
-            "name": "last"
+            "name": "last",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -25022,11 +25565,13 @@
         "input": {
           "activeStep": {
             "type": "number",
-            "name": "activeStep"
+            "name": "activeStep",
+            "required": false
           },
           "children": {
             "type": "arrayOf",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "linear": {
             "type": "boolean",
@@ -25040,7 +25585,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -25065,7 +25611,8 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "inset": {
             "type": "boolean",
@@ -25074,7 +25621,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -25099,15 +25647,18 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "color": {
             "type": "string",
-            "name": "color"
+            "name": "color",
+            "required": false
           },
           "hoverColor": {
             "type": "string",
-            "name": "hoverColor"
+            "name": "hoverColor",
+            "required": false
           },
           "onMouseEnter": {
             "title": "Enable onMouseEnter",
@@ -25123,7 +25674,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "viewBox": {
             "type": "string",
@@ -25159,45 +25711,55 @@
         "input": {
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "icon": {
             "type": "node",
-            "name": "icon"
+            "name": "icon",
+            "required": false
           },
           "index": {
             "type": "any",
-            "name": "index"
+            "name": "index",
+            "required": false
           },
           "label": {
             "type": "node",
-            "name": "label"
+            "name": "label",
+            "required": false
           },
           "onActive": {
             "title": "Enable onActive",
             "type": "boolean",
-            "name": "onActive"
+            "name": "onActive",
+            "required": false
           },
           "onTouchTap": {
             "title": "Enable onTouchTap",
             "type": "boolean",
-            "name": "onTouchTap"
+            "name": "onTouchTap",
+            "required": false
           },
           "selected": {
             "type": "boolean",
-            "name": "selected"
+            "name": "selected",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "value": {
             "type": "any",
-            "name": "value"
+            "name": "value",
+            "required": false
           },
           "width": {
             "type": "string",
-            "name": "width"
+            "name": "width",
+            "required": false
           }
         },
         "output": {
@@ -25233,15 +25795,18 @@
           },
           "bodyStyle": {
             "type": "object",
-            "name": "bodyStyle"
+            "name": "bodyStyle",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "fixedFooter": {
             "type": "boolean",
@@ -25255,11 +25820,13 @@
           },
           "footerStyle": {
             "type": "object",
-            "name": "footerStyle"
+            "name": "footerStyle",
+            "required": false
           },
           "headerStyle": {
             "type": "object",
-            "name": "headerStyle"
+            "name": "headerStyle",
+            "required": false
           },
           "height": {
             "type": "string",
@@ -25274,32 +25841,38 @@
           "onCellClick": {
             "title": "Enable onCellClick",
             "type": "boolean",
-            "name": "onCellClick"
+            "name": "onCellClick",
+            "required": false
           },
           "onCellHover": {
             "title": "Enable onCellHover",
             "type": "boolean",
-            "name": "onCellHover"
+            "name": "onCellHover",
+            "required": false
           },
           "onCellHoverExit": {
             "title": "Enable onCellHoverExit",
             "type": "boolean",
-            "name": "onCellHoverExit"
+            "name": "onCellHoverExit",
+            "required": false
           },
           "onRowHover": {
             "title": "Enable onRowHover",
             "type": "boolean",
-            "name": "onRowHover"
+            "name": "onRowHover",
+            "required": false
           },
           "onRowHoverExit": {
             "title": "Enable onRowHoverExit",
             "type": "boolean",
-            "name": "onRowHoverExit"
+            "name": "onRowHoverExit",
+            "required": false
           },
           "onRowSelection": {
             "title": "Enable onRowSelection",
             "type": "boolean",
-            "name": "onRowSelection"
+            "name": "onRowSelection",
+            "required": false
           },
           "selectable": {
             "type": "boolean",
@@ -25308,11 +25881,13 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "wrapperStyle": {
             "type": "object",
-            "name": "wrapperStyle"
+            "name": "wrapperStyle",
+            "required": false
           }
         },
         "output": {
@@ -25360,11 +25935,13 @@
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "deselectOnClickaway": {
             "type": "boolean",
@@ -25384,32 +25961,38 @@
           "onCellClick": {
             "title": "Enable onCellClick",
             "type": "boolean",
-            "name": "onCellClick"
+            "name": "onCellClick",
+            "required": false
           },
           "onCellHover": {
             "title": "Enable onCellHover",
             "type": "boolean",
-            "name": "onCellHover"
+            "name": "onCellHover",
+            "required": false
           },
           "onCellHoverExit": {
             "title": "Enable onCellHoverExit",
             "type": "boolean",
-            "name": "onCellHoverExit"
+            "name": "onCellHoverExit",
+            "required": false
           },
           "onRowHover": {
             "title": "Enable onRowHover",
             "type": "boolean",
-            "name": "onRowHover"
+            "name": "onRowHover",
+            "required": false
           },
           "onRowHoverExit": {
             "title": "Enable onRowHoverExit",
             "type": "boolean",
-            "name": "onRowHoverExit"
+            "name": "onRowHoverExit",
+            "required": false
           },
           "onRowSelection": {
             "title": "Enable onRowSelection",
             "type": "boolean",
-            "name": "onRowSelection"
+            "name": "onRowSelection",
+            "required": false
           },
           "preScanRows": {
             "type": "boolean",
@@ -25423,11 +26006,13 @@
           },
           "showRowHover": {
             "type": "boolean",
-            "name": "showRowHover"
+            "name": "showRowHover",
+            "required": false
           },
           "stripedRows": {
             "type": "boolean",
-            "name": "stripedRows"
+            "name": "stripedRows",
+            "required": false
           },
           "style": {
             "type": "object",
@@ -25480,11 +26065,13 @@
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "style": {
             "type": "object",
@@ -25519,11 +26106,13 @@
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "displaySelectAll": {
             "type": "boolean",
@@ -25538,7 +26127,8 @@
           "onSelectAll": {
             "title": "Enable onSelectAll",
             "type": "boolean",
-            "name": "onSelectAll"
+            "name": "onSelectAll",
+            "required": false
           },
           "selectAllSelected": {
             "type": "boolean",
@@ -25547,7 +26137,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -25575,46 +26166,56 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "columnNumber": {
             "type": "number",
-            "name": "columnNumber"
+            "name": "columnNumber",
+            "required": false
           },
           "hoverable": {
             "type": "boolean",
-            "name": "hoverable"
+            "name": "hoverable",
+            "required": false
           },
           "onClick": {
             "title": "Enable onClick",
             "type": "boolean",
-            "name": "onClick"
+            "name": "onClick",
+            "required": false
           },
           "onHover": {
             "title": "Enable onHover",
             "type": "boolean",
-            "name": "onHover"
+            "name": "onHover",
+            "required": false
           },
           "onHoverExit": {
             "title": "Enable onHoverExit",
             "type": "boolean",
-            "name": "onHoverExit"
+            "name": "onHoverExit",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "tooltip": {
             "type": "string",
-            "name": "tooltip"
+            "name": "tooltip",
+            "required": false
           },
           "tooltipStyle": {
             "type": "object",
-            "name": "tooltipStyle"
+            "name": "tooltipStyle",
+            "required": false
           }
         },
         "output": {
@@ -25648,11 +26249,13 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "displayBorder": {
             "type": "boolean",
@@ -25672,36 +26275,43 @@
           "onCellClick": {
             "title": "Enable onCellClick",
             "type": "boolean",
-            "name": "onCellClick"
+            "name": "onCellClick",
+            "required": false
           },
           "onCellHover": {
             "title": "Enable onCellHover",
             "type": "boolean",
-            "name": "onCellHover"
+            "name": "onCellHover",
+            "required": false
           },
           "onCellHoverExit": {
             "title": "Enable onCellHoverExit",
             "type": "boolean",
-            "name": "onCellHoverExit"
+            "name": "onCellHoverExit",
+            "required": false
           },
           "onRowClick": {
             "title": "Enable onRowClick",
             "type": "boolean",
-            "name": "onRowClick"
+            "name": "onRowClick",
+            "required": false
           },
           "onRowHover": {
             "title": "Enable onRowHover",
             "type": "boolean",
-            "name": "onRowHover"
+            "name": "onRowHover",
+            "required": false
           },
           "onRowHoverExit": {
             "title": "Enable onRowHoverExit",
             "type": "boolean",
-            "name": "onRowHoverExit"
+            "name": "onRowHoverExit",
+            "required": false
           },
           "rowNumber": {
             "type": "number",
-            "name": "rowNumber"
+            "name": "rowNumber",
+            "required": false
           },
           "selectable": {
             "type": "boolean",
@@ -25720,7 +26330,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -25763,15 +26374,18 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "columnNumber": {
             "type": "number",
-            "name": "columnNumber"
+            "name": "columnNumber",
+            "required": false
           },
           "hoverable": {
             "type": "boolean",
@@ -25781,21 +26395,25 @@
           "onClick": {
             "title": "Enable onClick",
             "type": "boolean",
-            "name": "onClick"
+            "name": "onClick",
+            "required": false
           },
           "onHover": {
             "title": "Enable onHover",
             "type": "boolean",
-            "name": "onHover"
+            "name": "onHover",
+            "required": false
           },
           "onHoverExit": {
             "title": "Enable onHoverExit",
             "type": "boolean",
-            "name": "onHoverExit"
+            "name": "onHoverExit",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -25829,19 +26447,23 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "contentContainerClassName": {
             "type": "string",
-            "name": "contentContainerClassName"
+            "name": "contentContainerClassName",
+            "required": false
           },
           "contentContainerStyle": {
             "type": "object",
-            "name": "contentContainerStyle"
+            "name": "contentContainerStyle",
+            "required": false
           },
           "initialSelectedIndex": {
             "type": "number",
@@ -25850,7 +26472,8 @@
           },
           "inkBarStyle": {
             "type": "object",
-            "name": "inkBarStyle"
+            "name": "inkBarStyle",
+            "required": false
           },
           "onChange": {
             "title": "Enable onChange",
@@ -25860,20 +26483,24 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "tabItemContainerStyle": {
             "type": "object",
-            "name": "tabItemContainerStyle"
+            "name": "tabItemContainerStyle",
+            "required": false
           },
           "tabTemplate": {
             "title": "Enable tabTemplate",
             "type": "boolean",
-            "name": "tabTemplate"
+            "name": "tabTemplate",
+            "required": false
           },
           "value": {
             "type": "any",
-            "name": "value"
+            "name": "value",
+            "required": false
           }
         },
         "output": {
@@ -25904,11 +26531,13 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "selected": {
             "type": "boolean",
-            "name": "selected"
+            "name": "selected",
+            "required": false
           }
         },
         "output": {
@@ -25933,15 +26562,18 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "defaultValue": {
             "type": "any",
-            "name": "defaultValue"
+            "name": "defaultValue",
+            "required": false
           },
           "disabled": {
             "type": "boolean",
@@ -25950,11 +26582,13 @@
           },
           "errorStyle": {
             "type": "object",
-            "name": "errorStyle"
+            "name": "errorStyle",
+            "required": false
           },
           "errorText": {
             "type": "node",
-            "name": "errorText"
+            "name": "errorText",
+            "required": false
           },
           "floatingLabelFixed": {
             "type": "boolean",
@@ -25963,15 +26597,18 @@
           },
           "floatingLabelFocusStyle": {
             "type": "object",
-            "name": "floatingLabelFocusStyle"
+            "name": "floatingLabelFocusStyle",
+            "required": false
           },
           "floatingLabelStyle": {
             "type": "object",
-            "name": "floatingLabelStyle"
+            "name": "floatingLabelStyle",
+            "required": false
           },
           "floatingLabelText": {
             "type": "node",
-            "name": "floatingLabelText"
+            "name": "floatingLabelText",
+            "required": false
           },
           "fullWidth": {
             "type": "boolean",
@@ -25980,19 +26617,23 @@
           },
           "hintStyle": {
             "type": "object",
-            "name": "hintStyle"
+            "name": "hintStyle",
+            "required": false
           },
           "hintText": {
             "type": "node",
-            "name": "hintText"
+            "name": "hintText",
+            "required": false
           },
           "id": {
             "type": "string",
-            "name": "id"
+            "name": "id",
+            "required": false
           },
           "inputStyle": {
             "type": "object",
-            "name": "inputStyle"
+            "name": "inputStyle",
+            "required": false
           },
           "multiLine": {
             "type": "boolean",
@@ -26001,22 +26642,26 @@
           },
           "name": {
             "type": "string",
-            "name": "name"
+            "name": "name",
+            "required": false
           },
           "onBlur": {
             "title": "Enable onBlur",
             "type": "boolean",
-            "name": "onBlur"
+            "name": "onBlur",
+            "required": false
           },
           "onChange": {
             "title": "Enable onChange",
             "type": "boolean",
-            "name": "onChange"
+            "name": "onChange",
+            "required": false
           },
           "onFocus": {
             "title": "Enable onFocus",
             "type": "boolean",
-            "name": "onFocus"
+            "name": "onFocus",
+            "required": false
           },
           "rows": {
             "type": "number",
@@ -26025,15 +26670,18 @@
           },
           "rowsMax": {
             "type": "number",
-            "name": "rowsMax"
+            "name": "rowsMax",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "textareaStyle": {
             "type": "object",
-            "name": "textareaStyle"
+            "name": "textareaStyle",
+            "required": false
           },
           "type": {
             "type": "string",
@@ -26042,11 +26690,13 @@
           },
           "underlineDisabledStyle": {
             "type": "object",
-            "name": "underlineDisabledStyle"
+            "name": "underlineDisabledStyle",
+            "required": false
           },
           "underlineFocusStyle": {
             "type": "object",
-            "name": "underlineFocusStyle"
+            "name": "underlineFocusStyle",
+            "required": false
           },
           "underlineShow": {
             "type": "boolean",
@@ -26055,11 +26705,13 @@
           },
           "underlineStyle": {
             "type": "object",
-            "name": "underlineStyle"
+            "name": "underlineStyle",
+            "required": false
           },
           "value": {
             "type": "any",
-            "name": "value"
+            "name": "value",
+            "required": false
           }
         },
         "output": {
@@ -26093,7 +26745,8 @@
         "input": {
           "muiTheme": {
             "type": "object",
-            "name": "muiTheme"
+            "name": "muiTheme",
+            "required": true
           },
           "show": {
             "type": "boolean",
@@ -26102,11 +26755,13 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "text": {
             "type": "node",
-            "name": "text"
+            "name": "text",
+            "required": false
           }
         },
         "output": {
@@ -26131,11 +26786,13 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "disabled": {
             "type": "boolean",
@@ -26144,16 +26801,19 @@
           },
           "htmlFor": {
             "type": "string",
-            "name": "htmlFor"
+            "name": "htmlFor",
+            "required": false
           },
           "muiTheme": {
             "type": "object",
-            "name": "muiTheme"
+            "name": "muiTheme",
+            "required": true
           },
           "onTouchTap": {
             "title": "Enable onTouchTap",
             "type": "boolean",
-            "name": "onTouchTap"
+            "name": "onTouchTap",
+            "required": false
           },
           "shrink": {
             "type": "boolean",
@@ -26162,11 +26822,13 @@
           },
           "shrinkStyle": {
             "type": "object",
-            "name": "shrinkStyle"
+            "name": "shrinkStyle",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -26224,7 +26886,8 @@
           },
           "muiTheme": {
             "type": "object",
-            "name": "muiTheme"
+            "name": "muiTheme",
+            "required": true
           },
           "style": {
             "type": "object",
@@ -26259,7 +26922,8 @@
           },
           "format": {
             "type": "enum",
-            "name": "format"
+            "name": "format",
+            "required": false
           },
           "mode": {
             "type": "enum",
@@ -26269,21 +26933,25 @@
           "onSelectAffix": {
             "title": "Enable onSelectAffix",
             "type": "boolean",
-            "name": "onSelectAffix"
+            "name": "onSelectAffix",
+            "required": false
           },
           "onSelectHour": {
             "title": "Enable onSelectHour",
             "type": "boolean",
-            "name": "onSelectHour"
+            "name": "onSelectHour",
+            "required": false
           },
           "onSelectMin": {
             "title": "Enable onSelectMin",
             "type": "boolean",
-            "name": "onSelectMin"
+            "name": "onSelectMin",
+            "required": false
           },
           "selectedTime": {
             "type": "object",
-            "name": "selectedTime"
+            "name": "selectedTime",
+            "required": true
           }
         },
         "output": {
@@ -26332,11 +27000,13 @@
           },
           "dialogBodyStyle": {
             "type": "object",
-            "name": "dialogBodyStyle"
+            "name": "dialogBodyStyle",
+            "required": false
           },
           "dialogStyle": {
             "type": "object",
-            "name": "dialogStyle"
+            "name": "dialogStyle",
+            "required": false
           },
           "disabled": {
             "type": "boolean",
@@ -26356,27 +27026,32 @@
           "onChange": {
             "title": "Enable onChange",
             "type": "boolean",
-            "name": "onChange"
+            "name": "onChange",
+            "required": false
           },
           "onDismiss": {
             "title": "Enable onDismiss",
             "type": "boolean",
-            "name": "onDismiss"
+            "name": "onDismiss",
+            "required": false
           },
           "onFocus": {
             "title": "Enable onFocus",
             "type": "boolean",
-            "name": "onFocus"
+            "name": "onFocus",
+            "required": false
           },
           "onShow": {
             "title": "Enable onShow",
             "type": "boolean",
-            "name": "onShow"
+            "name": "onShow",
+            "required": false
           },
           "onTouchTap": {
             "title": "Enable onTouchTap",
             "type": "boolean",
-            "name": "onTouchTap"
+            "name": "onTouchTap",
+            "required": false
           },
           "pedantic": {
             "type": "boolean",
@@ -26390,7 +27065,8 @@
           },
           "textFieldStyle": {
             "type": "object",
-            "name": "textFieldStyle"
+            "name": "textFieldStyle",
+            "required": false
           },
           "value": {
             "type": "object",
@@ -26435,11 +27111,13 @@
         "input": {
           "autoOk": {
             "type": "boolean",
-            "name": "autoOk"
+            "name": "autoOk",
+            "required": false
           },
           "bodyStyle": {
             "type": "object",
-            "name": "bodyStyle"
+            "name": "bodyStyle",
+            "required": false
           },
           "cancelLabel": {
             "type": "node",
@@ -26448,11 +27126,13 @@
           },
           "format": {
             "type": "enum",
-            "name": "format"
+            "name": "format",
+            "required": false
           },
           "initialTime": {
             "type": "object",
-            "name": "initialTime"
+            "name": "initialTime",
+            "required": false
           },
           "okLabel": {
             "type": "node",
@@ -26462,21 +27142,25 @@
           "onAccept": {
             "title": "Enable onAccept",
             "type": "boolean",
-            "name": "onAccept"
+            "name": "onAccept",
+            "required": false
           },
           "onDismiss": {
             "title": "Enable onDismiss",
             "type": "boolean",
-            "name": "onDismiss"
+            "name": "onDismiss",
+            "required": false
           },
           "onShow": {
             "title": "Enable onShow",
             "type": "boolean",
-            "name": "onShow"
+            "name": "onShow",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -26520,19 +27204,23 @@
           },
           "elementStyle": {
             "type": "object",
-            "name": "elementStyle"
+            "name": "elementStyle",
+            "required": false
           },
           "iconStyle": {
             "type": "object",
-            "name": "iconStyle"
+            "name": "iconStyle",
+            "required": false
           },
           "inputStyle": {
             "type": "object",
-            "name": "inputStyle"
+            "name": "inputStyle",
+            "required": false
           },
           "label": {
             "type": "string",
-            "name": "label"
+            "name": "label",
+            "required": false
           },
           "labelPosition": {
             "type": "enum",
@@ -26541,36 +27229,44 @@
           },
           "labelStyle": {
             "type": "object",
-            "name": "labelStyle"
+            "name": "labelStyle",
+            "required": false
           },
           "onToggle": {
             "title": "Enable onToggle",
             "type": "boolean",
-            "name": "onToggle"
+            "name": "onToggle",
+            "required": false
           },
           "rippleStyle": {
             "type": "object",
-            "name": "rippleStyle"
+            "name": "rippleStyle",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "thumbStyle": {
             "type": "object",
-            "name": "thumbStyle"
+            "name": "thumbStyle",
+            "required": false
           },
           "toggled": {
             "type": "boolean",
-            "name": "toggled"
+            "name": "toggled",
+            "required": false
           },
           "trackStyle": {
             "type": "object",
-            "name": "trackStyle"
+            "name": "trackStyle",
+            "required": false
           },
           "valueLink": {
             "type": "object",
-            "name": "valueLink"
+            "name": "valueLink",
+            "required": false
           }
         },
         "output": {
@@ -26758,11 +27454,13 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "noGutter": {
             "type": "boolean",
@@ -26771,7 +27469,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -26796,11 +27495,13 @@
         "input": {
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "firstChild": {
             "type": "boolean",
@@ -26814,7 +27515,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -26839,11 +27541,13 @@
         "input": {
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -26868,15 +27572,18 @@
         "input": {
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "text": {
             "type": "string",
-            "name": "text"
+            "name": "text",
+            "required": false
           }
         },
         "output": {
@@ -26901,31 +27608,38 @@
         "input": {
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "horizontalPosition": {
             "type": "enum",
-            "name": "horizontalPosition"
+            "name": "horizontalPosition",
+            "required": false
           },
           "label": {
             "type": "node",
-            "name": "label"
+            "name": "label",
+            "required": true
           },
           "show": {
             "type": "boolean",
-            "name": "show"
+            "name": "show",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "touch": {
             "type": "boolean",
-            "name": "touch"
+            "name": "touch",
+            "required": false
           },
           "verticalPosition": {
             "type": "enum",
-            "name": "verticalPosition"
+            "name": "verticalPosition",
+            "required": false
           }
         },
         "output": {
@@ -26955,23 +27669,28 @@
           },
           "centerRipple": {
             "type": "boolean",
-            "name": "centerRipple"
+            "name": "centerRipple",
+            "required": false
           },
           "children": {
             "type": "node",
-            "name": "children"
+            "name": "children",
+            "required": false
           },
           "color": {
             "type": "string",
-            "name": "color"
+            "name": "color",
+            "required": false
           },
           "opacity": {
             "type": "number",
-            "name": "opacity"
+            "name": "opacity",
+            "required": false
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           }
         },
         "output": {
@@ -26996,12 +27715,14 @@
         "input": {
           "className": {
             "type": "string",
-            "name": "className"
+            "name": "className",
+            "required": false
           },
           "onTouchTap": {
             "title": "Enable onTouchTap",
             "type": "boolean",
-            "name": "onTouchTap"
+            "name": "onTouchTap",
+            "required": false
           },
           "selected": {
             "type": "boolean",
@@ -27010,7 +27731,8 @@
           },
           "year": {
             "type": "number",
-            "name": "year"
+            "name": "year",
+            "required": false
           }
         },
         "output": {
@@ -27028,17 +27750,16 @@
       "type": "flow",
       "nodes": [
         {
-          "id": "AutoComplete",
-          "title": "AutoComplete",
+          "id": "MuiThemeProvider",
+          "title": "MuiThemeProvider",
           "ns": "react-material-ui",
-          "name": "AutoComplete",
-          "context": {
-            "dataSource": [
-              "aaaaa",
-              "bbbbb",
-              "ccccc"
-            ]
-          }
+          "name": "MuiThemeProvider"
+        },
+        {
+          "id": "Star",
+          "title": "Star",
+          "ns": "react-material-ui",
+          "name": "ToggleStar"
         },
         {
           "id": "Render",
@@ -27077,7 +27798,20 @@
       "links": [
         {
           "source": {
-            "id": "AutoComplete",
+            "id": "Star",
+            "port": "component"
+          },
+          "target": {
+            "id": "MuiThemeProvider",
+            "port": "children"
+          },
+          "metadata": {
+            "title": "Star component -> children MuiThemeProvider"
+          }
+        },
+        {
+          "source": {
+            "id": "MuiThemeProvider",
             "port": "component"
           },
           "target": {
@@ -27085,7 +27819,7 @@
             "port": "element"
           },
           "metadata": {
-            "title": "AutoComplete component -> element Render"
+            "title": "MuiThemeProvider component -> element Render"
           }
         },
         {

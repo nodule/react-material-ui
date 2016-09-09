@@ -12,28 +12,34 @@
     "input": {
       "displayDate": {
         "type": "object",
-        "name": "displayDate"
+        "name": "displayDate",
+        "required": true
       },
       "maxDate": {
         "type": "object",
-        "name": "maxDate"
+        "name": "maxDate",
+        "required": false
       },
       "minDate": {
         "type": "object",
-        "name": "minDate"
+        "name": "minDate",
+        "required": false
       },
       "onTouchTapYear": {
         "title": "Enable onTouchTapYear",
         "type": "boolean",
-        "name": "onTouchTapYear"
+        "name": "onTouchTapYear",
+        "required": false
       },
       "selectedDate": {
         "type": "object",
-        "name": "selectedDate"
+        "name": "selectedDate",
+        "required": true
       },
       "wordings": {
         "type": "object",
-        "name": "wordings"
+        "name": "wordings",
+        "required": false
       }
     },
     "output": {

@@ -17,11 +17,13 @@ module.exports = {
       },
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       className: {
         type: "string",
-        name: "className"
+        name: "className",
+        required: false
       },
       style: {
         type: "object",

@@ -17,7 +17,8 @@ module.exports = {
       },
       color: {
         type: "string",
-        name: "color"
+        name: "color",
+        required: false
       },
       opacity: {
         type: "number",
@@ -26,11 +27,13 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       touchGenerated: {
         type: "boolean",
-        name: "touchGenerated"
+        name: "touchGenerated",
+        required: false
       }
     },
     output: {

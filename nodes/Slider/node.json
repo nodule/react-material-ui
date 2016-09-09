@@ -17,11 +17,13 @@
       },
       "defaultValue": {
         "type": "custom",
-        "name": "defaultValue"
+        "name": "defaultValue",
+        "required": false
       },
       "description": {
         "type": "custom",
-        "name": "description"
+        "name": "description",
+        "required": false
       },
       "disableFocusRipple": {
         "type": "boolean",
@@ -35,7 +37,8 @@
       },
       "error": {
         "type": "custom",
-        "name": "error"
+        "name": "error",
+        "required": false
       },
       "max": {
         "type": "custom",
@@ -49,32 +52,38 @@
       },
       "name": {
         "type": "string",
-        "name": "name"
+        "name": "name",
+        "required": false
       },
       "onBlur": {
         "title": "Enable onBlur",
         "type": "boolean",
-        "name": "onBlur"
+        "name": "onBlur",
+        "required": false
       },
       "onChange": {
         "title": "Enable onChange",
         "type": "boolean",
-        "name": "onChange"
+        "name": "onChange",
+        "required": false
       },
       "onDragStart": {
         "title": "Enable onDragStart",
         "type": "boolean",
-        "name": "onDragStart"
+        "name": "onDragStart",
+        "required": false
       },
       "onDragStop": {
         "title": "Enable onDragStop",
         "type": "boolean",
-        "name": "onDragStop"
+        "name": "onDragStop",
+        "required": false
       },
       "onFocus": {
         "title": "Enable onFocus",
         "type": "boolean",
-        "name": "onFocus"
+        "name": "onFocus",
+        "required": false
       },
       "required": {
         "type": "boolean",
@@ -83,7 +92,8 @@
       },
       "sliderStyle": {
         "type": "object",
-        "name": "sliderStyle"
+        "name": "sliderStyle",
+        "required": false
       },
       "step": {
         "type": "number",
@@ -97,7 +107,8 @@
       },
       "value": {
         "type": "custom",
-        "name": "value"
+        "name": "value",
+        "required": false
       }
     },
     "output": {

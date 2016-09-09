@@ -12,15 +12,18 @@ module.exports = {
     input: {
       backgroundColor: {
         type: "string",
-        name: "backgroundColor"
+        name: "backgroundColor",
+        required: false
       },
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       className: {
         type: "string",
-        name: "className"
+        name: "className",
+        required: false
       },
       disabled: {
         type: "boolean",
@@ -29,19 +32,23 @@ module.exports = {
       },
       disabledColor: {
         type: "string",
-        name: "disabledColor"
+        name: "disabledColor",
+        required: false
       },
       href: {
         type: "string",
-        name: "href"
+        name: "href",
+        required: false
       },
       iconClassName: {
         type: "string",
-        name: "iconClassName"
+        name: "iconClassName",
+        required: false
       },
       iconStyle: {
         type: "object",
-        name: "iconStyle"
+        name: "iconStyle",
+        required: false
       },
       mini: {
         type: "boolean",
@@ -51,32 +58,38 @@ module.exports = {
       onMouseDown: {
         title: "Enable onMouseDown",
         type: "boolean",
-        name: "onMouseDown"
+        name: "onMouseDown",
+        required: false
       },
       onMouseEnter: {
         title: "Enable onMouseEnter",
         type: "boolean",
-        name: "onMouseEnter"
+        name: "onMouseEnter",
+        required: false
       },
       onMouseLeave: {
         title: "Enable onMouseLeave",
         type: "boolean",
-        name: "onMouseLeave"
+        name: "onMouseLeave",
+        required: false
       },
       onMouseUp: {
         title: "Enable onMouseUp",
         type: "boolean",
-        name: "onMouseUp"
+        name: "onMouseUp",
+        required: false
       },
       onTouchEnd: {
         title: "Enable onTouchEnd",
         type: "boolean",
-        name: "onTouchEnd"
+        name: "onTouchEnd",
+        required: false
       },
       onTouchStart: {
         title: "Enable onTouchStart",
         type: "boolean",
-        name: "onTouchStart"
+        name: "onTouchStart",
+        required: false
       },
       secondary: {
         type: "boolean",
@@ -85,7 +98,8 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       zDepth: {
         type: "custom",

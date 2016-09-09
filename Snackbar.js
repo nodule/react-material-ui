@@ -12,41 +12,50 @@ module.exports = {
     input: {
       action: {
         type: "node",
-        name: "action"
+        name: "action",
+        required: false
       },
       autoHideDuration: {
         type: "number",
-        name: "autoHideDuration"
+        name: "autoHideDuration",
+        required: false
       },
       bodyStyle: {
         type: "object",
-        name: "bodyStyle"
+        name: "bodyStyle",
+        required: false
       },
       className: {
         type: "string",
-        name: "className"
+        name: "className",
+        required: false
       },
       message: {
         type: "node",
-        name: "message"
+        name: "message",
+        required: true
       },
       onActionTouchTap: {
         title: "Enable onActionTouchTap",
         type: "boolean",
-        name: "onActionTouchTap"
+        name: "onActionTouchTap",
+        required: false
       },
       onRequestClose: {
         title: "Enable onRequestClose",
         type: "boolean",
-        name: "onRequestClose"
+        name: "onRequestClose",
+        required: false
       },
       open: {
         type: "boolean",
-        name: "open"
+        name: "open",
+        required: true
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

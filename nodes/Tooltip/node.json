@@ -12,31 +12,38 @@
     "input": {
       "className": {
         "type": "string",
-        "name": "className"
+        "name": "className",
+        "required": false
       },
       "horizontalPosition": {
         "type": "enum",
-        "name": "horizontalPosition"
+        "name": "horizontalPosition",
+        "required": false
       },
       "label": {
         "type": "node",
-        "name": "label"
+        "name": "label",
+        "required": true
       },
       "show": {
         "type": "boolean",
-        "name": "show"
+        "name": "show",
+        "required": false
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       },
       "touch": {
         "type": "boolean",
-        "name": "touch"
+        "name": "touch",
+        "required": false
       },
       "verticalPosition": {
         "type": "enum",
-        "name": "verticalPosition"
+        "name": "verticalPosition",
+        "required": false
       }
     },
     "output": {

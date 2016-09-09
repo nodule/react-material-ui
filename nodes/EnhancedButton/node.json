@@ -12,11 +12,13 @@
     "input": {
       "centerRipple": {
         "type": "boolean",
-        "name": "centerRipple"
+        "name": "centerRipple",
+        "required": false
       },
       "children": {
         "type": "node",
-        "name": "children"
+        "name": "children",
+        "required": false
       },
       "containerElement": {
         "type": "union",
@@ -25,35 +27,43 @@
       },
       "disableFocusRipple": {
         "type": "boolean",
-        "name": "disableFocusRipple"
+        "name": "disableFocusRipple",
+        "required": false
       },
       "disableKeyboardFocus": {
         "type": "boolean",
-        "name": "disableKeyboardFocus"
+        "name": "disableKeyboardFocus",
+        "required": false
       },
       "disableTouchRipple": {
         "type": "boolean",
-        "name": "disableTouchRipple"
+        "name": "disableTouchRipple",
+        "required": false
       },
       "disabled": {
         "type": "boolean",
-        "name": "disabled"
+        "name": "disabled",
+        "required": false
       },
       "focusRippleColor": {
         "type": "string",
-        "name": "focusRippleColor"
+        "name": "focusRippleColor",
+        "required": false
       },
       "focusRippleOpacity": {
         "type": "number",
-        "name": "focusRippleOpacity"
+        "name": "focusRippleOpacity",
+        "required": false
       },
       "href": {
         "type": "string",
-        "name": "href"
+        "name": "href",
+        "required": false
       },
       "keyboardFocused": {
         "type": "boolean",
-        "name": "keyboardFocused"
+        "name": "keyboardFocused",
+        "required": false
       },
       "onBlur": {
         "title": "Enable onBlur",
@@ -135,7 +145,8 @@
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       },
       "tabIndex": {
         "type": "number",
@@ -144,11 +155,13 @@
       },
       "touchRippleColor": {
         "type": "string",
-        "name": "touchRippleColor"
+        "name": "touchRippleColor",
+        "required": false
       },
       "touchRippleOpacity": {
         "type": "number",
-        "name": "touchRippleOpacity"
+        "name": "touchRippleOpacity",
+        "required": false
       },
       "type": {
         "type": "string",

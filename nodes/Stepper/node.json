@@ -12,11 +12,13 @@
     "input": {
       "activeStep": {
         "type": "number",
-        "name": "activeStep"
+        "name": "activeStep",
+        "required": false
       },
       "children": {
         "type": "arrayOf",
-        "name": "children"
+        "name": "children",
+        "required": false
       },
       "linear": {
         "type": "boolean",
@@ -30,7 +32,8 @@
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       }
     },
     "output": {

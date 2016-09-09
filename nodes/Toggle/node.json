@@ -22,19 +22,23 @@
       },
       "elementStyle": {
         "type": "object",
-        "name": "elementStyle"
+        "name": "elementStyle",
+        "required": false
       },
       "iconStyle": {
         "type": "object",
-        "name": "iconStyle"
+        "name": "iconStyle",
+        "required": false
       },
       "inputStyle": {
         "type": "object",
-        "name": "inputStyle"
+        "name": "inputStyle",
+        "required": false
       },
       "label": {
         "type": "string",
-        "name": "label"
+        "name": "label",
+        "required": false
       },
       "labelPosition": {
         "type": "enum",
@@ -43,36 +47,44 @@
       },
       "labelStyle": {
         "type": "object",
-        "name": "labelStyle"
+        "name": "labelStyle",
+        "required": false
       },
       "onToggle": {
         "title": "Enable onToggle",
         "type": "boolean",
-        "name": "onToggle"
+        "name": "onToggle",
+        "required": false
       },
       "rippleStyle": {
         "type": "object",
-        "name": "rippleStyle"
+        "name": "rippleStyle",
+        "required": false
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       },
       "thumbStyle": {
         "type": "object",
-        "name": "thumbStyle"
+        "name": "thumbStyle",
+        "required": false
       },
       "toggled": {
         "type": "boolean",
-        "name": "toggled"
+        "name": "toggled",
+        "required": false
       },
       "trackStyle": {
         "type": "object",
-        "name": "trackStyle"
+        "name": "trackStyle",
+        "required": false
       },
       "valueLink": {
         "type": "object",
-        "name": "valueLink"
+        "name": "valueLink",
+        "required": false
       }
     },
     "output": {

@@ -12,7 +12,8 @@ module.exports = {
     input: {
       anchorEl: {
         type: "object",
-        name: "anchorEl"
+        name: "anchorEl",
+        required: false
       },
       anchorOrigin: {
         type: "custom",
@@ -27,7 +28,8 @@ module.exports = {
       animation: {
         title: "Enable animation",
         type: "boolean",
-        name: "animation"
+        name: "animation",
+        required: false
       },
       autoCloseWhenOffScreen: {
         type: "boolean",
@@ -41,11 +43,13 @@ module.exports = {
       },
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       className: {
         type: "string",
-        name: "className"
+        name: "className",
+        required: false
       },
       onRequestClose: {
         title: "Enable onRequestClose",

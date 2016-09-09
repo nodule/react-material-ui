@@ -12,45 +12,55 @@
     "input": {
       "className": {
         "type": "string",
-        "name": "className"
+        "name": "className",
+        "required": false
       },
       "icon": {
         "type": "node",
-        "name": "icon"
+        "name": "icon",
+        "required": false
       },
       "index": {
         "type": "any",
-        "name": "index"
+        "name": "index",
+        "required": false
       },
       "label": {
         "type": "node",
-        "name": "label"
+        "name": "label",
+        "required": false
       },
       "onActive": {
         "title": "Enable onActive",
         "type": "boolean",
-        "name": "onActive"
+        "name": "onActive",
+        "required": false
       },
       "onTouchTap": {
         "title": "Enable onTouchTap",
         "type": "boolean",
-        "name": "onTouchTap"
+        "name": "onTouchTap",
+        "required": false
       },
       "selected": {
         "type": "boolean",
-        "name": "selected"
+        "name": "selected",
+        "required": false
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       },
       "value": {
         "type": "any",
-        "name": "value"
+        "name": "value",
+        "required": false
       },
       "width": {
         "type": "string",
-        "name": "width"
+        "name": "width",
+        "required": false
       }
     },
     "output": {

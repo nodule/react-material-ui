@@ -12,37 +12,45 @@
     "input": {
       "autoOk": {
         "type": "boolean",
-        "name": "autoOk"
+        "name": "autoOk",
+        "required": false
       },
       "displayDate": {
         "type": "object",
-        "name": "displayDate"
+        "name": "displayDate",
+        "required": true
       },
       "firstDayOfWeek": {
         "type": "number",
-        "name": "firstDayOfWeek"
+        "name": "firstDayOfWeek",
+        "required": false
       },
       "maxDate": {
         "type": "object",
-        "name": "maxDate"
+        "name": "maxDate",
+        "required": false
       },
       "minDate": {
         "type": "object",
-        "name": "minDate"
+        "name": "minDate",
+        "required": false
       },
       "onTouchTapDay": {
         "title": "Enable onTouchTapDay",
         "type": "boolean",
-        "name": "onTouchTapDay"
+        "name": "onTouchTapDay",
+        "required": false
       },
       "selectedDate": {
         "type": "object",
-        "name": "selectedDate"
+        "name": "selectedDate",
+        "required": true
       },
       "shouldDisableDate": {
         "title": "Enable shouldDisableDate",
         "type": "boolean",
-        "name": "shouldDisableDate"
+        "name": "shouldDisableDate",
+        "required": false
       }
     },
     "output": {

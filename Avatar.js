@@ -12,23 +12,28 @@ module.exports = {
     input: {
       backgroundColor: {
         type: "string",
-        name: "backgroundColor"
+        name: "backgroundColor",
+        required: false
       },
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       className: {
         type: "string",
-        name: "className"
+        name: "className",
+        required: false
       },
       color: {
         type: "string",
-        name: "color"
+        name: "color",
+        required: false
       },
       icon: {
         type: "element",
-        name: "icon"
+        name: "icon",
+        required: false
       },
       size: {
         type: "number",
@@ -37,11 +42,13 @@ module.exports = {
       },
       src: {
         type: "string",
-        name: "src"
+        name: "src",
+        required: false
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

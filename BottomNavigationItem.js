@@ -12,15 +12,18 @@ module.exports = {
     input: {
       icon: {
         type: "node",
-        name: "icon"
+        name: "icon",
+        required: false
       },
       label: {
         type: "node",
-        name: "label"
+        name: "label",
+        required: false
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

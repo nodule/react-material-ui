@@ -12,132 +12,162 @@ module.exports = {
     input: {
       checked: {
         type: "boolean",
-        name: "checked"
+        name: "checked",
+        required: false
       },
       className: {
         type: "string",
-        name: "className"
+        name: "className",
+        required: false
       },
       defaultChecked: {
         type: "boolean",
-        name: "defaultChecked"
+        name: "defaultChecked",
+        required: false
       },
       disableFocusRipple: {
         type: "boolean",
-        name: "disableFocusRipple"
+        name: "disableFocusRipple",
+        required: false
       },
       disableTouchRipple: {
         type: "boolean",
-        name: "disableTouchRipple"
+        name: "disableTouchRipple",
+        required: false
       },
       disabled: {
         type: "boolean",
-        name: "disabled"
+        name: "disabled",
+        required: false
       },
       iconStyle: {
         type: "object",
-        name: "iconStyle"
+        name: "iconStyle",
+        required: false
       },
       inputStyle: {
         type: "object",
-        name: "inputStyle"
+        name: "inputStyle",
+        required: false
       },
       inputType: {
         type: "string",
-        name: "inputType"
+        name: "inputType",
+        required: true
       },
       label: {
         type: "node",
-        name: "label"
+        name: "label",
+        required: false
       },
       labelPosition: {
         type: "enum",
-        name: "labelPosition"
+        name: "labelPosition",
+        required: false
       },
       labelStyle: {
         type: "object",
-        name: "labelStyle"
+        name: "labelStyle",
+        required: false
       },
       name: {
         type: "string",
-        name: "name"
+        name: "name",
+        required: false
       },
       onBlur: {
         title: "Enable onBlur",
         type: "boolean",
-        name: "onBlur"
+        name: "onBlur",
+        required: false
       },
       onFocus: {
         title: "Enable onFocus",
         type: "boolean",
-        name: "onFocus"
+        name: "onFocus",
+        required: false
       },
       onMouseDown: {
         title: "Enable onMouseDown",
         type: "boolean",
-        name: "onMouseDown"
+        name: "onMouseDown",
+        required: false
       },
       onMouseLeave: {
         title: "Enable onMouseLeave",
         type: "boolean",
-        name: "onMouseLeave"
+        name: "onMouseLeave",
+        required: false
       },
       onMouseUp: {
         title: "Enable onMouseUp",
         type: "boolean",
-        name: "onMouseUp"
+        name: "onMouseUp",
+        required: false
       },
       onParentShouldUpdate: {
         title: "Enable onParentShouldUpdate",
         type: "boolean",
-        name: "onParentShouldUpdate"
+        name: "onParentShouldUpdate",
+        required: false
       },
       onSwitch: {
         title: "Enable onSwitch",
         type: "boolean",
-        name: "onSwitch"
+        name: "onSwitch",
+        required: false
       },
       onTouchEnd: {
         title: "Enable onTouchEnd",
         type: "boolean",
-        name: "onTouchEnd"
+        name: "onTouchEnd",
+        required: false
       },
       onTouchStart: {
         title: "Enable onTouchStart",
         type: "boolean",
-        name: "onTouchStart"
+        name: "onTouchStart",
+        required: false
       },
       rippleColor: {
         type: "string",
-        name: "rippleColor"
+        name: "rippleColor",
+        required: false
       },
       rippleStyle: {
         type: "object",
-        name: "rippleStyle"
+        name: "rippleStyle",
+        required: false
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       switchElement: {
         type: "element",
-        name: "switchElement"
+        name: "switchElement",
+        required: true
       },
       switched: {
         type: "boolean",
-        name: "switched"
+        name: "switched",
+        required: true
       },
       thumbStyle: {
         type: "object",
-        name: "thumbStyle"
+        name: "thumbStyle",
+        required: false
       },
       trackStyle: {
         type: "object",
-        name: "trackStyle"
+        name: "trackStyle",
+        required: false
       },
       value: {
         type: "any",
-        name: "value"
+        name: "value",
+        required: false
       }
     },
     output: {

@@ -12,19 +12,23 @@ module.exports = {
     input: {
       color: {
         type: "string",
-        name: "color"
+        name: "color",
+        required: false
       },
       left: {
         type: "string",
-        name: "left"
+        name: "left",
+        required: true
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       width: {
         type: "string",
-        name: "width"
+        name: "width",
+        required: true
       }
     },
     output: {

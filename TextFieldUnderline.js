@@ -42,7 +42,8 @@ module.exports = {
       },
       muiTheme: {
         type: "object",
-        name: "muiTheme"
+        name: "muiTheme",
+        required: true
       },
       style: {
         type: "object",

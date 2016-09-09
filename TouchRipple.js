@@ -17,23 +17,28 @@ module.exports = {
       },
       centerRipple: {
         type: "boolean",
-        name: "centerRipple"
+        name: "centerRipple",
+        required: false
       },
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       color: {
         type: "string",
-        name: "color"
+        name: "color",
+        required: false
       },
       opacity: {
         type: "number",
-        name: "opacity"
+        name: "opacity",
+        required: false
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

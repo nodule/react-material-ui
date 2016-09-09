@@ -17,7 +17,8 @@ module.exports = {
       },
       afterStyle: {
         type: "object",
-        name: "afterStyle"
+        name: "afterStyle",
+        required: false
       },
       beforeElementType: {
         type: "string",
@@ -26,11 +27,13 @@ module.exports = {
       },
       beforeStyle: {
         type: "object",
-        name: "beforeStyle"
+        name: "beforeStyle",
+        required: false
       },
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       elementType: {
         type: "string",
@@ -39,7 +42,8 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

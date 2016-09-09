@@ -12,7 +12,8 @@ module.exports = {
     input: {
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       circle: {
         type: "boolean",
@@ -26,7 +27,8 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       transitionEnabled: {
         type: "boolean",

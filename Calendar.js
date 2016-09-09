@@ -18,11 +18,13 @@ module.exports = {
       },
       autoOk: {
         type: "boolean",
-        name: "autoOk"
+        name: "autoOk",
+        required: false
       },
       cancelLabel: {
         type: "node",
-        name: "cancelLabel"
+        name: "cancelLabel",
+        required: false
       },
       disableYearSelection: {
         type: "boolean",
@@ -31,7 +33,8 @@ module.exports = {
       },
       firstDayOfWeek: {
         type: "number",
-        name: "firstDayOfWeek"
+        name: "firstDayOfWeek",
+        required: false
       },
       initialDate: {
         type: "object",
@@ -55,35 +58,42 @@ module.exports = {
       },
       mode: {
         type: "enum",
-        name: "mode"
+        name: "mode",
+        required: false
       },
       okLabel: {
         type: "node",
-        name: "okLabel"
+        name: "okLabel",
+        required: false
       },
       onTouchTapCancel: {
         title: "Enable onTouchTapCancel",
         type: "boolean",
-        name: "onTouchTapCancel"
+        name: "onTouchTapCancel",
+        required: false
       },
       onTouchTapDay: {
         title: "Enable onTouchTapDay",
         type: "boolean",
-        name: "onTouchTapDay"
+        name: "onTouchTapDay",
+        required: false
       },
       onTouchTapOk: {
         title: "Enable onTouchTapOk",
         type: "boolean",
-        name: "onTouchTapOk"
+        name: "onTouchTapOk",
+        required: false
       },
       open: {
         type: "boolean",
-        name: "open"
+        name: "open",
+        required: false
       },
       shouldDisableDate: {
         title: "Enable shouldDisableDate",
         type: "boolean",
-        name: "shouldDisableDate"
+        name: "shouldDisableDate",
+        required: false
       }
     },
     output: {

@@ -18,7 +18,8 @@ module.exports = {
       animation: {
         title: "Enable animation",
         type: "boolean",
-        name: "animation"
+        name: "animation",
+        required: false
       },
       autoWidth: {
         type: "boolean",
@@ -27,11 +28,13 @@ module.exports = {
       },
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       className: {
         type: "string",
-        name: "className"
+        name: "className",
+        required: false
       },
       disabled: {
         type: "boolean",
@@ -40,15 +43,18 @@ module.exports = {
       },
       iconStyle: {
         type: "object",
-        name: "iconStyle"
+        name: "iconStyle",
+        required: false
       },
       labelStyle: {
         type: "object",
-        name: "labelStyle"
+        name: "labelStyle",
+        required: false
       },
       listStyle: {
         type: "object",
-        name: "listStyle"
+        name: "listStyle",
+        required: false
       },
       maxHeight: {
         type: "number",
@@ -57,12 +63,14 @@ module.exports = {
       },
       menuStyle: {
         type: "object",
-        name: "menuStyle"
+        name: "menuStyle",
+        required: false
       },
       onChange: {
         title: "Enable onChange",
         type: "boolean",
-        name: "onChange"
+        name: "onChange",
+        required: false
       },
       openImmediately: {
         type: "boolean",
@@ -71,15 +79,18 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       underlineStyle: {
         type: "object",
-        name: "underlineStyle"
+        name: "underlineStyle",
+        required: false
       },
       value: {
         type: "any",
-        name: "value"
+        name: "value",
+        required: false
       }
     },
     output: {

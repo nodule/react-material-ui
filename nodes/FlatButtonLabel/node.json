@@ -12,11 +12,13 @@
     "input": {
       "label": {
         "type": "node",
-        "name": "label"
+        "name": "label",
+        "required": false
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       }
     },
     "output": {

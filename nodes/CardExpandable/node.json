@@ -12,16 +12,19 @@
     "input": {
       "expanded": {
         "type": "boolean",
-        "name": "expanded"
+        "name": "expanded",
+        "required": false
       },
       "onExpanding": {
         "title": "Enable onExpanding",
         "type": "boolean",
-        "name": "onExpanding"
+        "name": "onExpanding",
+        "required": true
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       }
     },
     "output": {

@@ -17,7 +17,8 @@ module.exports = {
       },
       show: {
         type: "boolean",
-        name: "show"
+        name: "show",
+        required: true
       },
       style: {
         type: "object",

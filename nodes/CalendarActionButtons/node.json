@@ -12,25 +12,30 @@
     "input": {
       "autoOk": {
         "type": "boolean",
-        "name": "autoOk"
+        "name": "autoOk",
+        "required": false
       },
       "cancelLabel": {
         "type": "node",
-        "name": "cancelLabel"
+        "name": "cancelLabel",
+        "required": false
       },
       "okLabel": {
         "type": "node",
-        "name": "okLabel"
+        "name": "okLabel",
+        "required": false
       },
       "onTouchTapCancel": {
         "title": "Enable onTouchTapCancel",
         "type": "boolean",
-        "name": "onTouchTapCancel"
+        "name": "onTouchTapCancel",
+        "required": false
       },
       "onTouchTapOk": {
         "title": "Enable onTouchTapOk",
         "type": "boolean",
-        "name": "onTouchTapOk"
+        "name": "onTouchTapOk",
+        "required": false
       }
     },
     "output": {

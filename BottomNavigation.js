@@ -12,15 +12,18 @@ module.exports = {
     input: {
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       selectedIndex: {
         type: "number",
-        name: "selectedIndex"
+        name: "selectedIndex",
+        required: false
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

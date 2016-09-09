@@ -17,11 +17,13 @@ module.exports = {
       },
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       className: {
         type: "string",
-        name: "className"
+        name: "className",
+        required: false
       },
       displaySelectAll: {
         type: "boolean",
@@ -36,7 +38,8 @@ module.exports = {
       onSelectAll: {
         title: "Enable onSelectAll",
         type: "boolean",
-        name: "onSelectAll"
+        name: "onSelectAll",
+        required: false
       },
       selectAllSelected: {
         type: "boolean",
@@ -45,7 +48,8 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

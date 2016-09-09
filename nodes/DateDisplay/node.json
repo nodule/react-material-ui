@@ -13,7 +13,8 @@
       "DateTimeFormat": {
         "title": "Enable DateTimeFormat",
         "type": "boolean",
-        "name": "DateTimeFormat"
+        "name": "DateTimeFormat",
+        "required": true
       },
       "disableYearSelection": {
         "type": "boolean",
@@ -22,11 +23,13 @@
       },
       "locale": {
         "type": "string",
-        "name": "locale"
+        "name": "locale",
+        "required": true
       },
       "mode": {
         "type": "enum",
-        "name": "mode"
+        "name": "mode",
+        "required": false
       },
       "monthDaySelected": {
         "type": "boolean",
@@ -36,20 +39,24 @@
       "onTouchTapMonthDay": {
         "title": "Enable onTouchTapMonthDay",
         "type": "boolean",
-        "name": "onTouchTapMonthDay"
+        "name": "onTouchTapMonthDay",
+        "required": false
       },
       "onTouchTapYear": {
         "title": "Enable onTouchTapYear",
         "type": "boolean",
-        "name": "onTouchTapYear"
+        "name": "onTouchTapYear",
+        "required": false
       },
       "selectedDate": {
         "type": "object",
-        "name": "selectedDate"
+        "name": "selectedDate",
+        "required": true
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       },
       "weekCount": {
         "type": "number",

@@ -12,11 +12,13 @@ module.exports = {
     input: {
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       className: {
         type: "string",
-        name: "className"
+        name: "className",
+        required: false
       },
       displayBorder: {
         type: "boolean",
@@ -36,36 +38,43 @@ module.exports = {
       onCellClick: {
         title: "Enable onCellClick",
         type: "boolean",
-        name: "onCellClick"
+        name: "onCellClick",
+        required: false
       },
       onCellHover: {
         title: "Enable onCellHover",
         type: "boolean",
-        name: "onCellHover"
+        name: "onCellHover",
+        required: false
       },
       onCellHoverExit: {
         title: "Enable onCellHoverExit",
         type: "boolean",
-        name: "onCellHoverExit"
+        name: "onCellHoverExit",
+        required: false
       },
       onRowClick: {
         title: "Enable onRowClick",
         type: "boolean",
-        name: "onRowClick"
+        name: "onRowClick",
+        required: false
       },
       onRowHover: {
         title: "Enable onRowHover",
         type: "boolean",
-        name: "onRowHover"
+        name: "onRowHover",
+        required: false
       },
       onRowHoverExit: {
         title: "Enable onRowHoverExit",
         type: "boolean",
-        name: "onRowHoverExit"
+        name: "onRowHoverExit",
+        required: false
       },
       rowNumber: {
         type: "number",
-        name: "rowNumber"
+        name: "rowNumber",
+        required: false
       },
       selectable: {
         type: "boolean",
@@ -84,7 +93,8 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

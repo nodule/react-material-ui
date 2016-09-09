@@ -17,7 +17,8 @@
       },
       "children": {
         "type": "node",
-        "name": "children"
+        "name": "children",
+        "required": false
       },
       "disabled": {
         "type": "boolean",
@@ -26,23 +27,28 @@
       },
       "errorStyle": {
         "type": "object",
-        "name": "errorStyle"
+        "name": "errorStyle",
+        "required": false
       },
       "errorText": {
         "type": "node",
-        "name": "errorText"
+        "name": "errorText",
+        "required": false
       },
       "floatingLabelFixed": {
         "type": "boolean",
-        "name": "floatingLabelFixed"
+        "name": "floatingLabelFixed",
+        "required": false
       },
       "floatingLabelStyle": {
         "type": "object",
-        "name": "floatingLabelStyle"
+        "name": "floatingLabelStyle",
+        "required": false
       },
       "floatingLabelText": {
         "type": "node",
-        "name": "floatingLabelText"
+        "name": "floatingLabelText",
+        "required": false
       },
       "fullWidth": {
         "type": "boolean",
@@ -51,66 +57,81 @@
       },
       "hintStyle": {
         "type": "object",
-        "name": "hintStyle"
+        "name": "hintStyle",
+        "required": false
       },
       "hintText": {
         "type": "node",
-        "name": "hintText"
+        "name": "hintText",
+        "required": false
       },
       "iconStyle": {
         "type": "object",
-        "name": "iconStyle"
+        "name": "iconStyle",
+        "required": false
       },
       "id": {
         "type": "string",
-        "name": "id"
+        "name": "id",
+        "required": false
       },
       "labelStyle": {
         "type": "object",
-        "name": "labelStyle"
+        "name": "labelStyle",
+        "required": false
       },
       "maxHeight": {
         "type": "number",
-        "name": "maxHeight"
+        "name": "maxHeight",
+        "required": false
       },
       "menuStyle": {
         "type": "object",
-        "name": "menuStyle"
+        "name": "menuStyle",
+        "required": false
       },
       "onBlur": {
         "title": "Enable onBlur",
         "type": "boolean",
-        "name": "onBlur"
+        "name": "onBlur",
+        "required": false
       },
       "onChange": {
         "title": "Enable onChange",
         "type": "boolean",
-        "name": "onChange"
+        "name": "onChange",
+        "required": false
       },
       "onFocus": {
         "title": "Enable onFocus",
         "type": "boolean",
-        "name": "onFocus"
+        "name": "onFocus",
+        "required": false
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       },
       "underlineDisabledStyle": {
         "type": "object",
-        "name": "underlineDisabledStyle"
+        "name": "underlineDisabledStyle",
+        "required": false
       },
       "underlineFocusStyle": {
         "type": "object",
-        "name": "underlineFocusStyle"
+        "name": "underlineFocusStyle",
+        "required": false
       },
       "underlineStyle": {
         "type": "object",
-        "name": "underlineStyle"
+        "name": "underlineStyle",
+        "required": false
       },
       "value": {
         "type": "any",
-        "name": "value"
+        "name": "value",
+        "required": false
       }
     },
     "output": {

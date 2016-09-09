@@ -12,11 +12,13 @@
     "input": {
       "children": {
         "type": "node",
-        "name": "children"
+        "name": "children",
+        "required": false
       },
       "className": {
         "type": "string",
-        "name": "className"
+        "name": "className",
+        "required": false
       },
       "disableTouchRipple": {
         "type": "boolean",
@@ -30,11 +32,13 @@
       },
       "href": {
         "type": "string",
-        "name": "href"
+        "name": "href",
+        "required": false
       },
       "iconClassName": {
         "type": "string",
-        "name": "iconClassName"
+        "name": "iconClassName",
+        "required": false
       },
       "iconStyle": {
         "type": "object",
@@ -44,40 +48,48 @@
       "onBlur": {
         "title": "Enable onBlur",
         "type": "boolean",
-        "name": "onBlur"
+        "name": "onBlur",
+        "required": false
       },
       "onFocus": {
         "title": "Enable onFocus",
         "type": "boolean",
-        "name": "onFocus"
+        "name": "onFocus",
+        "required": false
       },
       "onKeyboardFocus": {
         "title": "Enable onKeyboardFocus",
         "type": "boolean",
-        "name": "onKeyboardFocus"
+        "name": "onKeyboardFocus",
+        "required": false
       },
       "onMouseEnter": {
         "title": "Enable onMouseEnter",
         "type": "boolean",
-        "name": "onMouseEnter"
+        "name": "onMouseEnter",
+        "required": false
       },
       "onMouseLeave": {
         "title": "Enable onMouseLeave",
         "type": "boolean",
-        "name": "onMouseLeave"
+        "name": "onMouseLeave",
+        "required": false
       },
       "onMouseOut": {
         "title": "Enable onMouseOut",
         "type": "boolean",
-        "name": "onMouseOut"
+        "name": "onMouseOut",
+        "required": false
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       },
       "tooltip": {
         "type": "node",
-        "name": "tooltip"
+        "name": "tooltip",
+        "required": false
       },
       "tooltipPosition": {
         "type": "custom",
@@ -86,7 +98,8 @@
       },
       "tooltipStyles": {
         "type": "object",
-        "name": "tooltipStyles"
+        "name": "tooltipStyles",
+        "required": false
       },
       "touch": {
         "type": "boolean",

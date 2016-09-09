@@ -12,11 +12,13 @@ module.exports = {
     input: {
       color: {
         type: "string",
-        name: "color"
+        name: "color",
+        required: false
       },
       innerStyle: {
         type: "object",
-        name: "innerStyle"
+        name: "innerStyle",
+        required: false
       },
       max: {
         type: "number",
@@ -40,7 +42,8 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       thickness: {
         type: "number",

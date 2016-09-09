@@ -12,11 +12,13 @@ module.exports = {
     input: {
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       onClickAway: {
         type: "any",
-        name: "onClickAway"
+        name: "onClickAway",
+        required: false
       }
     },
     output: {

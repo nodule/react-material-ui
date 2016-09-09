@@ -19,11 +19,13 @@ module.exports = {
       animation: {
         title: "Enable animation",
         type: "boolean",
-        name: "animation"
+        name: "animation",
+        required: false
       },
       autoOk: {
         type: "boolean",
-        name: "autoOk"
+        name: "autoOk",
+        required: false
       },
       cancelLabel: {
         type: "node",
@@ -37,19 +39,23 @@ module.exports = {
       },
       containerStyle: {
         type: "object",
-        name: "containerStyle"
+        name: "containerStyle",
+        required: false
       },
       disableYearSelection: {
         type: "boolean",
-        name: "disableYearSelection"
+        name: "disableYearSelection",
+        required: false
       },
       firstDayOfWeek: {
         type: "number",
-        name: "firstDayOfWeek"
+        name: "firstDayOfWeek",
+        required: false
       },
       initialDate: {
         type: "object",
-        name: "initialDate"
+        name: "initialDate",
+        required: false
       },
       locale: {
         type: "string",
@@ -58,15 +64,18 @@ module.exports = {
       },
       maxDate: {
         type: "object",
-        name: "maxDate"
+        name: "maxDate",
+        required: false
       },
       minDate: {
         type: "object",
-        name: "minDate"
+        name: "minDate",
+        required: false
       },
       mode: {
         type: "enum",
-        name: "mode"
+        name: "mode",
+        required: false
       },
       okLabel: {
         type: "node",
@@ -76,30 +85,36 @@ module.exports = {
       onAccept: {
         title: "Enable onAccept",
         type: "boolean",
-        name: "onAccept"
+        name: "onAccept",
+        required: false
       },
       onDismiss: {
         title: "Enable onDismiss",
         type: "boolean",
-        name: "onDismiss"
+        name: "onDismiss",
+        required: false
       },
       onShow: {
         title: "Enable onShow",
         type: "boolean",
-        name: "onShow"
+        name: "onShow",
+        required: false
       },
       open: {
         type: "boolean",
-        name: "open"
+        name: "open",
+        required: false
       },
       shouldDisableDate: {
         title: "Enable shouldDisableDate",
         type: "boolean",
-        name: "shouldDisableDate"
+        name: "shouldDisableDate",
+        required: false
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

@@ -12,15 +12,18 @@ module.exports = {
     input: {
       checked: {
         type: "boolean",
-        name: "checked"
+        name: "checked",
+        required: false
       },
       checkedIcon: {
         type: "element",
-        name: "checkedIcon"
+        name: "checkedIcon",
+        required: false
       },
       defaultChecked: {
         type: "boolean",
-        name: "defaultChecked"
+        name: "defaultChecked",
+        required: false
       },
       disabled: {
         type: "boolean",
@@ -29,11 +32,13 @@ module.exports = {
       },
       iconStyle: {
         type: "object",
-        name: "iconStyle"
+        name: "iconStyle",
+        required: false
       },
       inputStyle: {
         type: "object",
-        name: "inputStyle"
+        name: "inputStyle",
+        required: false
       },
       labelPosition: {
         type: "enum",
@@ -42,24 +47,29 @@ module.exports = {
       },
       labelStyle: {
         type: "object",
-        name: "labelStyle"
+        name: "labelStyle",
+        required: false
       },
       onCheck: {
         title: "Enable onCheck",
         type: "boolean",
-        name: "onCheck"
+        name: "onCheck",
+        required: false
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       uncheckedIcon: {
         type: "element",
-        name: "uncheckedIcon"
+        name: "uncheckedIcon",
+        required: false
       },
       valueLink: {
         type: "object",
-        name: "valueLink"
+        name: "valueLink",
+        required: false
       }
     },
     output: {

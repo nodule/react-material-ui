@@ -17,7 +17,8 @@ module.exports = {
       },
       format: {
         type: "enum",
-        name: "format"
+        name: "format",
+        required: false
       },
       mode: {
         type: "enum",
@@ -27,21 +28,25 @@ module.exports = {
       onSelectAffix: {
         title: "Enable onSelectAffix",
         type: "boolean",
-        name: "onSelectAffix"
+        name: "onSelectAffix",
+        required: false
       },
       onSelectHour: {
         title: "Enable onSelectHour",
         type: "boolean",
-        name: "onSelectHour"
+        name: "onSelectHour",
+        required: false
       },
       onSelectMin: {
         title: "Enable onSelectMin",
         type: "boolean",
-        name: "onSelectMin"
+        name: "onSelectMin",
+        required: false
       },
       selectedTime: {
         type: "object",
-        name: "selectedTime"
+        name: "selectedTime",
+        required: true
       }
     },
     output: {

@@ -12,46 +12,56 @@
     "input": {
       "active": {
         "type": "boolean",
-        "name": "active"
+        "name": "active",
+        "required": false
       },
       "children": {
         "type": "node",
-        "name": "children"
+        "name": "children",
+        "required": false
       },
       "completed": {
         "type": "boolean",
-        "name": "completed"
+        "name": "completed",
+        "required": false
       },
       "disabled": {
         "type": "boolean",
-        "name": "disabled"
+        "name": "disabled",
+        "required": false
       },
       "icon": {
         "type": "union",
-        "name": "icon"
+        "name": "icon",
+        "required": false
       },
       "last": {
         "type": "boolean",
-        "name": "last"
+        "name": "last",
+        "required": false
       },
       "onMouseEnter": {
         "title": "Enable onMouseEnter",
         "type": "boolean",
-        "name": "onMouseEnter"
+        "name": "onMouseEnter",
+        "required": false
       },
       "onMouseLeave": {
         "title": "Enable onMouseLeave",
         "type": "boolean",
-        "name": "onMouseLeave"
+        "name": "onMouseLeave",
+        "required": false
       },
       "onTouchStart": {
         "title": "Enable onTouchStart",
         "type": "boolean",
-        "name": "onTouchStart"
+        "name": "onTouchStart",
+        "required": false
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       }
     },
     "output": {

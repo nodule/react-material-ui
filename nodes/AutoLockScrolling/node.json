@@ -12,7 +12,8 @@
     "input": {
       "lock": {
         "type": "boolean",
-        "name": "lock"
+        "name": "lock",
+        "required": true
       }
     },
     "output": {

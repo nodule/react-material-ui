@@ -12,15 +12,18 @@ module.exports = {
     input: {
       children: {
         type: "node",
-        name: "children"
+        name: "children",
+        required: false
       },
       className: {
         type: "string",
-        name: "className"
+        name: "className",
+        required: false
       },
       defaultValue: {
         type: "any",
-        name: "defaultValue"
+        name: "defaultValue",
+        required: false
       },
       disabled: {
         type: "boolean",
@@ -29,11 +32,13 @@ module.exports = {
       },
       errorStyle: {
         type: "object",
-        name: "errorStyle"
+        name: "errorStyle",
+        required: false
       },
       errorText: {
         type: "node",
-        name: "errorText"
+        name: "errorText",
+        required: false
       },
       floatingLabelFixed: {
         type: "boolean",
@@ -42,15 +47,18 @@ module.exports = {
       },
       floatingLabelFocusStyle: {
         type: "object",
-        name: "floatingLabelFocusStyle"
+        name: "floatingLabelFocusStyle",
+        required: false
       },
       floatingLabelStyle: {
         type: "object",
-        name: "floatingLabelStyle"
+        name: "floatingLabelStyle",
+        required: false
       },
       floatingLabelText: {
         type: "node",
-        name: "floatingLabelText"
+        name: "floatingLabelText",
+        required: false
       },
       fullWidth: {
         type: "boolean",
@@ -59,19 +67,23 @@ module.exports = {
       },
       hintStyle: {
         type: "object",
-        name: "hintStyle"
+        name: "hintStyle",
+        required: false
       },
       hintText: {
         type: "node",
-        name: "hintText"
+        name: "hintText",
+        required: false
       },
       id: {
         type: "string",
-        name: "id"
+        name: "id",
+        required: false
       },
       inputStyle: {
         type: "object",
-        name: "inputStyle"
+        name: "inputStyle",
+        required: false
       },
       multiLine: {
         type: "boolean",
@@ -80,22 +92,26 @@ module.exports = {
       },
       name: {
         type: "string",
-        name: "name"
+        name: "name",
+        required: false
       },
       onBlur: {
         title: "Enable onBlur",
         type: "boolean",
-        name: "onBlur"
+        name: "onBlur",
+        required: false
       },
       onChange: {
         title: "Enable onChange",
         type: "boolean",
-        name: "onChange"
+        name: "onChange",
+        required: false
       },
       onFocus: {
         title: "Enable onFocus",
         type: "boolean",
-        name: "onFocus"
+        name: "onFocus",
+        required: false
       },
       rows: {
         type: "number",
@@ -104,15 +120,18 @@ module.exports = {
       },
       rowsMax: {
         type: "number",
-        name: "rowsMax"
+        name: "rowsMax",
+        required: false
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       textareaStyle: {
         type: "object",
-        name: "textareaStyle"
+        name: "textareaStyle",
+        required: false
       },
       type: {
         type: "string",
@@ -121,11 +140,13 @@ module.exports = {
       },
       underlineDisabledStyle: {
         type: "object",
-        name: "underlineDisabledStyle"
+        name: "underlineDisabledStyle",
+        required: false
       },
       underlineFocusStyle: {
         type: "object",
-        name: "underlineFocusStyle"
+        name: "underlineFocusStyle",
+        required: false
       },
       underlineShow: {
         type: "boolean",
@@ -134,11 +155,13 @@ module.exports = {
       },
       underlineStyle: {
         type: "object",
-        name: "underlineStyle"
+        name: "underlineStyle",
+        required: false
       },
       value: {
         type: "any",
-        name: "value"
+        name: "value",
+        required: false
       }
     },
     output: {

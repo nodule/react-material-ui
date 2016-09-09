@@ -12,23 +12,28 @@
     "input": {
       "color": {
         "type": "string",
-        "name": "color"
+        "name": "color",
+        "required": false
       },
       "innerStyle": {
         "type": "object",
-        "name": "innerStyle"
+        "name": "innerStyle",
+        "required": false
       },
       "opacity": {
         "type": "number",
-        "name": "opacity"
+        "name": "opacity",
+        "required": false
       },
       "show": {
         "type": "boolean",
-        "name": "show"
+        "name": "show",
+        "required": false
       },
       "style": {
         "type": "object",
-        "name": "style"
+        "name": "style",
+        "required": false
       }
     },
     "output": {

@@ -12,11 +12,13 @@ module.exports = {
     input: {
       color: {
         type: "string",
-        name: "color"
+        name: "color",
+        required: false
       },
       hoverColor: {
         type: "string",
-        name: "hoverColor"
+        name: "hoverColor",
+        required: false
       },
       onMouseEnter: {
         title: "Enable onMouseEnter",
@@ -32,7 +34,8 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       }
     },
     output: {

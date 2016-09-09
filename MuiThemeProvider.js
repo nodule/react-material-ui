@@ -12,11 +12,13 @@ module.exports = {
     input: {
       children: {
         type: "element",
-        name: "children"
+        name: "children",
+        required: false
       },
       muiTheme: {
         type: "object",
-        name: "muiTheme"
+        name: "muiTheme",
+        required: false
       }
     },
     output: {
