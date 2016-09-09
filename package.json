@@ -12,10 +12,13 @@
     "test": "chit -r"
   },
   "dependencies": {
-    "material-ui": "^0.15.4"
+    "chix-node-react": "github:psichi/chix-node-react",
+    "material-ui": "^0.15.4",
+    "react-dom": "^15.3.1"
   },
   "devDependencies": {
-    "chit": "0.x.x"
+    "chit": "0.x.x",
+    "chix-flow": "^1.2.0"
   },
   "chix": {
     "name": "react-material-ui",

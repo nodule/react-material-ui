@@ -1,0 +1,23 @@
+title: AutoComplete Simple
+ns: material-ui
+name: AutoComplete
+id: AutoComplete
+
+AutoComplete(react-material-ui/AutoComplete)
+Render(react/render)
+Selector(dom/querySelector)
+
+'#app' -> @selector Selector
+
+'Type anything' ->      @hintText AutoComplete
+true            -> @onUpdateInput AutoComplete
+true            ->     @fullWidth AutoComplete
+
+[
+  "aaaaa",
+  "bbbbb",
+  "ccccc"
+] -> @dataSource AutoComplete
+
+AutoComplete component ->   element Render
+Selector selection     -> container Render

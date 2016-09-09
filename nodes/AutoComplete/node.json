@@ -77,7 +77,7 @@
       "menuCloseDelay": {
         "type": "number",
         "name": "menuCloseDelay",
-        "default": ""
+        "default": 0
       },
       "menuProps": {
         "type": "object",
