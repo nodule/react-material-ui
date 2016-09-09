@@ -3,7 +3,9 @@ ns: material-ui
 name: AutoComplete
 id: AutoComplete
 
-AutoComplete(react-material-ui/AutoComplete)
+# AutoComplete(react-material-ui/AutoComplete)
+MuiThemeProvider(react-material-ui/MuiThemeProvider)
+Star(react-material-ui/ToggleStar)
 Render(react/render)
 Selector(dom/querySelector)
 Log(console/log)
@@ -12,17 +14,35 @@ Log(console/log)
 
 'Started?' -> msg Log
 
-# 'Type anything' ->       hintText AutoComplete
-true            ->  onUpdateInput AutoComplete
-true            ->      fullWidth AutoComplete
+# 1. children moet een array worden, ReactNode moet dit dan vervolgens oplossen.
+# 2. Alle material-ui's moeten standaard required: false meekrijgen, tenzij
+#    een default reeds gegeven is en tenzij required al gezet is.
+# 3. Peer Dependencies zijn belangrijk
+# 4. Als al die bugs eruit zijn, moet je een UI kunnen maken via een graph
+# 5. volgende fase is alle handlers exposen zodat deze opgevangen kunnen worden
+#     vanuit de integrerende graph.
+# 6. Nieuwe input kan meteen gezet worden en hoeft niet te wachten tot de
+#    andere poorten gevuld zijn.
+# 7. Alle relevante input wordt ook exposed, zodat na het afhandlen van een
+#    eventHandler de input van de UI subgraph geupdate kan worden.
 
+Star component -> children MuiThemeProvider
+# {} -> muiTheme MuiThemeProvider
+
+# 'Type anything' ->       hintText AutoComplete
+# true            ->  @onUpdateInput AutoComplete
+# true            ->      @fullWidth AutoComplete
+
+/*
 [
   "aaaaa",
   "bbbbb",
   "ccccc"
 ] -> @dataSource AutoComplete
+*/
 
-AutoComplete component ->   element Render
+# AutoComplete component ->   element Render
+MuiThemeProvider component ->  element Render
 Selector selection     -> container Render
 Selector selection     -> msg Log
 
