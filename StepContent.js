@@ -39,7 +39,7 @@ module.exports = {
       transitionDuration: {
         type: "number",
         name: "transitionDuration",
-        "default": ""
+        "default": 0
       }
     },
     output: {

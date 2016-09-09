@@ -33,7 +33,7 @@ module.exports = {
       size: {
         type: "number",
         name: "size",
-        "default": ""
+        "default": 0
       },
       src: {
         type: "string",

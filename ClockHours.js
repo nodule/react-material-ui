@@ -18,7 +18,7 @@ module.exports = {
       initialHours: {
         type: "number",
         name: "initialHours",
-        "default": ""
+        "default": 0
       },
       onChange: {
         title: "Enable onChange",

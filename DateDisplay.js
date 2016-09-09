@@ -54,7 +54,7 @@ module.exports = {
       weekCount: {
         type: "number",
         name: "weekCount",
-        "default": ""
+        "default": 0
       }
     },
     output: {

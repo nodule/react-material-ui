@@ -63,7 +63,7 @@ module.exports = {
       nestedLevel: {
         type: "number",
         name: "nestedLevel",
-        "default": ""
+        "default": 0
       },
       nestedListStyle: {
         type: "object",

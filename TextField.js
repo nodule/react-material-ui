@@ -100,7 +100,7 @@ module.exports = {
       rows: {
         type: "number",
         name: "rows",
-        "default": ""
+        "default": 0
       },
       rowsMax: {
         type: "number",

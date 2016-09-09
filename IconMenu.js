@@ -115,7 +115,7 @@ module.exports = {
       touchTapCloseDelay: {
         type: "number",
         name: "touchTapCloseDelay",
-        "default": ""
+        "default": 0
       },
       useLayerForClickAway: {
         type: "boolean",

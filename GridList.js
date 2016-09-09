@@ -13,7 +13,7 @@ module.exports = {
       cellHeight: {
         type: "number",
         name: "cellHeight",
-        "default": ""
+        "default": 0
       },
       children: {
         type: "node",
@@ -22,12 +22,12 @@ module.exports = {
       cols: {
         type: "number",
         name: "cols",
-        "default": ""
+        "default": 0
       },
       padding: {
         type: "number",
         name: "padding",
-        "default": ""
+        "default": 0
       },
       style: {
         type: "object",

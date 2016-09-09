@@ -17,17 +17,17 @@ module.exports = {
       enterDelay: {
         type: "number",
         name: "enterDelay",
-        "default": ""
+        "default": 0
       },
       maxScale: {
         type: "number",
         name: "maxScale",
-        "default": ""
+        "default": 0
       },
       minScale: {
         type: "number",
         name: "minScale",
-        "default": ""
+        "default": 0
       },
       style: {
         type: "object",

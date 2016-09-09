@@ -53,7 +53,7 @@ module.exports = {
       maxHeight: {
         type: "number",
         name: "maxHeight",
-        "default": ""
+        "default": 0
       },
       menuStyle: {
         type: "object",

@@ -29,7 +29,7 @@ module.exports = {
       initialSelectedIndex: {
         type: "number",
         name: "initialSelectedIndex",
-        "default": ""
+        "default": 0
       },
       inkBarStyle: {
         type: "object",

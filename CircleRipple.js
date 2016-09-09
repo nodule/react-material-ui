@@ -22,7 +22,7 @@ module.exports = {
       opacity: {
         type: "number",
         name: "opacity",
-        "default": ""
+        "default": 0
       },
       style: {
         type: "object",

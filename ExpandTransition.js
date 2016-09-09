@@ -17,7 +17,7 @@ module.exports = {
       enterDelay: {
         type: "number",
         name: "enterDelay",
-        "default": ""
+        "default": 0
       },
       loading: {
         type: "boolean",
@@ -36,12 +36,12 @@ module.exports = {
       transitionDelay: {
         type: "number",
         name: "transitionDelay",
-        "default": ""
+        "default": 0
       },
       transitionDuration: {
         type: "number",
         name: "transitionDuration",
-        "default": ""
+        "default": 0
       }
     },
     output: {

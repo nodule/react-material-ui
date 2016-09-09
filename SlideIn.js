@@ -26,7 +26,7 @@ module.exports = {
       enterDelay: {
         type: "number",
         name: "enterDelay",
-        "default": ""
+        "default": 0
       },
       style: {
         type: "object",

@@ -140,7 +140,7 @@ module.exports = {
       tabIndex: {
         type: "number",
         name: "tabIndex",
-        "default": ""
+        "default": 0
       },
       touchRippleColor: {
         type: "string",

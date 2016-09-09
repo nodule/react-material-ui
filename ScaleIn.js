@@ -21,7 +21,7 @@ module.exports = {
       enterDelay: {
         type: "number",
         name: "enterDelay",
-        "default": ""
+        "default": 0
       },
       maxScale: {
         type: "number",

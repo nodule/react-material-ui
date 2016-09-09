@@ -66,12 +66,12 @@ module.exports = {
       swipeAreaWidth: {
         type: "number",
         name: "swipeAreaWidth",
-        "default": ""
+        "default": 0
       },
       width: {
         type: "number",
         name: "width",
-        "default": ""
+        "default": 0
       },
       zDepth: {
         type: "custom",

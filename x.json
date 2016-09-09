@@ -4542,11 +4542,13 @@
           "animation": {
             "title": "Enable animation",
             "type": "boolean",
-            "name": "animation"
+            "name": "animation",
+            "required": false
           },
           "dataSource": {
             "type": "array",
-            "name": "dataSource"
+            "name": "dataSource",
+            "required": false
           },
           "dataSourceConfig": {
             "type": "object",
@@ -4560,11 +4562,13 @@
           },
           "errorStyle": {
             "type": "object",
-            "name": "errorStyle"
+            "name": "errorStyle",
+            "required": false
           },
           "errorText": {
             "type": "node",
-            "name": "errorText"
+            "name": "errorText",
+            "required": false
           },
           "filter": {
             "title": "Enable filter",
@@ -4574,7 +4578,8 @@
           },
           "floatingLabelText": {
             "type": "node",
-            "name": "floatingLabelText"
+            "name": "floatingLabelText",
+            "required": false
           },
           "fullWidth": {
             "type": "boolean",
@@ -4583,15 +4588,18 @@
           },
           "hintText": {
             "type": "node",
-            "name": "hintText"
+            "name": "hintText",
+            "required": false
           },
           "listStyle": {
             "type": "object",
-            "name": "listStyle"
+            "name": "listStyle",
+            "required": false
           },
           "maxSearchResults": {
             "type": "number",
-            "name": "maxSearchResults"
+            "name": "maxSearchResults",
+            "required": false
           },
           "menuCloseDelay": {
             "type": "number",
@@ -4600,26 +4608,31 @@
           },
           "menuProps": {
             "type": "object",
-            "name": "menuProps"
+            "name": "menuProps",
+            "required": false
           },
           "menuStyle": {
             "type": "object",
-            "name": "menuStyle"
+            "name": "menuStyle",
+            "required": false
           },
           "onBlur": {
             "title": "Enable onBlur",
             "type": "boolean",
-            "name": "onBlur"
+            "name": "onBlur",
+            "required": false
           },
           "onFocus": {
             "title": "Enable onFocus",
             "type": "boolean",
-            "name": "onFocus"
+            "name": "onFocus",
+            "required": false
           },
           "onKeyDown": {
             "title": "Enable onKeyDown",
             "type": "boolean",
-            "name": "onKeyDown"
+            "name": "onKeyDown",
+            "required": false
           },
           "onNewRequest": {
             "title": "Enable onNewRequest",
@@ -4650,7 +4663,8 @@
           },
           "style": {
             "type": "object",
-            "name": "style"
+            "name": "style",
+            "required": false
           },
           "targetOrigin": {
             "type": "custom",
@@ -4659,7 +4673,8 @@
           },
           "textFieldStyle": {
             "type": "object",
-            "name": "textFieldStyle"
+            "name": "textFieldStyle",
+            "required": false
           }
         },
         "output": {
@@ -27018,9 +27033,6 @@
           "ns": "react-material-ui",
           "name": "AutoComplete",
           "context": {
-            "hintText": "Type anything",
-            "onUpdateInput": true,
-            "fullWidth": true,
             "dataSource": [
               "aaaaa",
               "bbbbb",
@@ -27041,6 +27053,24 @@
           "name": "querySelector",
           "context": {
             "selector": "#app"
+          }
+        },
+        {
+          "id": "Log",
+          "title": "Log",
+          "ns": "console",
+          "name": "log",
+          "context": {
+            "msg": "Rendered!"
+          }
+        },
+        {
+          "id": "Finished",
+          "title": "Finished",
+          "ns": "console",
+          "name": "log",
+          "context": {
+            "msg": "AutoComplete finished!"
           }
         }
       ],
@@ -27069,6 +27099,19 @@
           },
           "metadata": {
             "title": "Selector selection -> container Render"
+          }
+        },
+        {
+          "source": {
+            "id": "Selector",
+            "port": "selection"
+          },
+          "target": {
+            "id": "Log",
+            "port": "msg"
+          },
+          "metadata": {
+            "title": "Selector selection -> msg Log"
           }
         }
       ],

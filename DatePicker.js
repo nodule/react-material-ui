@@ -54,7 +54,7 @@ module.exports = {
       firstDayOfWeek: {
         type: "number",
         name: "firstDayOfWeek",
-        "default": ""
+        "default": 0
       },
       formatDate: {
         title: "Enable formatDate",

@@ -26,7 +26,7 @@ module.exports = {
       cols: {
         type: "number",
         name: "cols",
-        "default": ""
+        "default": 0
       },
       containerElement: {
         type: "union",
@@ -36,7 +36,7 @@ module.exports = {
       rows: {
         type: "number",
         name: "rows",
-        "default": ""
+        "default": 0
       },
       style: {
         type: "object",

@@ -1072,5 +1072,6 @@ module.exports = {
   ToolbarTitle: require('./ToolbarTitle'),
   Tooltip: require('./Tooltip'),
   TouchRipple: require('./TouchRipple'),
-  YearButton: require('./YearButton')
+  YearButton: require('./YearButton'),
+  defaultLayout: require('./defaultLayout')
 }

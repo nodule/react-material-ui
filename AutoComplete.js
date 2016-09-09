@@ -23,11 +23,13 @@ module.exports = {
       animation: {
         title: "Enable animation",
         type: "boolean",
-        name: "animation"
+        name: "animation",
+        required: false
       },
       dataSource: {
         type: "array",
-        name: "dataSource"
+        name: "dataSource",
+        required: false
       },
       dataSourceConfig: {
         type: "object",
@@ -41,11 +43,13 @@ module.exports = {
       },
       errorStyle: {
         type: "object",
-        name: "errorStyle"
+        name: "errorStyle",
+        required: false
       },
       errorText: {
         type: "node",
-        name: "errorText"
+        name: "errorText",
+        required: false
       },
       filter: {
         title: "Enable filter",
@@ -55,7 +59,8 @@ module.exports = {
       },
       floatingLabelText: {
         type: "node",
-        name: "floatingLabelText"
+        name: "floatingLabelText",
+        required: false
       },
       fullWidth: {
         type: "boolean",
@@ -64,43 +69,51 @@ module.exports = {
       },
       hintText: {
         type: "node",
-        name: "hintText"
+        name: "hintText",
+        required: false
       },
       listStyle: {
         type: "object",
-        name: "listStyle"
+        name: "listStyle",
+        required: false
       },
       maxSearchResults: {
         type: "number",
-        name: "maxSearchResults"
+        name: "maxSearchResults",
+        required: false
       },
       menuCloseDelay: {
         type: "number",
         name: "menuCloseDelay",
-        "default": ""
+        "default": 0
       },
       menuProps: {
         type: "object",
-        name: "menuProps"
+        name: "menuProps",
+        required: false
       },
       menuStyle: {
         type: "object",
-        name: "menuStyle"
+        name: "menuStyle",
+        required: false
       },
       onBlur: {
         title: "Enable onBlur",
         type: "boolean",
-        name: "onBlur"
+        name: "onBlur",
+        required: false
       },
       onFocus: {
         title: "Enable onFocus",
         type: "boolean",
-        name: "onFocus"
+        name: "onFocus",
+        required: false
       },
       onKeyDown: {
         title: "Enable onKeyDown",
         type: "boolean",
-        name: "onKeyDown"
+        name: "onKeyDown",
+        required: false
       },
       onNewRequest: {
         title: "Enable onNewRequest",
@@ -131,7 +144,8 @@ module.exports = {
       },
       style: {
         type: "object",
-        name: "style"
+        name: "style",
+        required: false
       },
       targetOrigin: {
         type: "custom",
@@ -140,7 +154,8 @@ module.exports = {
       },
       textFieldStyle: {
         type: "object",
-        name: "textFieldStyle"
+        name: "textFieldStyle",
+        required: false
       }
     },
     output: {

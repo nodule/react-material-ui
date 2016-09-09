@@ -21,12 +21,12 @@ module.exports = {
       max: {
         type: "number",
         name: "max",
-        "default": ""
+        "default": 0
       },
       min: {
         type: "number",
         name: "min",
-        "default": ""
+        "default": 0
       },
       mode: {
         type: "enum",
@@ -36,7 +36,7 @@ module.exports = {
       size: {
         type: "number",
         name: "size",
-        "default": ""
+        "default": 0
       },
       style: {
         type: "object",
@@ -45,12 +45,12 @@ module.exports = {
       thickness: {
         type: "number",
         name: "thickness",
-        "default": ""
+        "default": 0
       },
       value: {
         type: "number",
         name: "value",
-        "default": ""
+        "default": 0
       }
     },
     output: {

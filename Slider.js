@@ -88,7 +88,7 @@ module.exports = {
       step: {
         type: "number",
         name: "step",
-        "default": ""
+        "default": 0
       },
       style: {
         type: "object",

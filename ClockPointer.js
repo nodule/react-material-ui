@@ -23,7 +23,7 @@ module.exports = {
       value: {
         type: "number",
         name: "value",
-        "default": ""
+        "default": 0
       }
     },
     output: {

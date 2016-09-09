@@ -25,12 +25,12 @@ module.exports = {
       percentage: {
         type: "number",
         name: "percentage",
-        "default": ""
+        "default": 0
       },
       size: {
         type: "number",
         name: "size",
-        "default": ""
+        "default": 0
       },
       status: {
         type: "enum",

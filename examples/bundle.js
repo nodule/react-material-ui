@@ -156,7 +156,1973 @@ mixin(BaseNode, $Context, $Control, $Error, $Event, $Export, $IsStartable, $Meta
 BaseNode.prototype.setContext = BaseNode.prototype.setContextProperty;
 
 module.exports = BaseNode;
-},{"./common/parent":2,"./common/status":3,"./mixin":7,"./node/base/context":8,"./node/base/control":9,"./node/base/error":10,"./node/base/event":11,"./node/base/export":12,"./node/base/isStartable":13,"./node/base/meta":14,"./node/base/ports":15,"./node/base/process":16,"./node/base/report":17,"./node/base/toJSON":18,"events":86}],2:[function(require,module,exports){
+},{"./common/parent":13,"./common/status":14,"./mixin":44,"./node/base/context":46,"./node/base/control":47,"./node/base/error":48,"./node/base/event":49,"./node/base/export":50,"./node/base/isStartable":51,"./node/base/meta":52,"./node/base/ports":53,"./node/base/process":54,"./node/base/report":55,"./node/base/toJSON":56,"events":141}],2:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var uuid = require('uuid').v4;
+var IoHandler = require('./io/handler');
+var ProcessManager = require('./process/manager');
+var DefaultContextProvider = require('./context/defaultProvider');
+var Loader = require('chix-loader');
+var EventEmitter = require('events');
+
+var mixin = require('./mixin');
+var $Control = require('./actor/control');
+var $IIP = require('./actor/iip');
+var $Link = require('./actor/link');
+var $Node = require('./actor/node');
+var $Map = require('./actor/map');
+var $Meta = require('./actor/meta');
+var $Parent = require('./common/parent');
+var $Port = require('./actor/port');
+var $Process = require('./actor/process');
+var $Report = require('./actor/report');
+// const $Action = require('./actor/action')
+
+/**
+ *
+ * Actor
+ *
+ * The Actor is responsible of managing a flow
+ * it links and it's nodes.
+ *
+ * A node contains the actual programming logic.
+ *
+ * @public
+ * @author Rob Halff <rob.halff@gmail.com>
+ * @constructor
+ */
+
+var Actor = function (_EventEmitter) {
+  _inherits(Actor, _EventEmitter);
+
+  function Actor() {
+    _classCallCheck(this, Actor);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Actor).call(this));
+
+    _this.ioHandler = undefined;
+    _this.processManager = undefined;
+    _this.view = [];
+    _this.identifier = 'actor:main';
+
+    // default to own id, map can overwrite
+    _this.id = uuid();
+
+    _this.type = 'flow';
+
+    _this.links = new Map();
+    _this.iips = new Map();
+    _this.status = undefined;
+    _this.nodes = new Map();
+
+    /**
+     *
+     * Added by default.
+     *
+     * If others need to be used they should be set before addMap()
+     *
+     */
+    _this.setIoHandler(new IoHandler());
+    _this.setProcessManager(new ProcessManager());
+    _this.setLoader(new Loader());
+    _this.addContextProvider(new DefaultContextProvider());
+    return _this;
+  }
+
+  /**
+   *
+   * Create an actor
+   *
+   * @public
+   */
+
+
+  _createClass(Actor, [{
+    key: 'addLoader',
+
+
+    /**
+     *
+     * Adds the definition Loader
+     *
+     * This provides an api to get the required node definitions.
+     *
+     * The loader should already be init'ed
+     *
+     * e.g. the remote loader will already have loaded the definitions.
+     * and is ready to respond to getNodeDefinition(ns, name, type, provider)
+     *
+     * e.g. An async loader could do something like this:
+     *
+     *   loader(flow, function() { actor.addLoader(loader); }
+     *
+     * With a sync loader it will just look like:
+     *
+     * actor.addLoader(loader)
+     *
+     * @public
+     */
+    value: function addLoader(loader) {
+      this.loader = loader;
+      return this;
+    }
+
+    /**
+     *
+     * Add IO Handler.
+     *
+     * The IO Handler handles all the input and output.
+     *
+     * @param {IOHandler} handler
+     * @public
+     *
+     */
+
+  }, {
+    key: 'addIoHandler',
+    value: function addIoHandler(handler) {
+      this.ioHandler = handler;
+
+      return this;
+    }
+
+    /**
+     *
+     * Add Process Manager.
+     *
+     * The Process Manager holds all processes.
+     *
+     * @param {Object} manager
+     * @public
+     *
+     */
+
+  }, {
+    key: 'addProcessManager',
+    value: function addProcessManager(manager) {
+      this.processManager = manager;
+
+      return this;
+    }
+
+    /**
+     *
+     * Add a new context provider.
+     *
+     * A context provider pre-processes the raw context
+     *
+     * This is useful for example when using the command line.
+     * All nodes which do not have context set can be asked for context.
+     *
+     * E.g. database credentials could be prompted for after which all
+     *      input is fullfilled and the flow will start to run.
+     *
+     * @param {ContextProvider} provider
+     * @private
+     *
+     */
+
+  }, {
+    key: 'addContextProvider',
+    value: function addContextProvider(provider) {
+      this.contextProvider = provider;
+
+      return this;
+    }
+  }], [{
+    key: 'create',
+    value: function create(map, loader, ioHandler, processManager) {
+      var actor = new Actor();
+      loader = loader || new Loader();
+      processManager = processManager || new ProcessManager();
+      ioHandler = ioHandler || new IoHandler();
+      actor.addLoader(loader);
+      actor.addIoHandler(ioHandler);
+      actor.addProcessManager(processManager);
+      actor.addMap(map);
+
+      return actor;
+    }
+  }]);
+
+  return Actor;
+}(EventEmitter);
+
+Actor.prototype.setLoader = Actor.prototype.addLoader;
+Actor.prototype.setContextProvider = Actor.prototype.addContextProvider;
+Actor.prototype.setIoHandler = Actor.prototype.addIoHandler;
+Actor.prototype.setProcessManager = Actor.prototype.addProcessManager;
+
+mixin(Actor, $Control, $IIP, $Link, $Map, $Meta, $Node, $Parent, $Port, $Process, $Report
+// $Action
+);
+module.exports = Actor;
+},{"./actor/control":3,"./actor/iip":4,"./actor/link":5,"./actor/map":6,"./actor/meta":7,"./actor/node":8,"./actor/port":9,"./actor/process":10,"./actor/report":11,"./common/parent":13,"./context/defaultProvider":16,"./io/handler":38,"./mixin":44,"./process/manager":76,"chix-loader":82,"events":141,"uuid":99}],3:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Status = require('./status');
+var debug = require('debug')('chix:actor');
+var Connector = require('../connector');
+var Run = require('../run');
+var Events = require('../events/flow');
+
+var Control = function () {
+  function Control() {
+    _classCallCheck(this, Control);
+  }
+
+  _createClass(Control, [{
+    key: 'hold',
+
+    /**
+     *
+     * Holds a Node
+     *
+     * @param {String} id
+     * @public
+     */
+    value: function hold(id) {
+      this.getNode(id).hold();
+
+      return this;
+    }
+
+    /**
+     *
+     * Pushes the Actor
+     *
+     * Will send :start to all nodes without input
+     * and all nodes which have all their input ports
+     * filled by context already.
+     *
+     * @public
+     */
+
+  }, {
+    key: 'push',
+    value: function push() {
+      if (false && this.status !== 'created') {
+        throw Error('To push actor must be in created state, current status ' + this.status);
+      }
+      this.setStatus(Status.RUNNING);
+      debug('%s: push()', this.identifier);
+
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this.nodes.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var node = _step.value;
+
+          if (node.isStartable()) {
+            var iip = new Connector();
+            iip.plug(node.id, ':start');
+            this.sendIIP(iip, '');
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      this.setStatus('running');
+
+      return this;
+    }
+
+    /**
+     *
+     * Starts the actor
+     *
+     * @param {Boolean} push
+     * @fires Flow#start
+     * @public
+     */
+
+  }, {
+    key: 'start',
+    value: function start(push) {
+      // this.status = Status.RUNNING
+      if (['created', 'running', 'stopped'].indexOf(this.status) >= 0) {
+        this.setStatus('created');
+        debug('%s: start', this.identifier);
+
+        // this.sendIIPsOutstanding()
+        // this.clearIIPs()
+
+        var _iteratorNormalCompletion2 = true;
+        var _didIteratorError2 = false;
+        var _iteratorError2 = undefined;
+
+        try {
+          for (var _iterator2 = this.nodes.values()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var node = _step2.value;
+
+            // skip normal nodes now, because they auto start
+            // flows, do need to start here
+            if (node.type === 'flow') {
+              node.start();
+            } else {
+              // manually evaluate node
+              // TODO: get this right once and for all.
+              // this also removes the need for attaching to the start ports.
+              // :start port is just optional, it's actually synoniem to 'wait until you're told you're ready'
+              if (true || push) {
+                node.onPortFill();
+                this.setStatus(Status.RUNNING);
+              }
+            }
+          }
+        } catch (err) {
+          _didIteratorError2 = true;
+          _iteratorError2 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+              _iterator2.return();
+            }
+          } finally {
+            if (_didIteratorError2) {
+              throw _iteratorError2;
+            }
+          }
+        }
+
+        if (push !== false) {
+          // this.push()
+        } else {
+          this.setStatus('started');
+        }
+
+        this.event(Events.START, {
+          node: this
+        });
+
+        return this;
+      }
+
+      throw Error('To start actor must be in created state, current status: ' + this.status);
+    }
+
+    /**
+     *
+     * Stops the actor
+     *
+     * Use a callback to make sure it is stopped.
+     *
+     * Will set the status to `stopped`
+     *
+     * Any outstanding IIPs will be cleared.
+     *
+     * Emits the `stop` event when done.
+     *
+     * @param {Function} cb - Callback
+     * @fires Flow#stop
+     * @public
+     */
+
+  }, {
+    key: 'stop',
+    value: function stop(cb) {
+      var self = this;
+
+      this.status = Status.STOPPED;
+
+      if (this.ioHandler) {
+        this.ioHandler.reset(function resetCallbackIoHandler() {
+          // close ports opened by iips
+          self.clearIIPs();
+
+          self.event(Events.STOP, {
+            node: self
+          });
+
+          if (cb) {
+            cb();
+          }
+
+          // hack, remove it all together possibly
+          self.ioHandler._shutdown = false;
+        });
+      } else {
+        if (cb) {
+          cb();
+        }
+      }
+    }
+
+    /**
+     * Will pause the actor
+     *
+     * Will set status to `stopped`(?)
+     *
+     * And will hold() all nodes.
+     *
+     * Graphs in their turn will put all their nodes on hold()
+     *
+     * @returns {Control}
+     */
+
+  }, {
+    key: 'pause',
+    value: function pause() {
+      this.status = Status.STOPPED;
+
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
+
+      try {
+        for (var _iterator3 = this.nodes.values()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var node = _step3.value;
+
+          node.hold();
+        }
+      } catch (err) {
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion3 && _iterator3.return) {
+            _iterator3.return();
+          }
+        } finally {
+          if (_didIteratorError3) {
+            throw _iteratorError3;
+          }
+        }
+      }
+
+      return this;
+    }
+
+    /**
+     *
+     * Resumes the actor
+     *
+     * Will set it's own status to `running`
+     *
+     * All nodes which are on hold will resume again.
+     *
+     * @public
+     */
+
+  }, {
+    key: 'resume',
+    value: function resume() {
+      this.status = Status.RUNNING;
+
+      var _iteratorNormalCompletion4 = true;
+      var _didIteratorError4 = false;
+      var _iteratorError4 = undefined;
+
+      try {
+        for (var _iterator4 = this.nodes.values()[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+          var node = _step4.value;
+
+          node.release();
+        }
+      } catch (err) {
+        _didIteratorError4 = true;
+        _iteratorError4 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion4 && _iterator4.return) {
+            _iterator4.return();
+          }
+        } finally {
+          if (_didIteratorError4) {
+            throw _iteratorError4;
+          }
+        }
+      }
+
+      return this;
+    }
+
+    /**
+     *
+     * Get the current status
+     *
+     * @public
+     */
+
+  }, {
+    key: 'getStatus',
+    value: function getStatus() {
+      return this.status;
+    }
+
+    /**
+     *
+     * Releases a node if it was on hold
+     *
+     * @param {String} id - Id of node to release
+     * @public
+     */
+
+  }, {
+    key: 'release',
+    value: function release(id) {
+      return this.getNode(id).release();
+    }
+
+    /**
+     *
+     * Resets this instance so it can be re-used
+     *
+     * Will call reset() on all nodes
+     *
+     * Graphs in their turn will reset() all their nodes
+     *
+     * Note: The registered loader is left untouched.
+     *
+     * @public
+     */
+
+  }, {
+    key: 'reset',
+    value: function reset() {
+      var _iteratorNormalCompletion5 = true;
+      var _didIteratorError5 = false;
+      var _iteratorError5 = undefined;
+
+      try {
+        for (var _iterator5 = this.nodes.values()[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+          var node = _step5.value;
+
+          node.reset();
+        }
+
+        // if nothing has started yet
+        // there is no ioHandler
+      } catch (err) {
+        _didIteratorError5 = true;
+        _iteratorError5 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion5 && _iterator5.return) {
+            _iterator5.return();
+          }
+        } finally {
+          if (_didIteratorError5) {
+            throw _iteratorError5;
+          }
+        }
+      }
+
+      if (this.ioHandler) {
+        this.ioHandler.reset();
+      }
+
+      return this;
+    }
+
+    /**
+     * Clears this graph from it's nodes
+     *
+     * Use the callback function to ensure all nodes are removed
+     *
+     * @param {Function} cb - Callback
+     */
+
+  }, {
+    key: 'clear',
+    value: function clear(cb) {
+      if (!cb) {
+        throw Error('clear expects a callback');
+      }
+
+      var self = this;
+      var cnt = 0;
+      var total = this.nodes.size;
+
+      function removeNodeHandler() {
+        cnt++;
+        if (cnt === total) {
+          self.nodes = new Map();
+          cb();
+        }
+      }
+
+      if (total === 0) {
+        cb();
+      } else {
+        // remove node will automatically remove all links
+        var _iteratorNormalCompletion6 = true;
+        var _didIteratorError6 = false;
+        var _iteratorError6 = undefined;
+
+        try {
+          for (var _iterator6 = this.nodes.values()[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
+            var node = _step6.value;
+
+            // will remove links also.
+            this.removeNode(node.id, removeNodeHandler);
+          }
+        } catch (err) {
+          _didIteratorError6 = true;
+          _iteratorError6 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion6 && _iterator6.return) {
+              _iterator6.return();
+            }
+          } finally {
+            if (_didIteratorError6) {
+              throw _iteratorError6;
+            }
+          }
+        }
+      }
+    }
+
+    /**
+     *
+     * Run the current flow
+     *
+     * The flow starts by providing the ports with their context.
+     *
+     * Nodes which have all their ports filled by context will run immediatly.
+     *
+     * Others will wait until their unfilled ports are filled by connections.
+     *
+     * If a port is not required and context was given and there are
+     * no connections on it, it will not block the node from running.
+     *
+     * If a map has actions defined, run expects an action name to run.
+     *
+     * Combinations:
+     *
+     *   - run()
+     *     run flow without callback
+     *
+     *   - run(callback)
+     *     run with callback
+     *
+     *   - action('actionName').run()
+     *     run action without callback
+     *
+     *   - action('actionName').run(callback)
+     *     run action with callback
+     *
+     * The callback will receive the output of the (last) node(s)
+     * Determined by which output ports are exposed.
+     *
+     * If we pass the exposed output, it can contain output from anywhere.
+     *
+     * If a callback is defined but there are no exposed output ports.
+     * The callback will never fire.
+     *
+     * @public
+     */
+
+  }, {
+    key: 'run',
+    value: function run(callback) {
+      return new Run(this, callback);
+    }
+  }]);
+
+  return Control;
+}();
+
+module.exports = Control;
+},{"../connector":15,"../events/flow":18,"../run":77,"./status":12,"debug":"debug"}],4:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Packet = require('../packet');
+var Connector = require('../connector');
+var Link = require('../link');
+var forOf = require('object-forof');
+var Events = require('../events/flow');
+
+var IIP = function () {
+  function IIP() {
+    _classCallCheck(this, IIP);
+  }
+
+  _createClass(IIP, [{
+    key: 'createIIP',
+
+    /**
+     *
+     * Create an IIP
+     *
+     * Optionally with `options` for the port:
+     *
+     * e.g. { persist: true }
+     *
+     * Optionally with `source` information
+     *
+     * e.g. { index: 1 } // index for array port
+     *
+     * @param {Object} iip
+     * @fires Flow#addIIP
+     * @returns {xLink}
+     */
+    value: function createIIP(iip) {
+      var xLink = Link.create({
+        source: {
+          id: this.id, // we are the sender
+          port: ':iip'
+        },
+        target: iip.target
+      });
+
+      xLink.set('dispose', true);
+
+      if (iip.data === undefined) {
+        throw Error('IIP data is `undefined`');
+      }
+
+      xLink.data = iip.data;
+
+      this.event(Events.ADDIIP, xLink.toJSON());
+
+      return xLink;
+    }
+
+    /**
+     * Connect an IIP
+     *
+     * @param {Object|Link} iip
+     * @returns {*}
+     */
+
+  }, {
+    key: 'connectIIP',
+    value: function connectIIP(iip) {
+      if (iip.target.constructor.name !== 'Connector') {
+        (function () {
+          var target = new Connector();
+          target.plug(iip.target.id, iip.target.port);
+          forOf(function (key, setting) {
+            return target.set(key, setting);
+          }, iip.target.setting);
+          iip.target = target;
+        })();
+      }
+
+      // TODO: iip should contain their own unique id
+      if (!this.id) {
+        throw Error('Actor must contain an id');
+      }
+
+      return this.addLink(iip);
+    }
+
+    /**
+     *
+     * Send IIPs
+     *
+     * Creates, connects and sends an IIPs
+     *
+     * @param {Object} iips
+     * @public
+     */
+
+  }, {
+    key: 'sendIIPs',
+    value: function sendIIPs(iips) {
+      var links = iips.map(this.createIIP.bind(this)).map(this.connectIIP.bind(this)).map(this.__sendIIP.bind(this));
+
+      return links;
+    }
+
+    /**
+     *
+     * Send IIPs present in this.iips
+     *
+     * Used by the runtime, which first adds them
+     * next when the graph is started they will be used.
+     *
+     * @private
+     */
+
+  }, {
+    key: 'sendIIPsOutstanding',
+    value: function sendIIPsOutstanding() {
+      for (var iip in this.iips.values()) {
+        this.__sendIIP(iip);
+      }
+    }
+
+    /*
+     * Send a single IIP to a port.
+     *
+     * Note: If multiple IIPs have to be send use sendIIPs instead.
+     *
+     * Source is mainly for testing, but essentially it allows you
+     * to imposter a sender as long as you send along the right
+     * id and source port name.
+     *
+     * Source is also used to set an index[] for array ports.
+     * However, if you send multiple iips for an array port
+     * they should be send as a group using sendIIPs
+     *
+     * This is because they should be added in reverse order.
+     * Otherwise the process will start too early.
+     *
+     * @param {Connector} target
+     * @param {Object} data
+     * @public
+     */
+
+  }, {
+    key: 'sendIIP',
+    value: function sendIIP(target, data) {
+      // TODO: just create a unique id for the IIP, do not use the graph id
+      if (!this.id) {
+        throw Error('Actor must contain an id');
+      }
+
+      if (undefined === data) {
+        throw Error('Refused to send IIP without data');
+      }
+
+      var ln = {
+        source: {
+          id: this.id, // we are the sender
+          pid: this.pid,
+          port: ':iip'
+        },
+        target: target,
+        data: data
+      };
+
+      var xLink = this.createIIP(ln);
+
+      this.connectIIP(xLink);
+
+      this.__sendIIP(xLink);
+
+      return xLink;
+    }
+  }, {
+    key: '__sendIIP',
+    value: function __sendIIP(xLink) {
+      var p = Packet.create(
+      // JSON.parse(JSON.stringify(xLink.data)),
+      xLink.data,
+      // target port type
+      this.getNode(xLink.target.id).getPortType('input', xLink.target.port));
+
+      xLink.source.write(p);
+
+      // remove data bit.
+      // delete xLink.data
+    }
+
+    /**
+     * clearIIP
+     *
+     * Unplugs, disconnects and removes an IIP
+     *
+     * When an IIP is connected and the data is send
+     * this method removes/unregisters the IIP again.
+     *
+     * @param {Link} link
+     * @fires Flow#removeIIP
+     */
+
+  }, {
+    key: 'clearIIP',
+    value: function clearIIP(link) {
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this.iips.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var oldLink = _step.value;
+
+          // source is always us so do not have to check it.
+          // source will have to be checked when iip has it's own id.
+          if ((oldLink.source.port === ':iip' || oldLink.target.port === link.target.port || oldLink.target.port === ':start' // huge uglyness
+          ) && oldLink.target.id === link.target.id) {
+            this.unplugPort('input', oldLink.target);
+
+            this.ioHandler.disconnect(oldLink);
+
+            this.iips.delete(oldLink.id);
+
+            // TODO: just rename this to clearIIP
+            this.event(Events.REMOVEIIP, oldLink);
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+    }
+
+    /**
+     *
+     * Clear IIPs
+     *
+     * If target is specified, only those iips will be cleared.
+     */
+
+  }, {
+    key: 'clearIIPs',
+    value: function clearIIPs(target) {
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = this.iips.values()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var iip = _step2.value;
+
+          if (!target || target.id === iip.target.id && target.port === iip.target.port) {
+            this.clearIIP(iip);
+          }
+        }
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2.return) {
+            _iterator2.return();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
+        }
+      }
+    }
+  }]);
+
+  return IIP;
+}();
+
+module.exports = IIP;
+},{"../connector":15,"../events/flow":18,"../link":43,"../packet":66,"object-forof":97}],5:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var debug = require('debug')('chix:actor');
+var util = require('util');
+var Events = require('../events/flow');
+
+var Link = function () {
+  function Link() {
+    _classCallCheck(this, Link);
+  }
+
+  _createClass(Link, [{
+    key: 'addLink',
+
+    /**
+     * Adds a link from nodes port to the other
+     *
+     * Each link is registered with the IOHandler
+     *
+     * Emits the addLink event
+     *
+     * @param {xLink} link
+     * @fires Flow#addLink
+     */
+    value: function addLink(link) {
+      debug('%s: addLink()', this.identifier);
+      var sourceNode = void 0;
+
+      if (link.constructor.name !== 'Link') {
+        throw Error('Link must be of type Link');
+      }
+
+      var existingLink = this.findLink(link);
+      if (existingLink) {
+        console.log('WARNING: link already added, FIXME');
+        this.event(Events.ADDLINK, existingLink);
+        return existingLink;
+      }
+
+      // CHANGE THIS, source id should not be the graph id but a unique id.
+      if (link.source.id !== this.id) {
+        // Warn: IIP has our own id
+        sourceNode = this.getNode(link.source.id);
+        if (!sourceNode.portExists('output', link.source.port)) {
+          throw Error(util.format('Source node (%s:%s) does not have an output port named `%s`\n\n' + '\tOutput ports available:\t%s\n', sourceNode.ns, sourceNode.name, link.source.port, Object.keys(sourceNode.ports.output).join(', ')));
+        }
+      }
+
+      var targetNode = this.getNode(link.target.id);
+
+      debug('%s: %s %s -> %s %s', this.identifier, sourceNode ? sourceNode.identifier : '', link.source ? link.source.port : '', link.target.port, targetNode.identifier);
+
+      if (link.target.port !== ':start' && !targetNode.portExists('input', link.target.port)) {
+        throw Error(util.format('Target node (%s:%s) does not have an input port named `%s`\n\n' + '\tInput ports available:\t%s\n', targetNode.ns, targetNode.name, link.target.port, Object.keys(targetNode.ports.input).join(', ')));
+      }
+
+      // const targetNode = this.getNode(link.target.id)
+
+      // FIXME: rewriting sync property
+      // to contain the process id of the node it's pointing
+      // to not just the nodeId defined within the graph
+      if (link.target.has('sync')) {
+        link.target.set('sync', this.getNode(link.target.get('sync')).pid);
+      }
+
+      link.graphId = this.id;
+      link.graphPid = this.pid;
+
+      var self = this;
+
+      if (link.source.id) {
+        if (link.source.id === this.id) {
+          link.setSourcePid(this.pid || this.id);
+        } else {
+          link.setSourcePid(this.getNode(link.source.id).pid);
+        }
+      }
+
+      link.setTargetPid(this.getNode(link.target.id).pid);
+
+      // remember our own links, so we can remove them
+      // if it has data it's an iip
+      if (undefined !== link.data) {
+        this.iips.set(link.id, link);
+      } else {
+        this.links.set(link.id, link);
+      }
+
+      this.ioHandler.connect(link);
+
+      this.plugPort('input', link.target);
+
+      if (link.source.id !== this.id) {
+        this.plugPort('output', link.source);
+      }
+
+      // outputs are not plugged, also look at ioHandler.connect
+
+      link.on('change', function changeLink(link) {
+        self.event(Events.CHANGELINK, link);
+      });
+
+      // bit inconsistent with event.node
+      // should be event.link
+      this.event(Events.ADDLINK, link);
+
+      return link;
+    }
+
+    /**
+     * Get link by it's id
+     *
+     * @param {String} id - Id of the link
+     * @returns {*}
+     */
+
+  }, {
+    key: 'getLink',
+    value: function getLink(id) {
+      return this.links.get(id);
+    }
+
+    /**
+     * Find a link by it's structure.
+     *
+     * Can be used to find the link when it's ID is unknown
+     *
+     * @param {Object} ln
+     * @returns {T}
+     */
+
+  }, {
+    key: 'findLink',
+    value: function findLink(ln) {
+      return Array.from(this.links).find(function (_link) {
+        var link = Object.assign({ source: {} }, _link);
+        if (ln.source.id === link.source.id && ln.target.id === link.target.id && ln.source.port === link.source.port && ln.target.port === link.target.port) {
+          return (!ln.source.setting.index || ln.source.setting.index === link.source.setting.index) && (!ln.target.setting.index || ln.target.setting.index === link.target.setting.index);
+        }
+      });
+    }
+
+    /**
+     *
+     * Removes link
+     *
+     * Disconnects the link from the IOHandler and removes it.
+     *
+     * @param {Link} ln
+     * @fires Flow#removeLink
+     * @public
+     */
+
+  }, {
+    key: 'removeLink',
+    value: function removeLink(ln) {
+      // we should be able to find a link without id.
+      var what = 'links';
+
+      var link = this.links.get(ln.id);
+      if (!link) {
+        link = this.iips.get(ln.id);
+        if (!link) {
+          // throw Error('Cannot find link')
+          // TODO: Seems to happen with ip directly to subgraph (non-fatal)
+          console.warn('FIXME: cannot find link');
+          return this;
+        }
+        what = 'iips';
+      }
+
+      this.unplugPort('input', link.target);
+      if (link.source.id !== this.id) {
+        this.unplugPort('output', link.source);
+      }
+
+      this.ioHandler.disconnect(link);
+
+      // io handler could do this.
+      // removelink on the top-level actor/graph
+      // is not very useful
+
+      if (this[what].has(link.id)) {
+        var oldLink = this[what].get(link.id);
+
+        this[what].delete(link.id);
+
+        this.event(Events.REMOVELINK, oldLink);
+
+        return this;
+      }
+      throw Error('Unable to remove link with id: ' + link.id);
+    }
+  }]);
+
+  return Link;
+}();
+
+module.exports = Link;
+},{"../events/flow":18,"debug":"debug","util":146}],6:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var debug = require('debug')('chix:actor');
+var util = require('util');
+var validate = require('../validate');
+var Link = require('../link');
+
+var Map = function () {
+  function Map() {
+    _classCallCheck(this, Map);
+  }
+
+  _createClass(Map, [{
+    key: 'addMap',
+
+    /**
+     * Reads a map from JSON
+     *
+     * Will validate the JSON first then creates the nodes and it's links
+     *
+     * If the map itself contains nodeDefinitions those will be added to
+     * the loader.
+     *
+     * If the map itself does not have a provider property set it will
+     * be set to '@', which means internal lookup.
+     *
+     * A default view will be setup unmasking all nodes.
+     *
+     * If this Actor is the main actor it's status will be set to `created`
+     *
+     * If this Actor was not yet registered with the Process Manager it will be registered.
+     *
+     * @param {Object} map
+     * @public
+     *
+     */
+    value: function addMap(map) {
+      var _this = this;
+
+      debug('%s: addMap()', this.identifier);
+      try {
+        validate.flow(map);
+      } catch (e) {
+        if (map.title) {
+          throw Error(util.format('Flow `%s`: %s', map.title, e.message));
+        } else {
+          throw Error(util.format('Flow %s:%s: %s', map.ns, map.name, e.message));
+        }
+      }
+
+      if (map.id) {
+        // xFlow contains it, direct actors don't perse
+        this.id = map.id;
+      }
+
+      // allow a map to carry it's own definitions
+      if (map.nodeDefinitions) {
+        this.loader.addNodeDefinitions('@', map.nodeDefinitions);
+      }
+
+      // add nodes and links one by one so there is more control
+      map.nodes.forEach(function (node) {
+        if (!node.id) {
+          throw new Error(util.format('Node lacks an id: %s:%s', node.ns, node.name));
+        }
+
+        // give the node a default provider.
+        if (!node.provider) {
+          if (map.providers && map.providers.hasOwnProperty('@')) {
+            node.provider = map.providers['@'].url;
+          }
+        }
+
+        var def = _this.loader.getNodeDefinition(node, map);
+        if (!def) {
+          throw new Error(util.format('Failed to get node definition for %s:%s', node.ns, node.name));
+        }
+
+        debug('%s: Creating node %s:%s', _this.identifier, node.ns, node.name);
+        _this.createNode(node, def);
+      });
+
+      if (map.hasOwnProperty('links')) {
+        map.links.forEach(function (link) {
+          _this.addLink(Link.create(link));
+        });
+      }
+
+      for (var i = 0; i < map.nodes.length; i++) {
+        this.view.push(map.nodes[i].id);
+      }
+
+      // fix later
+      if (this.constructor.name === 'Actor') {
+        this.setStatus('created');
+      }
+
+      if (!this.pid) {
+        // re-run
+        this.processManager.register(this);
+      }
+
+      return this;
+    }
+  }]);
+
+  return Map;
+}();
+
+module.exports = Map;
+},{"../link":43,"../validate":81,"debug":"debug","util":146}],7:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Events = require('../events/flow');
+
+var Meta = function () {
+  function Meta() {
+    _classCallCheck(this, Meta);
+  }
+
+  _createClass(Meta, [{
+    key: 'setMeta',
+
+    /**
+     * Will set a meta property for the node specified by nodeId
+     *
+     * A meta property can contain any sort of value.
+     *
+     * @param {String} nodeId - The nodeId
+     * @param {String} key - The meta key
+     * @param {Any} value - The meta value
+     * @fires Flow#metadata
+     */
+    value: function setMeta(nodeId, key, value) {
+      var node = this.getNode(nodeId);
+
+      node.setMeta(key, value);
+
+      this.event(Events.METADATA, {
+        id: this.id,
+        node: node.export()
+      });
+    }
+  }]);
+
+  return Meta;
+}();
+
+module.exports = Meta;
+},{"../events/flow":18}],8:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var XNode = require('../node');
+var validate = require('../validate');
+var debug = require('debug')('chix:actor');
+var util = require('util');
+var Events = require('../events/flow');
+
+var Node = function () {
+  function Node() {
+    _classCallCheck(this, Node);
+  }
+
+  _createClass(Node, [{
+    key: 'createNode',
+
+    /**
+     *
+     * Create/instantiate  a node
+     *
+     * Node at this stage is nothing more then:
+     *
+     *  { ns: "fs", name: "readFile" }
+     *
+     * @param {Object} node - Node as defined within a map
+     * @param {Object} def  - Node Definition
+     * @fires Flow#addNode
+     * @public
+     */
+    value: function createNode(node, def) {
+      if (!def) {
+        throw new Error(util.format('Failed to get node definition for %s:%s', node.ns, node.name));
+      }
+
+      if (!node.id) {
+        throw Error('Node should have an id');
+      }
+
+      if (this.hasNode(node.id)) {
+        console.log('Warning: Node already added, skipping... FIXME');
+        this.event(Events.ADDNODE, { node: this.getNode(node.id) });
+        return this.getNode(node.id);
+      }
+
+      if (!def.ports) {
+        def.ports = {};
+      }
+
+      // merges expose, persist etc, with port definitions.
+      // This is not needed with proper inheritance
+      for (var type in node.ports) {
+        if (node.ports.hasOwnProperty(type) && def.ports.hasOwnProperty(type)) {
+          for (var name in node.ports[type]) {
+            if (node.ports[type].hasOwnProperty(name) && def.ports[type].hasOwnProperty(name)) {
+              for (var property in node.ports[type][name]) {
+                if (node.ports[type][name].hasOwnProperty(property)) {
+                  // add or overwrite it.
+                  def.ports[type][name][property] = node.ports[type][name][property];
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // allow instance to overwrite other node definition data also.
+      // probably make much more overwritable, although many
+      // should not be overwritten, so maybe just keep it this way.
+      if (node.title) {
+        def.title = node.title;
+      }
+
+      if (node.description) {
+        def.description = node.description;
+      }
+
+      var identifier = node.title || [node.ns, '::', node.name, '-', this.nodes.size].join('');
+
+      var _node = void 0;
+
+      if (def.type === 'flow') {
+        var XFlow = require('../flow'); // solve circular reference.
+
+        validate.flow(def);
+
+        _node = new XFlow(node.id, def, identifier, this.loader, // single(ton) instance
+        this.ioHandler, // single(ton) instance
+        this.processManager // single(ton) instance
+        );
+
+        this.nodes.set(node.id, _node);
+
+        debug('%s: created %s', this.identifier, _node.identifier);
+      } else {
+        var cls = def.type || 'xNode';
+
+        if (Node.nodeTypes.hasOwnProperty(cls)) {
+          validate.nodeDefinition(def);
+
+          _node = new Node.nodeTypes[cls](node.id, def, identifier);
+
+          this.nodes.set(node.id, _node);
+
+          debug('%s: created %s', this.identifier, _node.identifier);
+
+          // register and set pid, xFlow/actor adds itself to it (hack)
+          this.processManager.register(this.nodes.get(node.id));
+
+          if (_node.hasShutdown()) {
+            // TODO: implement shutdown
+            _node.on('execute', function () {
+              console.log('will execute');
+            });
+          }
+        } else {
+          throw Error(util.format('Unknown node type: `%s`', cls));
+        }
+      }
+
+      // add parent to both xflow's and node's
+      // not very pure seperation, but it's just very convenient
+      _node.setParent(this);
+
+      if (node.provider) {
+        _node.provider = node.provider;
+      }
+
+      this.contextProvider.addContext(_node, node.context, def.ports.input);
+
+      // CAN BE REMOVED, disposale can be done as soon as the IO manager writes
+      /*
+       _node.on('freePort', function freePortHandlerActor (event) {
+       let links
+       let i
+        debug('%s:%s freePortHandler', self.identifier, event.port)
+        // get all current port connections
+       links = this.portGetConnections(event.port)
+        if (links.length) {
+       if (event.link) {
+       // remove the link belonging to this event
+       if (event.link.has('dispose')) {
+       // TODO: remove cyclic all together, just use core/forEach
+       //  this will cause bugs if you send multiple cyclics because
+       //  the port is never unplugged..
+       if (!event.link.target.has('cyclic')) {
+       self.removeLink(event.link)
+       }
+       }
+       }
+       }
+       })
+       */
+
+      this.event(Events.ADDNODE, { node: _node });
+
+      return _node;
+    }
+
+    /**
+     *
+     * Adds a node to the map.
+     *
+     * The object format is like it's defined within a map.
+     *
+     * Right now this is only used during map loading.
+     *
+     * For dynamic loading care should be taken to make
+     * this node resolvable by the loader.
+     *
+     * Which means the definition should either be found
+     * at the default location defined within the map.
+     * Or the node itself should carry provider information.
+     *
+     * A provider can be defined as:
+     *
+     *  - url:        https://serve.rhcloud.com/flows/{ns}/{name}
+     *  - file:       ./{ns}/{name}
+     *  - namespace:  MyNs
+     *
+     * Namespaces are defined within the map, so MyNs will point to
+     * either the full url or filesystem location.
+     *
+     * Once a map is loaded _all_ nodes will carry the full url individually.
+     * The namespace is just their to simplify the json format and for ease
+     * of maintainance.
+     *
+     *
+     * @param {Object} node
+     * @fires Flow#addNode
+     * @public
+     */
+
+  }, {
+    key: 'addNode',
+    value: function addNode(node, def) {
+      this.createNode(node, def);
+
+      return this;
+    }
+
+    /**
+     *
+     * Renames a node
+     *
+     * Renames the id of a node.
+     * This should not rename the real id.
+     *
+     * @param {string} nodeId
+     * @param {function} cb
+     * @public
+     */
+
+  }, {
+    key: 'renameNode',
+    value: function renameNode(nodeId, cb) {
+      throw Error('renameNode not implemented');
+      // console.log(nodeId, cb)
+    }
+
+    /**
+     *
+     * Removes a node
+     *
+     * @param {string} nodeId
+     * @param {function} cb
+     * @fires Flow#removeNode
+     * @public
+     */
+
+  }, {
+    key: 'removeNode',
+    value: function removeNode(nodeId, cb) {
+      var self = this;
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this.links.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var link = _step.value;
+
+          if (link.source.id === nodeId || link.target.id === nodeId) {
+            this.removeLink(link);
+          }
+        }
+
+        // should wait for IO, especially there is a chance
+        // system events are still spitting.
+        // nodeId is an actual object here, the subgraph.
+
+        // register and set pid
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      this.processManager.unregister(this.getNode(nodeId), function unregisterHandlerActor() {
+        var oldNode = self.getNode(nodeId).export();
+
+        self.nodes.delete(nodeId);
+
+        self.event(Events.REMOVENODE, {
+          node: oldNode
+        });
+
+        if (cb) {
+          cb();
+        }
+      });
+    }
+  }, {
+    key: 'removeNodes',
+    value: function removeNodes() {
+      this.clear();
+    }
+
+    /**
+     *
+     * Get all nodes.
+     *
+     * TODO: unnecessary method
+     *
+     * @return {Object} nodes
+     * @public
+     *
+     */
+
+  }, {
+    key: 'getNodes',
+    value: function getNodes() {
+      return this.nodes;
+    }
+
+    /**
+     *
+     * Check if this node exists
+     *
+     * @param {String} id
+     * @return {Object} node
+     * @public
+     */
+
+  }, {
+    key: 'hasNode',
+    value: function hasNode(id) {
+      return this.nodes.has(id);
+    }
+
+    /**
+     *
+     * Get a node by it's id.
+     *
+     * @param {String} id
+     * @return {Object} node
+     * @public
+     */
+
+  }, {
+    key: 'getNode',
+    value: function getNode(id) {
+      if (this.nodes.has(id)) {
+        return this.nodes.get(id);
+      } else {
+        var _iteratorNormalCompletion2 = true;
+        var _didIteratorError2 = false;
+        var _iteratorError2 = undefined;
+
+        try {
+          for (var _iterator2 = this.nodes.values()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var node = _step2.value;
+
+            if (node.id === id || node.identifier === id) {
+              return node;
+            }
+          }
+        } catch (err) {
+          _didIteratorError2 = true;
+          _iteratorError2 = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+              _iterator2.return();
+            }
+          } finally {
+            if (_didIteratorError2) {
+              throw _iteratorError2;
+            }
+          }
+        }
+      }
+
+      // :iip sets self as source
+      if (id === this.id) {
+        return this;
+      }
+
+      throw new Error(util.format('Node %s does not exist', id));
+    }
+
+    /**
+     *
+     * Register extra node types:
+     *
+     * Current types available are:
+     *
+     *  - ReactNode
+     *  - PolymerNode
+     *
+     */
+
+  }], [{
+    key: 'registerNodeType',
+    value: function registerNodeType(Type) {
+      this.nodeTypes[Type.name] = Type;
+    }
+  }]);
+
+  return Node;
+}();
+
+Node.nodeTypes = {
+  xNode: XNode
+};
+
+module.exports = Node;
+},{"../events/flow":18,"../flow":25,"../node":45,"../validate":81,"debug":"debug","util":146}],9:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Port = function () {
+  function Port() {
+    _classCallCheck(this, Port);
+  }
+
+  _createClass(Port, [{
+    key: 'plugPort',
+
+    /**
+     *
+     * Plugs a source into a target node
+     *
+     *
+     * @param {Connector} target
+     */
+    value: function plugPort(type, connector) {
+      return this.getNode(connector.id).getPort(type, connector.port).plug(connector);
+    }
+
+    /**
+     *
+     * Unplugs a port for the node specified.
+     *
+     * @param {Connector} target
+     */
+
+  }, {
+    key: 'unplugPort',
+    value: function unplugPort(type, connector) {
+      if (this.hasNode(connector.id)) {
+        return this.getNode(connector.id).getPort(type, connector.port).unplug(connector);
+      }
+
+      return false;
+    }
+    /**
+     *
+     * Adds a port
+     *
+     * NOT IMPLEMENTED
+     *
+     * @public
+     */
+
+  }, {
+    key: 'addPort',
+    value: function addPort() {
+      return this;
+    }
+
+    /**
+     *
+     * Removes a port
+     *
+     * NOT IMPLEMENTED
+     *
+     * @public
+     */
+
+  }, {
+    key: 'removePort',
+    value: function removePort() {
+      return this;
+    }
+  }]);
+
+  return Port;
+}();
+
+module.exports = Port;
+},{}],10:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Process = function () {
+  function Process() {
+    _classCallCheck(this, Process);
+  }
+
+  _createClass(Process, [{
+    key: 'getNodeByPid',
+
+    /**
+     *
+     * Retrieve a node by it's process id
+     *
+     * @param {String} pid - Process ID
+     * @return {Object} node
+     * @public
+     */
+    value: function getNodeByPid(pid) {
+      return Array.from(this.nodes.values()).find(function (node) {
+        return node.pid === pid;
+      });
+    }
+
+    /**
+     *
+     * Used by the process manager to set our id
+     *
+     */
+
+  }, {
+    key: 'setPid',
+    value: function setPid(pid) {
+      this.pid = pid;
+    }
+  }]);
+
+  return Process;
+}();
+
+module.exports = Process;
+},{}],11:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Report = function () {
+  function Report() {
+    _classCallCheck(this, Report);
+  }
+
+  _createClass(Report, [{
+    key: 'report',
+
+    /**
+     *
+     * JSON Status report about the nodes.
+     *
+     * Mainly meant to debug after shutdown.
+     *
+     * Should handle all stuff one can think of
+     * why `it` doesn't work.
+     *
+     */
+    value: function report() {
+      // let size
+      // const qm = this.ioHandler.queueManager
+
+      var _report = {
+        ok: true,
+        flow: this.id,
+        nodes: [],
+        queues: []
+      };
+
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this.nodes.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var node = _step.value;
+
+          if (node.status !== 'complete') {
+            _report.ok = false;
+            _report.nodes.push({
+              node: node.report()
+            });
+          }
+        }
+
+        /*
+        for (const link of this.links.values()) {
+          if (qm.hasQueue(link.ioid)) {
+            size = qm.size(link.ioid)
+            _report.ok = false
+            _report.queues.push({
+              link: link.toJSON(),
+              port: link.target.port,
+              // super weird, will be undefined if called here.
+              // size: qm.size(link.ioid),
+              size: size,
+              node: this.getNode(link.target.id).report()
+            })
+          }
+        }
+        */
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      return _report;
+    }
+  }]);
+
+  return Report;
+}();
+
+module.exports = Report;
+},{}],12:[function(require,module,exports){
+'use strict';
+
+var Status = {};
+Status.STOPPED = 'stopped';
+Status.RUNNING = 'running';
+
+module.exports = Status;
+},{}],13:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -189,7 +2155,7 @@ var Parent = function () {
 }();
 
 module.exports = Parent;
-},{}],3:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -263,7 +2229,187 @@ var Status = function () {
 }();
 
 module.exports = Status;
-},{"../events/node":5}],4:[function(require,module,exports){
+},{"../events/node":21}],15:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Setting = require('./setting');
+var debug = require('debug')('chix:connector');
+var Events = require('./events/connector');
+
+/**
+ *
+ * Connector
+ *
+ * The thing you plug into a port.
+ *
+ * Contains information about port and an optional
+ * action to perform within the node (subgraph)
+ *
+ * Can also contains port specific settings.
+ *
+ * An xLink has a source and a target connector.
+ *
+ * ................... xLink ....................
+ *
+ *  -------------------.    .------------------
+ * | Source Connector -------  Target Connector |
+ *  ------------------'     `------------------
+ *
+ * When a link is plugged into a node, we do so
+ * by plugging the target connector.
+ *
+ * @constructor
+ * @public
+ *
+ */
+
+var Connector = function (_Setting) {
+  _inherits(Connector, _Setting);
+
+  function Connector(settings) {
+    _classCallCheck(this, Connector);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Connector).call(this, settings));
+
+    _this.wire = undefined;
+    return _this;
+  }
+
+  /**
+   *
+   * Plug
+   *
+   * TODO: plug is not the correct name
+   *
+   * @param {String} id - TODO: not sure which id, from the node I pressume..
+   * @param {String} port
+   * @param {String} action
+   */
+
+
+  _createClass(Connector, [{
+    key: 'plug',
+    value: function plug(id, port, action) {
+      debug('plug %s:%s', id, port);
+      this.id = id;
+      this.port = port;
+      if (action) {
+        this.action = action;
+      }
+    }
+
+    /**
+     * Write packet to this connector
+     *
+     * @param p
+     * @fires Connector#data
+     */
+
+  }, {
+    key: 'write',
+    value: function write(p) {
+      var index = this.get('index');
+      debug('write %s:%s %s', this.id, this.port, index === undefined ? '' : '[' + index + ']');
+      this.emit(Events.DATA, p, this);
+    }
+
+    /**
+     *
+     * Create
+     *
+     * Creates a connector
+     *
+     * @param {String} id - TODO: not sure which id, from the node I pressume..
+     * @param {String} port
+     * @param {Object} settings
+     * @param {String} action
+     */
+
+  }, {
+    key: 'setPid',
+
+
+    /**
+     *
+     * Register process id this connector handles.
+     *
+     */
+    value: function setPid(pid) {
+      this.pid = pid;
+    }
+  }, {
+    key: 'toJSON',
+    value: function toJSON() {
+      var ret = {
+        id: this.id,
+        port: this.port
+      };
+
+      if (this.setting) {
+        ret.setting = JSON.parse(JSON.stringify(this.setting));
+      }
+
+      if (this.action) {
+        ret.action = this.action;
+      }
+
+      return ret;
+    }
+  }], [{
+    key: 'create',
+    value: function create(id, port, settings, action) {
+      var c = new Connector(settings);
+      c.plug(id, port, action);
+      return c;
+    }
+  }]);
+
+  return Connector;
+}(Setting);
+
+module.exports = Connector;
+},{"./events/connector":17,"./setting":80,"debug":"debug"}],16:[function(require,module,exports){
+'use strict';
+
+/**
+ *
+ * Default Context Provider
+ *
+ * @constructor
+ * @public
+ */
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var DefaultProvider = function () {
+  function DefaultProvider() {
+    _classCallCheck(this, DefaultProvider);
+  }
+
+  _createClass(DefaultProvider, [{
+    key: 'addContext',
+    value: function addContext(node, defaultContext) {
+      if (typeof defaultContext !== 'undefined') {
+        node.addContext(defaultContext);
+      }
+    }
+  }]);
+
+  return DefaultProvider;
+}();
+
+module.exports = DefaultProvider;
+},{}],17:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -275,7 +2421,237 @@ module.exports = {
    */
   DATA: 'data'
 };
-},{}],5:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+  /**
+   * Start event.
+   *
+   * @event Flow#start
+   * @type {object}
+   * @property {node} node - Node being started
+   */
+  START: { name: 'start' },
+
+  /**
+   * Stop event.
+   *
+   * @event Flow#stop
+   * @type {object}
+   * @property {node} node - Node being stopped
+   */
+  STOP: { name: 'stop' },
+
+  /**
+   * Metadata event.
+   *
+   * @event Flow#metadata
+   * @type {object}
+   * @property {id} id - graphId
+   * @property {node} node - node which meta property was set
+   */
+  METADATA: { name: 'metadata' },
+
+  /**
+   * Add IIP event.
+   *
+   * @event Flow#addIIP
+   * @type {Link} Link - IIP Link which was added
+   */
+  ADDIIP: { name: 'addIIP' },
+
+  /**
+   * Remove IIP event.
+   *
+   * @event Flow#removeIIP
+   * @type {Link} oldLink - IIP Link which was removed
+   */
+  REMOVEIIP: { name: 'removeIIP' },
+
+  /**
+   * Add Link event.
+   *
+   * @event Flow#addLink
+   * @type {Link} link - Link which was added
+   */
+  ADDLINK: { name: 'addLink' },
+
+  /**
+   * Change Link event.
+   *
+   * @event Flow#changeLink
+   * @type {Link} link - Link which was changed
+   */
+  CHANGELINK: { name: 'changeLink' },
+
+  /**
+   * Remove Link event.
+   *
+   * @event Flow#removeLink
+   * @type {Link} oldLink - Link which was removed
+   */
+  REMOVELINK: { name: 'removeLink' },
+
+  /**
+   * Add node event.
+   *
+   * @event Flow#addNode
+   * @type {Object}
+   * @property {Node} node - Node which was added
+   */
+  ADDNODE: { name: 'addNode' },
+
+  /**
+   * Remove node event.
+   *
+   * @event Flow#removeNode
+   * @type {Object}
+   * @property {Node} oldNode - Node which was removed
+   */
+  REMOVENODE: { name: 'removeNode' },
+
+  /**
+   * Add Port event.
+   *
+   * @event Flow#addPort
+   * @type {Object}
+   * @property {Node} node - Node to which port was added
+   * @property {String} port - Port name which was added
+   * @property {String} nodeId - Internal nodeId
+   * @property {String} name - Internal Port name
+   * @property {String} type - Type input|output
+   */
+  ADDPORT: { name: 'addPort' },
+
+  /**
+   * Remove Port event.
+   *
+   * @event Flow#removePort
+   * @type {Object}
+   * @property {Node} node - Node to which port was removed
+   * @property {String} port - Port name which was removed
+   * @property {String} type - Type input|output
+   */
+  REMOVEPORT: { name: 'removePort' },
+
+  /**
+   * Rename Port event.
+   *
+   * @event Flow#renamePort
+   * @type {Object}
+   * @property {Node} node - Node which port was changed
+   * @property {String} from - Old port name
+   * @property {String} to - New port name
+   */
+  RENAMEPORT: { name: 'renamePort' },
+
+  /**
+   * Port Output event.
+   *
+   * @event Flow#output
+   * @type {Object}
+   * @property {Node} node - Node
+   * @property {String} port - port name
+   * @property {String} out - Output packet
+   * @property {String} action - Optional current action
+   */
+  OUTPUT: { name: 'output' },
+
+  /**
+   * Port Output event.
+   *
+   * @event Flow#error
+   * @type {Object}
+   * @property {Node} node - Node
+   * @property {Error} msg - The Error
+   */
+  ERROR: { name: 'error', expose: true }
+};
+},{}],19:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+  /**
+   * Send event.
+   *
+   * @event IO#Send
+   * @type {object}
+   * @property {id} id - graphId
+   * @property {node} node - node which meta property was set
+   */
+  SEND: 'send',
+
+  /**
+   * Connect event.
+   *
+   * @event IO#Connect
+   * @type {Link} link - The connected link
+   */
+  CONNECT: 'connect',
+
+  /**
+   * Disconnect event.
+   *
+   * @event IO#Connect
+   * @type {Link} link - The disconnected link
+   */
+  DISCONNECT: 'disconnect',
+
+  /**
+   * Drop event.
+   *
+   * @event IO#Drop
+   * @type {Packet} p - The dropped packet
+   */
+  DROP: 'drop',
+
+  /**
+   * Data event.
+   *
+   * @event IO#Data
+   * @type {Any} data - Plain data contained within the packet
+   */
+  DATA: 'data',
+
+  /**
+   * Packet event.
+   *
+   * @event IO#Packet
+   * @type {Link} link - The Link
+   * @type {Any} data - The packet
+   */
+  PACKET: 'packet',
+
+  /**
+   * Receive event.
+   *
+   * @event IO#Receive
+   * @type {Link} link - The Link which just received data
+   */
+  RECEIVE: 'receive'
+};
+},{}],20:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+  /**
+   * Change event
+   *
+   * @event Link#change
+   * @type {object}
+   */
+  CHANGE: 'change',
+
+  /**
+   * Clear event
+   *
+   * @event Link#clear
+   * @type {object}
+   */
+  CLEAR: 'clear'
+};
+},{}],21:[function(require,module,exports){
 'use strict';
 
 /**
@@ -410,7 +2786,83 @@ module.exports = {
    */
   TIMEOUT: { name: 'nodeTimeout', expose: true }
 };
-},{}],6:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+  /**
+   * Add Process event
+   *
+   * @event Process#addProcess
+   * @type {object}
+   * @property {node} node - Added Process
+   */
+  ADD_PROCESS: 'addProcess',
+
+  /**
+   * Remove Process event
+   *
+   * @event Process#removeProcess
+   * @type {object}
+   * @property {node} node - Removed Process
+   */
+  REMOVE_PROCESS: 'removeProcess',
+
+  /**
+   * Start Process event
+   *
+   * @event Process#startProcess
+   * @type {object}
+   * @property {node} node - Process to be started
+   */
+  START_PROCESS: 'startProcess',
+
+  /**
+   * Stop Process event
+   *
+   * @event Process#stopProcess
+   * @type {object}
+   * @property {node} node - Stopped Process
+   */
+  STOP_PROCESS: 'stopProcess',
+
+  /**
+   * Process Status event
+   *
+   * @event Process#processStatus
+   * @type {object}
+   * @property {node} node - Process Status
+   */
+  PROCESS_STATUS: 'processStatus',
+
+  /**
+   * Error event
+   *
+   * @event Process#error
+   * @type {object}
+   * @property {node} node - The errored process
+   */
+  ERROR: 'error',
+
+  /**
+   * Change Pid event
+   *
+   * @event Process#changePid
+   * @type {object}
+   * @property {node} node - Process which pid was changed
+   */
+  CHANGE_PID: 'changePid',
+
+  /**
+   * Report event
+   *
+   * @event Process#report
+   * @type {object}
+   * @property {Object} report - Object containing report
+   */
+  REPORT: 'report'
+};
+},{}],23:[function(require,module,exports){
 'use strict';
 
 module.exports = {
@@ -430,7 +2882,1971 @@ module.exports = {
    */
   DATA: 'data'
 };
-},{}],7:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
+'use strict';
+
+module.exports = {
+  /**
+   * Change event
+   *
+   * @event Setting#change
+   * @type {Object}
+   */
+  CHANGE: 'change'
+};
+},{}],25:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Actor = require('./actor');
+var debug = require('debug')('chix:flow');
+
+var mixin = require('./mixin');
+var $Action = require('./flow/action');
+var $Context = require('./flow/context');
+var $Control = require('./flow/control');
+var $Error = require('./flow/error');
+var $Event = require('./node/base/event');
+var $Export = require('./flow/export');
+var $IsStartable = require('./flow/isStartable');
+var $Meta = require('./flow/meta');
+var $Ports = require('./flow/ports');
+var $Process = require('./flow/process');
+var $Status = require('./common/status');
+var $ToJSON = require('./flow/toJSON');
+
+/**
+ *
+ * This FlowNode extends the Actor.
+ *
+ * What it mainly does is delegate what it it asked to do
+ * To the nodes from the actor.
+ *
+ * External Interface is not really needed anymore.
+ *
+ * Because the flow has ports just like a normal node
+ *
+ * @constructor
+ * @public
+ *
+ */
+
+var Flow = function (_Actor) {
+  _inherits(Flow, _Actor);
+
+  function Flow(id, map, identifier, loader, ioHandler, processManager) {
+    _classCallCheck(this, Flow);
+
+    if (!id) {
+      throw Error('xFlow requires an id');
+    }
+
+    if (!map) {
+      throw Error('xFlow requires a map');
+    }
+
+    // Call the super's constructor
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Flow).apply(this, arguments));
+
+    var self = _this;
+
+    _this._delay = 0;
+
+    if (loader) {
+      _this.loader = loader;
+    }
+
+    if (ioHandler) {
+      _this.ioHandler = ioHandler;
+    }
+
+    if (processManager) {
+      _this.processManager = processManager;
+    }
+
+    // indicates whether this is an action instance.
+    _this.actionName = undefined;
+
+    // TODO: trying to solve provider issue
+    _this.provider = map.provider;
+
+    _this.providers = map.providers;
+
+    _this.actions = {};
+
+    _this.id = id;
+
+    _this.name = map.name;
+
+    _this.type = 'flow';
+
+    _this.title = map.title;
+
+    _this.description = map.description;
+
+    _this.ns = map.ns;
+
+    _this.active = false;
+
+    _this.metadata = map.metadata || {};
+
+    _this.identifier = identifier || [map.ns, ':', map.name].join('');
+
+    // Need to think about how to implement this for flows
+    // this.ports.output[':complete'] = { type: 'any' }
+
+    _this.runCount = 0;
+
+    // this.filled = 0
+
+    _this._interval = 100;
+
+    _this.nodeTimeout = map.nodeTimeout || 3000;
+
+    _this.inputTimeout = typeof map.inputTimeout === 'undefined' ? 3000 : map.inputTimeout;
+
+    _this._hold = false;
+
+    _this._inputTimeout = null;
+
+    _this.ports = map.ports ? JSON.parse(JSON.stringify(map.ports)) : {};
+
+    debug('%s: addMap', _this.identifier);
+    _this.addMap(map);
+
+    _this.initPortOptions = function () {
+      // Init port options.
+      for (var port in self.ports.input) {
+        if (self.ports.input.hasOwnProperty(port)) {
+          // This flow's port
+          var thisPort = self.ports.input[port];
+
+          // set port option
+          if (thisPort.options) {
+            for (var opt in thisPort.options) {
+              if (thisPort.options.hasOwnProperty(opt)) {
+                self.setPortOption('input', port, opt, thisPort.options[opt]);
+              }
+            }
+          }
+        }
+      }
+    };
+
+    _this.createPorts(_this.ports);
+
+    // Just use the same as node is using, merge node & flow & actor functionality.
+    // common mixins.
+    /** @property {Array} inPorts */
+    Object.defineProperty(_this, 'inPorts', {
+      enumerable: true,
+      get: function get() {
+        return Object.keys(this.ports.input);
+      }
+    });
+
+    /** @property {Array} outPorts */
+    Object.defineProperty(_this, 'outPorts', {
+      enumerable: true,
+      get: function get() {
+        return Object.keys(this.ports.output);
+      }
+    });
+
+    // this.setup()
+    // this.initPortOptions()
+
+    // this.listenForOutput()
+
+    _this.setStatus('created');
+    return _this;
+  }
+
+  /**
+   *
+   * Create an xFlow
+   *
+   * Some kind of logic as the actor
+   *
+   * @public
+   */
+
+
+  _createClass(Flow, null, [{
+    key: 'create',
+    value: function create(map, loader, ioHandler, processManager) {
+      var actor = new Flow(map.id, map, map.ns + ':' + map.name, loader, ioHandler, processManager);
+
+      return actor;
+    }
+  }]);
+
+  return Flow;
+}(Actor);
+
+mixin(Actor, $Action, $Context, $Control, $Error, $Event, $Export, $IsStartable, $Meta, $Ports, $Process, $Status, $ToJSON);
+
+module.exports = Flow;
+},{"./actor":2,"./common/status":14,"./flow/action":26,"./flow/context":27,"./flow/control":28,"./flow/error":29,"./flow/export":30,"./flow/isStartable":31,"./flow/meta":32,"./flow/ports":33,"./flow/process":34,"./flow/toJSON":35,"./mixin":44,"./node/base/event":49,"debug":"debug"}],26:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Action = function () {
+  function Action() {
+    _classCallCheck(this, Action);
+  }
+
+  _createClass(Action, [{
+    key: 'action',
+    value: function action(_action) {
+      if (!this.actions.hasOwnProperty(_action)) {
+        throw Error('this.action should return something with the action map');
+        /*
+         const ActionActor = this.action(action)
+          // ActionActor.map.ports = this.ports
+          // not sure what to do with the id and identifier.
+         // I think they should stay the same, for now.
+         //
+         this.actions[action] = new Flow(
+         this.id,
+         // ActionActor, // BROKEN
+         map, // action definition should be here
+         this.identifier + '::' + action
+         )
+          // a bit loose this.
+         this.actions[action].actionName = action
+          //this.actions[action].ports = this.ports
+         */
+      }
+
+      return this.actions[_action];
+    }
+  }, {
+    key: 'isAction',
+    value: function isAction() {
+      return Boolean(this.actionName);
+    }
+  }]);
+
+  return Action;
+}();
+
+module.exports = Action;
+},{}],27:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var debug = require('debug')('chix:flow');
+var forOf = require('object-forof');
+var Events = require('../events/node');
+
+var Context = function () {
+  function Context() {
+    _classCallCheck(this, Context);
+  }
+
+  _createClass(Context, [{
+    key: 'addContext',
+    value: function addContext(context) {
+      var _this = this;
+
+      debug('%s: addContext', this.identifier);
+      forOf(function (port, val) {
+        var portDef = _this.getPortDefinition(port, 'input');
+        _this.getNode(portDef.nodeId).setContextProperty(portDef.name, val);
+      }, context);
+    }
+  }, {
+    key: 'setContextProperty',
+    value: function setContextProperty(port, data) {
+      var portDef = this.getPortDefinition(port, 'input');
+      this.getNode(portDef.nodeId).setContextProperty(portDef.name, data);
+
+      // TODO: test if it succeeded
+      this.event(Events.CONTEXTUPDATE, {
+        node: this,
+        port: port,
+        data: data
+      });
+    }
+  }, {
+    key: 'clearContextProperty',
+    value: function clearContextProperty(port) {
+      var portDef = this.getPortDefinition(port, 'input');
+      this.getNode(portDef.nodeId).clearContextProperty(portDef.name);
+
+      this.event(Events.CONTEXTCLEAR, {
+        node: this,
+        port: port
+      });
+    }
+  }]);
+
+  return Context;
+}();
+
+module.exports = Context;
+},{"../events/node":21,"debug":"debug","object-forof":97}],28:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Control = function () {
+  function Control() {
+    _classCallCheck(this, Control);
+  }
+
+  _createClass(Control, [{
+    key: 'complete',
+    value: function complete() {
+      this.ready = false;
+      this.active = false;
+    }
+  }, {
+    key: 'hold',
+    value: function hold() {
+      this._hold = true;
+      this.stop();
+    }
+  }, {
+    key: 'release',
+    value: function release() {
+      this._hold = false;
+      this.resume();
+    }
+  }, {
+    key: 'reset',
+    value: function reset() {
+      this.runCount = 0;
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this.nodes.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var node = _step.value;
+
+          node.reset();
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+    }
+  }, {
+    key: 'shutdown',
+    value: function shutdown() {}
+  }, {
+    key: 'destroy',
+    value: function destroy() {
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = this.nodes.values()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var node = _step2.value;
+
+          node.destroy();
+        }
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2.return) {
+            _iterator2.return();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
+        }
+      }
+    }
+  }]);
+
+  return Control;
+}();
+
+module.exports = Control;
+},{}],29:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var util = require('util');
+var Events = require('../events/link');
+
+var ErrorMixin = function () {
+  function ErrorMixin() {
+    _classCallCheck(this, ErrorMixin);
+  }
+
+  _createClass(ErrorMixin, [{
+    key: 'error',
+    value: function error(node, err) {
+      var _error = util.isError(err) ? err : Error(err);
+
+      var eobj = {
+        node: node.export(),
+        msg: err
+      };
+
+      node.setStatus('error');
+
+      node.event(Events.ERROR, eobj);
+
+      return _error;
+    }
+  }]);
+
+  return ErrorMixin;
+}();
+
+module.exports = ErrorMixin;
+},{"../events/link":20,"util":146}],30:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Export = function () {
+  function Export() {
+    _classCallCheck(this, Export);
+  }
+
+  _createClass(Export, [{
+    key: 'export',
+
+    /**
+     *
+     * Return a serializable export of this flow.
+     *
+     * @public
+     */
+    value: function _export() {
+      return {
+        id: this.id,
+        pid: this.pid,
+        ns: this.ns,
+        name: this.name,
+        identifier: this.identifier,
+        ports: this.ports,
+        // cycles: this.cycles,
+        inPorts: this.inPorts,
+        outPorts: this.outPorts,
+        // filled: this.filled,
+        // context: this.context,
+        active: this.active,
+        provider: this.provider
+        // input: this._filteredInput(),
+        // nodeTimeout: this.nodeTimeout,
+        // inputTimeout: this.inputTimeout
+      };
+    }
+  }]);
+
+  return Export;
+}();
+
+module.exports = Export;
+},{}],31:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var IsStartable = function () {
+  function IsStartable() {
+    _classCallCheck(this, IsStartable);
+  }
+
+  _createClass(IsStartable, [{
+    key: 'isStartable',
+    value: function isStartable() {
+      return true;
+    }
+  }]);
+
+  return IsStartable;
+}();
+
+module.exports = IsStartable;
+},{}],32:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Meta = function () {
+  function Meta() {
+    _classCallCheck(this, Meta);
+  }
+
+  _createClass(Meta, [{
+    key: 'setMetadata',
+    value: function setMetadata(metadata) {
+      this.metadata = metadata;
+      return this;
+    }
+  }, {
+    key: 'setMeta',
+    value: function setMeta(key, value) {
+      this.metadata[key] = value;
+      return this;
+    }
+  }]);
+
+  return Meta;
+}();
+
+module.exports = Meta;
+},{}],33:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var util = require('util');
+var forOf = require('object-forof');
+var ExternalInputPort = require('../port/external/input');
+var ExternalOutputPort = require('../port/external/output');
+var StartPort = require('../port/external/start');
+var Events = require('../events/flow');
+
+var Ports = function () {
+  function Ports() {
+    _classCallCheck(this, Ports);
+  }
+
+  _createClass(Ports, [{
+    key: 'portExists',
+
+    /**
+     *
+     * Checks whether the port exists at the node
+     * this Flow is relaying for.
+     *
+     * @param {String} type
+     * @param {String} port
+     */
+    value: function portExists(type, port) {
+      // this returns whether this port exists for _us_
+      // it only considers the exposed ports.
+      var portDef = this.getPortDefinition(port, type, false);
+      return this.getNode(portDef.nodeId).portExists(type, portDef.name);
+    }
+
+    /**
+     *
+     * Checks whether the port is open at the node
+     * this Flow is relaying for.
+     *
+     * @param {String} port
+     */
+
+  }, {
+    key: 'portIsOpen',
+    value: function portIsOpen(port) {
+      // the port open logic is about _our_ open and exposed ports.
+      // yet ofcourse it should check the real node.
+      // so also delegate.
+      var portDef = this.getPortDefinition(port, 'input');
+      // Todo there is no real true false in portIsOpen?
+      // it will fail hard.
+      return this.getNode(portDef.nodeId).portIsOpen(portDef.name);
+    }
+
+    /**
+     *
+     * Get _this_ Flow's port definition.
+     *
+     * The definition contains the _real_ portname
+     * of the node _this_ port is relaying for.
+     *
+     * @param {String} port
+     */
+
+  }, {
+    key: 'getPortDefinition',
+    value: function getPortDefinition(port, type) {
+      var createStartPort = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
+
+      if (port === ':start' && type === 'input') {
+        // && createStartPort && !this.portExists('input', ':start')) {
+        this.addPort('input', ':start', { type: 'any', name: ':start', required: false });
+      }
+      if (this.ports[type].hasOwnProperty(port)) {
+        return this.ports[type][port];
+      } else {
+        throw new Error(util.format('Unable to find exported port definition for %s port `%s` (%s:%s)\n' + '\tAvailable ports: %s', type, port, this.ns, this.name, Object.keys(this.ports[type]).toString()));
+      }
+    }
+  }, {
+    key: 'getPort',
+    value: function getPort(type, name) {
+      return this.getPortDefinition(name, type);
+    }
+  }, {
+    key: 'getInputPort',
+    value: function getInputPort(name) {
+      return this.getPortDefinition(name, 'input');
+    }
+  }, {
+    key: 'getOutputPort',
+    value: function getOutputPort(name) {
+      return this.getPortDefinition(name, 'output');
+    }
+
+    /**
+     *
+     * Get the port option at the node
+     * this flow is relaying for.
+     *
+     * @param {String} type
+     * @param {String} port
+     * @param {String} option
+     */
+
+  }, {
+    key: 'getPortOption',
+    value: function getPortOption(type, port, option) {
+      // Exposed ports can also have options set.
+      // if this is _our_ port (it is exposed)
+      // just delegate this to the real node.
+      var portDef = this.getPortDefinition(port, type);
+      // Todo there is no real true false in portIsOpen?
+      // it will fail hard.
+      return this.getNode(portDef.nodeId).getPortOption(type, portDef.name, option);
+    }
+
+    /**
+     *
+     * Sets an input port option.
+     *
+     * The node schema for instance can specifiy whether a port is persistent.
+     *
+     * At the moment a connection can override these values.
+     * It's a way of saying I give you this once so take care of it.
+     *
+     * Ok, with forks running this should eventually be much smarter.
+     * If there are long running flows, all instances should have their
+     * ports updated.
+     *
+     * Not sure when setPortOption is called, if it is called during 'runtime'
+     * there is no problem and we could just set it on the current Actor.
+     * I could also just already fix it and update baseActor and all _actors.
+     * which would be sufficient.
+     */
+
+  }, {
+    key: 'setPortOption',
+    value: function setPortOption(type, port, opt, value) {
+      var portDef = this.getPortDefinition(port, type);
+      this.getNode(portDef.nodeId).setPortOption(type, portDef.name, opt, value);
+    }
+  }, {
+    key: 'exposePort',
+    value: function exposePort(type, nodeId, port, name) {
+      var node = this.getNode(nodeId);
+
+      if (node.ports[type]) {
+        for (var p in node.ports[type]) {
+          if (node.ports[type].hasOwnProperty(p)) {
+            if (p === port) {
+              // not sure, is this all info?
+              this.addPort(type, name, {
+                nodeId: nodeId,
+                name: port
+              });
+
+              continue;
+            }
+          }
+        }
+      }
+
+      this.event(Events.ADDPORT, {
+        node: this.export(),
+        nodeId: nodeId,
+        name: port,
+        port: name,
+        type: type
+      });
+    }
+  }, {
+    key: 'removePort',
+    value: function removePort(type, name) {
+      if (this.ports[type][name]) {
+        delete this.ports[type][name];
+
+        this.event(Events.REMOVEPORT, {
+          node: this.export(),
+          port: name,
+          type: type
+        });
+      }
+    }
+  }, {
+    key: 'renamePort',
+    value: function renamePort(type, from, to) {
+      if (this.ports[type][from]) {
+        this.ports[type][to] = this.ports[type][from];
+        this.ports[type][to].name = to;
+
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+          for (var _iterator = this.links.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var link = _step.value;
+
+            if (type === 'input' && link.target.id === this.id && link.target.port === from) {
+              link.target.port = to;
+            } else if (type === 'output' && link.source.id === this.id && link.source.port === from) {
+              link.source.port = to;
+            }
+          }
+        } catch (err) {
+          _didIteratorError = true;
+          _iteratorError = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+              _iterator.return();
+            }
+          } finally {
+            if (_didIteratorError) {
+              throw _iteratorError;
+            }
+          }
+        }
+
+        delete this.ports[type][from];
+
+        this.event(Events.RENAMEPORT, {
+          node: this.export(),
+          from: from,
+          to: to,
+          type: type
+        });
+      }
+    }
+  }, {
+    key: 'addPort',
+    value: function addPort(type, name, def) {
+      if (!this.ports[type]) {
+        this.ports[type] = {};
+      }
+
+      if (name === ':start') {
+        this.ports[type][name] = new StartPort(def, this);
+      } else {
+        var internalPort = this.getNode(def.nodeId).getPort(type, def.name);
+
+        if (type === 'input') {
+          this.ports[type][name] = new ExternalInputPort(def, internalPort);
+        } else {
+          this.ports[type][name] = new ExternalOutputPort(def, internalPort);
+        }
+      }
+
+      var _port = this.ports[type][name];
+      _port.setParent(this);
+    }
+
+    /**
+     *
+     * Close the port of the node we are relaying for
+     * and also close our own port.
+     *
+     * @param {String} port
+     */
+
+  }, {
+    key: 'closePort',
+    value: function closePort(port) {
+      // delegate this to the real node
+      // only if this is one of _our_ exposed nodes.
+      var portDef = this.getPortDefinition(port, 'input');
+
+      if (port !== ':start') {
+        this.getNode(portDef.nodeId).closePort(portDef.name);
+      }
+    }
+  }, {
+    key: 'getPortType',
+    value: function getPortType(kind, port) {
+      if (port === ':start') {
+        return 'any';
+      }
+      var portDef = this.getPortDefinition(port, 'input');
+      var type = this.getNode(portDef.nodeId).getPortType(kind, portDef.name);
+      if (type) {
+        return type;
+      } else {
+        throw Error('Unable to determine port type');
+      }
+    }
+  }, {
+    key: 'inputPortAvailable',
+    value: function inputPortAvailable(target) {
+      if (target.action && !this.isAction()) {
+        return this.action(target.action).inputPortAvailable(target);
+      } else {
+        // little bit too much :start hacking..
+        // probably causes the :start problem with clock
+        if (target.port === ':start') {
+          return true;
+        } else {
+          var portDef = this.getPortDefinition(target.port, 'input');
+
+          if (!this.linkMap.has(target.wire.id)) {
+            throw Error('Cannot find internal link within linkMap');
+          }
+
+          return this.getNode(portDef.nodeId).inputPortAvailable(this.linkMap.get(target.wire.id).target);
+        }
+      }
+    }
+
+    /**
+     *
+     * Receive a ports definition and creates the Port instances
+     *
+     * @param {Object} ports
+     * @param {Object} ports.input
+     * @param {Object} ports.output
+     */
+
+  }, {
+    key: 'createPorts',
+    value: function createPorts(ports) {
+      var _this = this;
+
+      ports = ports || {};
+      // initialize both input and output ports might
+      // one of them be empty.
+      if (!ports.input) {
+        ports.input = {};
+      }
+      if (!ports.output) {
+        ports.output = {};
+      }
+
+      this.ports = { input: {}, output: {} };
+      forOf(function (name, def) {
+        return _this.addPort('input', name, def);
+      }, ports.input);
+      forOf(function (name, def) {
+        return _this.addPort('output', name, def);
+      }, ports.output);
+
+      // Always add complete port, :start port will be added dynamicaly
+      // this.addPort('output', ':complete', {name: ':complete', type: 'any'})
+    }
+  }, {
+    key: 'sendPortOutput',
+    value: function sendPortOutput(port, p) {
+      var out = {
+        node: this.export(),
+        port: port,
+        out: p
+      };
+
+      if (this.isAction()) {
+        out.action = this.action;
+      }
+
+      p.release(this);
+
+      this.event(Events.OUTPUT, out);
+    }
+  }]);
+
+  return Ports;
+}();
+
+module.exports = Ports;
+},{"../events/flow":18,"../port/external/input":70,"../port/external/output":71,"../port/external/start":72,"object-forof":97,"util":146}],34:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Process = function () {
+  function Process() {
+    _classCallCheck(this, Process);
+  }
+
+  _createClass(Process, [{
+    key: 'setPid',
+    value: function setPid(pid) {
+      this.pid = pid;
+    }
+  }]);
+
+  return Process;
+}();
+
+module.exports = Process;
+},{}],35:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var validate = require('../validate');
+
+var ToJSON = function () {
+  function ToJSON() {
+    _classCallCheck(this, ToJSON);
+  }
+
+  _createClass(ToJSON, [{
+    key: 'toJSON',
+
+    /**
+     *
+     * Export this modified instance to a nodedefinition.
+     *
+     * @public
+     */
+    value: function toJSON() {
+      var def = {
+        id: this.id,
+        ns: this.ns,
+        name: this.name,
+        title: this.title,
+        type: this.type,
+        description: this.description,
+        // should not be the full nodes
+        nodes: [],
+        links: [],
+        ports: this.ports,
+        providers: this.providers
+      };
+
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this.nodes.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var node = _step.value;
+
+          def.nodes.push(node.toJSON());
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = this.links.values()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var link = _step2.value;
+
+          def.links.push(link.toJSON());
+        }
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2.return) {
+            _iterator2.return();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
+        }
+      }
+
+      validate.flow(def);
+
+      return def;
+    }
+  }]);
+
+  return ToJSON;
+}();
+
+module.exports = ToJSON;
+},{"../validate":81}],36:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var debug = require('debug')('chix:io');
+var uuid = require('uuid').v4;
+var Events = require('../events/io');
+var ConnectorEvents = require('../events/connector');
+
+var Connect = function () {
+  function Connect() {
+    _classCallCheck(this, Connect);
+  }
+
+  _createClass(Connect, [{
+    key: 'connect',
+
+    /**
+     *
+     * Connects ports together using the link information provided.
+     *
+     * @param {xLink} link
+     * @fires IO#connect
+     * @public
+     */
+    value: function connect(link) {
+      if (!link.source) {
+        throw Error('Link requires a source');
+      }
+
+      if (!link.source.pid) {
+        link.source.pid = link.source.id;
+      }
+
+      if (!link.ioid) {
+        link.ioid = uuid();
+      }
+
+      if (!link.target) {
+        throw Error('Link requires a target');
+      }
+
+      if (!link.target.pid) {
+        link.target.pid = link.target.id;
+      }
+
+      this.connections.set(link.ioid, link);
+
+      if (link.target.has('sync')) {
+        this.addSyncedTarget(link);
+      }
+
+      if (link.source.get('pointer')) {
+        this.addPointerPort(link);
+      }
+
+      debug('%s: link connected', link.ioid);
+
+      link.source.on(ConnectorEvents.DATA, this.onDataHandler);
+
+      this.emit(Events.CONNECT, link);
+    }
+  }]);
+
+  return Connect;
+}();
+
+module.exports = Connect;
+},{"../events/connector":17,"../events/io":19,"debug":"debug","uuid":99}],37:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var debug = require('debug')('chix:io');
+var Events = require('../events/io');
+var ConnectorEvents = require('../events/connector');
+
+var Disconnect = function () {
+  function Disconnect() {
+    _classCallCheck(this, Disconnect);
+  }
+
+  _createClass(Disconnect, [{
+    key: 'disconnect',
+
+    /**
+     *
+     * Disconnects a link
+     *
+     * @param {xLink} link
+     * @fires IO#disconnect
+     */
+    value: function disconnect(link) {
+      // unregister the connection
+      if (this.connections.has(link.ioid)) {
+        this.connections.delete(link.ioid);
+      } else {
+        throw Error('Cannot disconnect an unknown connection');
+      }
+
+      if (this.syncedTargetMap.has(link.target.pid)) {
+        this.removeSyncedTarget(link);
+      }
+
+      if (this.pointerPorts.has(link.source.pid)) {
+        this.removePointerPort(link);
+      }
+
+      debug('%s: disconnected', link.ioid);
+
+      delete link.ioid;
+
+      link.source.removeListener(ConnectorEvents.DATA, this.onDataHandler);
+
+      // used by actor to close ports
+      this.emit(Events.DISCONNECT, link);
+    }
+  }]);
+
+  return Disconnect;
+}();
+
+module.exports = Disconnect;
+},{"../events/connector":17,"../events/io":19,"debug":"debug"}],38:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var EventEmitter = require('events').EventEmitter;
+var debug = require('debug')('chix:io');
+
+var mixin = require('../mixin');
+var $Connect = require('./connect');
+var $Disconnect = require('./disconnect');
+var $Pointer = require('./pointer');
+var $Send = require('./send');
+var $Sync = require('./sync');
+
+var Events = require('../events/io');
+
+/**
+ *
+ * Io Handler
+ *
+ * It should know:
+ *
+ *  - the connections.
+ *  - relevant source & target connection settings.
+ *
+ * Connection settings can overlap with port settings.
+ * Connection settings take precedence over port settings.
+ *
+ * @constructor
+ * @public
+ *
+ **/
+
+var IoHandler = function (_EventEmitter) {
+  _inherits(IoHandler, _EventEmitter);
+
+  function IoHandler() {
+    _classCallCheck(this, IoHandler);
+
+    // connections.byTarget, connections.bySource etc.
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(IoHandler).call(this));
+
+    _this.connections = new Map();
+    _this.syncedTargetMap = new Map();
+    _this.pointerPorts = new Map();
+    _this._shutdown = false;
+    _this.onDataHandler = _this.onDataHandler.bind(_this);
+    return _this;
+  }
+
+  /**
+   * @param {Packet} p - Packet
+   * @param {Connector} source - Source Connector
+   * @fires IO#send
+   */
+
+
+  _createClass(IoHandler, [{
+    key: 'onDataHandler',
+    value: function onDataHandler(p, source) {
+      var wire = source.wire;
+      if (source.get('collect')) {
+        debug('%s: collecting packets', wire.ioid);
+        this.CHI.collect(wire, p);
+        return; // will be handled by event
+      }
+
+      this.emit(Events.SEND, wire);
+      this.send(wire, p);
+    }
+  }, {
+    key: 'get',
+    value: function get(link) {
+      if (this.connections.has(link.ioid)) {
+        return this.connections.get(link.ioid);
+      }
+    }
+  }, {
+    key: 'reset',
+    value: function reset(cb) {
+      this._shutdown = true;
+
+      if (cb) cb();
+    }
+
+    /**
+     *
+     * @param {Packet} packet - The dropped packet
+     * @param {String} origin - Origin
+     * @fires IO#drop
+     */
+
+  }, {
+    key: 'drop',
+    value: function drop(packet, origin) {
+      // TODO: drop data/packet gracefully
+      debug('IoHandler: Dropping packet %s %s', packet, origin);
+      this.emit(Events.DROP, packet);
+    }
+  }]);
+
+  return IoHandler;
+}(EventEmitter);
+
+mixin(IoHandler, $Connect, $Disconnect, $Pointer, $Send, $Sync);
+
+module.exports = IoHandler;
+},{"../events/io":19,"../mixin":44,"./connect":36,"./disconnect":37,"./pointer":40,"./send":41,"./sync":42,"debug":"debug","events":141}],39:[function(require,module,exports){
+'use strict';
+
+/**
+ *
+ * Handles the index
+ *
+ * TODO: packet is still needed, because index is set
+ *
+ * @param {Link} link
+ * @param {Data} data
+ * @param {Packet} p
+ * @public
+ */
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+function handleIndex(link, data, p) {
+  // TODO: data should be better defined and a typed object
+  var index = link.source.get('index');
+  if (/^\d+/.test(index)) {
+    // numeric
+    if (Array.isArray(data)) {
+      if (index < data.length) {
+        // new remember index.
+        p.point(link, index);
+        // p.index = index
+        // return data[index]
+      } else {
+        throw Error('index[] out-of-bounds on array output port ' + link.source.port);
+      }
+    } else {
+      throw Error('Got index[] on array output port ' + link.source.port + ', but data is not of the array type');
+    }
+  } else {
+    if ((typeof data === 'undefined' ? 'undefined' : _typeof(data)) === 'object') {
+      if (data.hasOwnProperty(index)) {
+        // TODO: test with dot-object
+        // new remember index.
+        p.point(link, index);
+        // p.index = index
+        // return data[index]
+      } else {
+        // maybe do not fail hard and just send to the error port.
+        console.log(p);
+        throw Error('Property ' + index + ' not found on object output port ' + link.source.port);
+      }
+    } else {
+      throw Error('Got index[] on non-object output port ' + link.source.port);
+    }
+  }
+}
+
+module.exports = handleIndex;
+},{}],40:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var debug = require('debug')('chix:io');
+
+var Pointer = function () {
+  function Pointer() {
+    _classCallCheck(this, Pointer);
+  }
+
+  _createClass(Pointer, [{
+    key: 'addPointerPort',
+    value: function addPointerPort(link) {
+      if (!this.pointerPorts.has(link.source.pid)) {
+        this.pointerPorts.set(link.source.pid, []);
+      }
+      this.pointerPorts.get(link.source.pid).push(link.source.port);
+      debug('%s: added pointer port `%s`', link.ioid, link.source.port);
+    }
+  }, {
+    key: 'removePointerPort',
+    value: function removePointerPort(link) {
+      var src = this.pointerPorts.get(link.source.pid);
+      src.splice(src.indexOf(link.source.port), 1);
+      if (src.length === 0) {
+        this.pointerPorts.delete(link.source.pid);
+      }
+    }
+  }, {
+    key: 'getPointerPorts',
+    value: function getPointerPorts(originId) {
+      if (this.pointerPorts.has(originId)) {
+        return this.pointerPorts.get(originId);
+      } else {
+        throw new Error(originId + ' s has no pointer ports');
+      }
+    }
+  }]);
+
+  return Pointer;
+}();
+
+module.exports = Pointer;
+},{"debug":"debug"}],41:[function(require,module,exports){
+(function (process){
+'use strict';
+
+/* eslint-disable no-cond-assign */
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var debug = require('debug')('chix:io');
+var Packet = require('../packet');
+var handleIndex = require('./indexHandler');
+var Events = require('../events/io');
+
+var Send = function () {
+  function Send() {
+    _classCallCheck(this, Send);
+  }
+
+  _createClass(Send, [{
+    key: 'hold',
+    value: function hold() {
+      this._hold = true;
+      this._heldItems = [];
+    }
+  }, {
+    key: 'step',
+    value: function step() {
+      if (this._heldItems.length) {
+        var item = this._heldItems.shift();
+        this.send(item[0], item[1], true);
+      }
+    }
+  }, {
+    key: 'resume',
+    value: function resume() {
+      this._hold = false;
+      var item = void 0;
+      if (this._heldItems.length) {
+        while (item = this._heldItems.shift()) {
+          this.send(item[0], item[1], true);
+        }
+      }
+    }
+
+    /**
+     *
+     * The method to provide input to this io handler.
+     *
+     * @param {Link} link
+     * @param {Packet} p
+     *
+     */
+
+  }, {
+    key: 'send',
+    value: function send(link, p, step) {
+      if (this._hold && !step) {
+        this._heldItems.push([link, p]);
+        return;
+      }
+
+      if (!Packet.isPacket(p)) {
+        throw Error('send expects a packet');
+      }
+
+      debug('sending packet');
+
+      /*
+      if (link.source.has('pointer')) { // is just a boolean
+        debug('%s: handling pointer', link.ioid)
+        p.setOwner(link)
+        p = p.clone(link)
+        p.release(link)
+         // Create an identifier
+        const pp = this.getPointerPorts(link.source.pid)
+        pp.unshift(link.source.pid)
+        const identifier = pp.join('-')
+        // The source node+port are pointed to.
+        // The packet has it's chi updated with the
+        // source.pid as key and an assigned item id as value
+        this.CHI.pointer(
+          link.source.pid,
+          link.source.port,
+          p,
+          identifier
+        )
+      }
+      if (link.target.has('sync')) {
+        debug('%s: handling sync port', link.ioid)
+        const syncPorts = this.getSyncedTargetPorts(link.target)
+        this.CHI.sync(
+          link,
+          link.target.get('sync'), // originId
+          p,
+          syncPorts
+        )
+        // always return, react on CHI.on('synced')
+        return
+      }
+      */
+      this.__sendData(link, p);
+    }
+
+    /**
+     *
+     * The method to provide input to this io handler.
+     *
+     * Ok, what misses here is info on how to find the actor
+     * Who needs the information
+     *
+     *
+     * Actor:
+     *
+     *  ioHandler.listenTo(Object.keys(this.nodes),
+     *
+     * @param {Connector} target
+     * @param {object} input
+     * @param {object} chi
+     * @fires IO#data
+     * @fires IO#packet
+     * @fires IO#receive
+     * @private
+     */
+
+    /*
+     *
+     * Send Data
+     *
+     * @param {xLink} link - Link to write to
+     * @param {Any} data - The input data
+     * @private
+     */
+
+  }, {
+    key: '__sendData',
+    value: function __sendData(link, p) {
+      var _this = this;
+
+      if (this._shutdown) {
+        // TODO:: probably does not both have to be dropped
+        // during __sendData *and* during output
+        p.release(link);
+        this.drop(p, link);
+      } else {
+        var _ret = function () {
+          /* Do this with a component
+          if (link.target.has('cyclic') &&
+            Array.isArray(p.read(link)) // second time it's not an array anymore
+          ) {
+            debug('%s: cycling', link.ioid)
+            // grouping
+            // The counter part will be 'collect'
+            const g = this.CHI.group()
+            if (p.read(link).length === 0) {
+              return false
+            }
+            const data = JSON.parse(JSON.stringify(p.read(link)))
+            for (let i = 0; i < data.length; i++) {
+              // create new packet
+              const newp = Packet.create(
+                data[i],
+                typeof data[i] // not sure if this will always work.
+              ).setOwner(link)
+              // this is a copy taking place..
+              newp.set('chi', p.chi ? JSON.parse(JSON.stringify(p.chi)) : {})
+              g.item(newp.chi)
+              this.send(link, newp)
+            }
+            g.done()
+            return null
+          }
+          */
+
+          var cp = void 0; // current packet
+
+          if (link.source.has('index') && !p.hasOwnProperty('index')) {
+            // already done during clone
+            // cp.chi = JSON.parse(JSON.stringify(cp.chi))
+            // const cp = p.clone(link); // important!
+            cp = p.clone(p.owner); // important!
+            if (undefined === cp.read(p.owner)[link.source.get('index')]) {
+              debug('%s: INDEX UNDEFINED %s', link.ioid, link.source, cp.read(cp.owner));
+              return {
+                v: null
+              }; // nop
+            } else {
+              handleIndex(link, cp.read(cp.owner), cp);
+              // cp.write(link, handleIndex(link, cp.read(link), cp))
+            }
+          } else {
+            cp = p;
+          }
+
+          // better call it pointer
+          if (link.target.has('mask')) {
+            cp.point(cp.owner, link.target.get('mask'));
+          }
+
+          _this.emit(Events.DATA, {
+            link: link,
+            // data: cp.read(link) // only emit the data
+            data: cp.read(link) // only emit the data
+          });
+
+          _this.emit(Events.PACKET, {
+            link: link,
+            data: cp
+          });
+
+          debug('writing packet %s -> %s', link.source.port, link.target.port);
+
+          process.nextTick(function () {
+            cp.release(link);
+            link.target.write(cp);
+          });
+
+          _this.emit(Events.RECEIVE, link);
+        }();
+
+        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
+      }
+    }
+  }]);
+
+  return Send;
+}();
+
+module.exports = Send;
+}).call(this,require('_process'))
+},{"../events/io":19,"../packet":66,"./indexHandler":39,"_process":143,"debug":"debug"}],42:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var debug = require('debug')('chix:io');
+
+var Sync = function () {
+  function Sync() {
+    _classCallCheck(this, Sync);
+  }
+
+  _createClass(Sync, [{
+    key: 'addSyncedTarget',
+
+    // build the syncedTargetMap, it contains a port array
+    // (the group that wants a sync with some originId
+    value: function addSyncedTarget(link) {
+      if (!this.syncedTargetMap.has(link.target.pid)) {
+        this.syncedTargetMap.set(link.target.pid, {});
+      }
+      if (!this.syncedTargetMap.get(link.target.pid)[link.target.get('sync')]) {
+        this.syncedTargetMap.get(link.target.pid)[link.target.get('sync')] = [];
+      }
+      this.syncedTargetMap.get(link.target.pid)[link.target.get('sync')].push(link.target.port);
+      debug('%s: syncing source port `%s` with target port %s', link.ioid, link.target.get('sync'), link.target.port);
+    }
+  }, {
+    key: 'removeSyncedTarget',
+    value: function removeSyncedTarget(link) {
+      var tgt = this.syncedTargetMap.get(link.target.pid);
+      tgt.splice(tgt.indexOf(link.target.port), 1);
+      if (tgt.length === 0) {
+        this.syncedTargetMap.delete(link.target.pid);
+      }
+    }
+  }, {
+    key: 'getSyncedTargetPorts',
+    value: function getSyncedTargetPorts(target) {
+      var originId = target.get('sync');
+      if (!this.syncedTargetMap.has(target.pid)) {
+        throw new Error('Unkown sync: ' + target.pid);
+      }
+      if (!this.syncedTargetMap.get(target.pid).hasOwnProperty(originId)) {
+        throw new Error('Unkown sync with: ' + originId);
+      }
+      // returns the ports array, those who want to sync with originId
+      return this.syncedTargetMap.get(target.pid)[originId];
+    }
+
+    /**
+     *
+     * Send synchronized input
+     *
+     * TODO: Input is synced here then we
+     *   throw it into the input sender.
+     *   They probably stay synced, but
+     *   it's not enforced anywhere after this.
+     *
+     * @param {string} targetId
+     * @param {object} data
+     */
+
+  }, {
+    key: 'sendSynced',
+    value: function sendSynced(targetId, data) {
+      for (var targetPort in data) {
+        if (data.hasOwnProperty(targetPort)) {
+          var synced = data[targetPort];
+          // keep in sync, do not use setImmediate
+          debug('%s: sendSynced', synced.link.ioid);
+          this.__sendData(synced.link, synced.p);
+        }
+      }
+    }
+  }]);
+
+  return Sync;
+}();
+
+module.exports = Sync;
+},{"debug":"debug"}],43:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var uuid = require('uuid').v4;
+var Connector = require('./connector');
+var Setting = require('./setting');
+var validate = require('./validate');
+var Events = require('./events/link');
+
+/**
+ *
+ * xLink
+ *
+ *
+ * Settings:
+ *
+ *   - ttl
+ *   - expire
+ *   - dispose: true
+ *
+ * Just need something to indicate it's an iip.
+ *
+ * @constructor
+ * @public
+ */
+
+var Link = function (_Setting) {
+  _inherits(Link, _Setting);
+
+  function Link(id, ioid) {
+    _classCallCheck(this, Link);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Link).call(this));
+
+    _this.fills = 0;
+    _this.writes = 0;
+    _this.id = id === undefined ? uuid() : id;
+    _this.ioid = ioid || uuid();
+    _this.metadata = {};
+    return _this;
+  }
+
+  /**
+   *
+   * Creates a new connection/link
+   *
+   * Basically takes a plain link object
+   * and creates a proper xLink from it.
+   *
+   * The internal map holds xLinks, whereas
+   * the source map is just plain JSON.
+   *
+   * Structurewise they are almost the same.
+   *
+   * @param {Object} ln
+   * @return {xLink} link
+   * @public
+   */
+
+
+  _createClass(Link, [{
+    key: 'build',
+    value: function build(ln) {
+      if (!ln.source) {
+        throw Error('Create link expects a source');
+      }
+
+      if (!ln.target) {
+        throw Error('Create link expects a target');
+      }
+
+      validate.link(ln);
+
+      this.setSource(ln.source.id, ln.source.port, ln.source.setting, ln.source.action);
+
+      if (ln.metadata) {
+        this.setMetadata(ln.metadata);
+      } else {
+        this.setMetadata({});
+      }
+
+      this.setTarget(ln.target.id, ln.target.port, ln.target.setting, ln.target.action);
+    }
+
+    /**
+     *
+     * Set target
+     *
+     * @param {String} targetId
+     * @param {String} port
+     * @param {Object} settings
+     * @param {String} action
+     * @public
+     */
+
+  }, {
+    key: 'setTarget',
+    value: function setTarget(targetId, port, settings, action) {
+      this.target = new Connector(settings);
+      this.target.wire = this;
+      this.target.plug(targetId, port, action);
+    }
+
+    /**
+     *
+     * Set Source
+     *
+     * @param {Object} sourceId
+     * @param {String} port
+     * @param {Object} settings
+     * @param {String} action
+     * @public
+     */
+
+  }, {
+    key: 'setSource',
+    value: function setSource(sourceId, port, settings, action) {
+      this.source = new Connector(settings);
+      this.source.wire = this;
+      this.source.plug(sourceId, port, action);
+    }
+
+    /**
+     *
+     * Setting of pid's is delayed.
+     * I would like them to be available during plug.
+     * but whatever.
+     *
+     */
+
+  }, {
+    key: 'setSourcePid',
+    value: function setSourcePid(pid) {
+      this.source.setPid(pid);
+    }
+  }, {
+    key: 'setTargetPid',
+    value: function setTargetPid(pid) {
+      this.target.setPid(pid);
+    }
+  }, {
+    key: 'setMetadata',
+    value: function setMetadata(metadata) {
+      this.metadata = metadata;
+    }
+  }, {
+    key: 'setMeta',
+    value: function setMeta(key, val) {
+      this.metadata[key] = val;
+    }
+
+    /**
+     *
+     * Set Title
+     *
+     * @param {String} title
+     * @fires Link#metadata
+     * @public
+     */
+
+  }, {
+    key: 'setTitle',
+    value: function setTitle(title) {
+      this.setMeta('title', title);
+      this.emit(Events.CHANGE, this, 'metadata', this.metadata);
+    }
+
+    /**
+     *
+     * @fires Link#clear
+     * @public
+     */
+
+  }, {
+    key: 'clear',
+    value: function clear() {
+      this.fills = 0;
+      this.writes = 0;
+      this.emit(Events.CLEAR, this);
+    }
+
+    /**
+     * Update link by passing it a full object.
+     *
+     * Will only emit one change event.
+     *
+     * @fires Link#change
+     * @public
+     */
+
+  }, {
+    key: 'update',
+    value: function update(ln) {
+      this.build(ln);
+      this.emit(Events.CHANGE, this);
+    }
+  }, {
+    key: 'toJSON',
+    value: function toJSON() {
+      // TODO: use schema validation for toJSON
+      if (!this.hasOwnProperty('source')) {
+        console.log(this);
+        throw Error('Link should have a source property');
+      }
+      if (!this.hasOwnProperty('target')) {
+        throw Error('Link should have a target property');
+      }
+
+      var link = {
+        id: this.id,
+        source: this.source.toJSON(),
+        target: this.target.toJSON()
+      };
+
+      if (this.metadata) {
+        link.metadata = this.metadata;
+      }
+
+      if (this.fills) {
+        link.fills = this.fills;
+      }
+
+      if (this.writes) {
+        link.writes = this.writes;
+      }
+
+      if (this.data !== undefined) {
+        link.data = JSON.parse(JSON.stringify(this.data));
+      }
+
+      return link;
+    }
+  }], [{
+    key: 'create',
+    value: function create(ln) {
+      ln = ln || {};
+      if (!ln.source) {
+        ln.source = {};
+      }
+      if (!ln.target) {
+        ln.target = {};
+      }
+      var link = new Link(ln.id, ln.ioid);
+
+      if (ln.source || ln.target) {
+        link.build(ln);
+      }
+
+      return link;
+    }
+  }]);
+
+  return Link;
+}(Setting);
+
+module.exports = Link;
+},{"./connector":15,"./events/link":20,"./setting":80,"./validate":81,"uuid":99}],44:[function(require,module,exports){
 'use strict';
 
 var ignore = ['length', 'name', 'prototype'];
@@ -524,7 +4940,313 @@ module.exports = function mixin(context) {
     }
   }
 };
-},{}],8:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var NodeBox = require('./sandbox/node');
+var BaseNode = require('./BaseNode');
+var forOf = require('object-forof');
+var mixin = require('./mixin');
+var $callbackWrapper = require('./node/callbackWrapper');
+var $context = require('./node/context');
+var $delegate = require('./node/delegate');
+var $fill = require('./node/fill');
+var $output = require('./node/output');
+var $port = require('./node/port');
+var $runOnce = require('./node/runOnce');
+var $shutdown = require('./node/shutdown');
+var $start = require('./node/start');
+
+// Running within vm is also possible and api should stay
+// compatible with that, but disable for now.
+// vm = require('vm'),
+
+/**
+ * Error Event.
+ *
+ * @event Node#error
+ * @type {object}
+ * @property {object} node - An export of this node
+ * @property {string} msg - The error message
+ */
+
+/**
+ * Executed Event.
+ *
+ * @event Node#executed
+ * @type {object}
+ * @property {object} node - An export of this node
+ */
+
+/**
+ * Context Update event.
+ *
+ * @event Node#contextUpdate
+ */
+
+/**
+ * Output Event.
+ *
+ * Fired multiple times on output
+ *
+ * Once for every output port.
+ *
+ * @event Node#output
+ * @type {object}
+ * @property {object} node - An export of this node
+ * @property {string} port - The output port
+ * @property {string} out - A (reference) to the output
+ */
+
+/**
+ *
+ * Node
+ *
+ * TODO:
+ *   do not copy all those properties extend the node object itself.
+ *   however, do not forget the difference between a nodeDefinition
+ *   and a node.
+ *
+ *   node contains the process definition, which is the node
+ *   definition merged with the instance configuration.
+ *
+ * @author Rob Halff <rob.halff@gmail.com>
+ * @param {String} id
+ * @param {Object} node
+ * @param {String} identifier
+ * @param {CHI} CHI
+ * @constructor
+ * @public
+ */
+
+var xNode = function (_BaseNode) {
+  _inherits(xNode, _BaseNode);
+
+  function xNode(id, node, identifier, CHI) {
+    _classCallCheck(this, xNode);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(xNode).call(this, id, node, identifier, CHI));
+
+    if (_this.async !== true) {
+      // super might have set it
+      _this.async = node.type === 'async';
+      _this.async = node.async ? true : _this.async;
+    }
+
+    _this.type = 'node';
+
+    _this.state = {};
+
+    _this._delay = 0;
+
+    // remember def for .compile()
+    _this.def = node;
+
+    /**
+     *
+     * Indicates whether this instance is active.
+     *
+     * This works together with the active state
+     * of the sandbox.
+     *
+     * When a blackbox sends async output done()
+     * should be used to inform us it is done.
+     *
+     * @property {Boolean} active
+     * @public
+     */
+    _this.active = false;
+
+    // this._setup()
+
+    /** delay interval */
+    _this.interval = 100;
+
+    /** @property {Object} input */
+    // this.input = {}
+
+    /** @property {Object} dependencies */
+    _this.dependencies = node.dependencies || {};
+
+    /** @property {Array} expose */
+    _this.expose = node.expose;
+
+    /** @property {String} fn */
+    _this.fn = node.fn;
+
+    /**
+     * @property {Numeric} nodeTimeout
+     * @default 3000
+     */
+    _this.nodeTimeout = node.nodeTimeout || 3000;
+
+    /**
+     *
+     * inputTimeout in milliseconds
+     *
+     * If inputTimeout === `false` there will be no timeout
+     *
+     * @property {Mixed} inputTimeout
+     * @default 3000
+     */
+    _this.inputTimeout = typeof node.inputTimeout === 'undefined' ? 3000 : node.inputTimeout;
+
+    /** @private */
+    _this.__halted = false; // was halted by a hold
+
+    /** @private */
+    _this._inputTimeout = null;
+
+    /** @property {Numeric} filled */
+    Object.defineProperty(_this, 'filled', {
+      enumerable: true,
+      configurable: false,
+      get: function get() {
+        return forOf(function (name, port) {
+          return port.isFilled() || undefined;
+        }, this.ports.input).length;
+      }
+    });
+
+    /** @property {Object} context */
+    Object.defineProperty(_this, 'context', {
+      enumerable: true,
+      configurable: false,
+      get: function get() {
+        var context = {};
+        forOf(function (name, port) {
+          context[name] = port.context;
+        }, this.ports.input);
+        return context;
+      }
+    });
+
+    _this.status = 'init';
+
+    // simplify this. compile if not compiled.
+    _this.nodebox = new NodeBox();
+    _this.nodebox.set('done', _this.complete.bind(_this));
+    _this.nodebox.set('cb', _this._asyncOutput.bind(_this));
+    _this.nodebox.set('state', _this.state);
+    _this.nodebox.require(_this.dependencies.npm);
+    _this.nodebox.expose(_this.expose);
+    _this.nodebox.set('output', _this.async ? _this._asyncOutput.bind(_this) : {});
+
+    if (_this._isPreloaded(node.ports)) {
+      if (_this.fn) {
+        // this.nodebox.fill(this.fn)
+        // not tested..
+        _this.nodebox.fill(_this.fn);
+      }
+
+      if (_this.async) {
+        // how about nodebox.state?
+        // state is now in the definition itself..
+        // this should really also be a deep copy.
+        _this.nodebox.state = node.state;
+        // this._loadAsync()
+        // this.createPorts(node.ports)
+      }
+    } else {
+      // console.log(compile(node, true))
+      _this.nodebox.compile(_this.fn);
+
+      if (_this.async) {
+        // This collects the port definitions they
+        // attach to `on`
+        _this.nodebox.run();
+
+        // this._loadAsync()
+        // this.createPorts(node.ports)
+      }
+    }
+
+    _this.state = _this.nodebox.state;
+
+    _this.createPorts(node.ports);
+
+    _this.setStatus('created');
+
+    _this.start();
+    return _this;
+  }
+
+  /**
+   *
+   * Starts the node
+   *
+   * TODO: dependencies are always the same, only input is different.
+   * dependencies must be created during createScript.
+   * also they must be wrapped within a function.
+   * otherwise you cannot overwrite window and document etc.
+   * ...Maybe statewise it's a good thing, dependencies are re-required.
+   *
+   * FIXME: this method does too much on it's own.
+   *
+   * Note: start is totally unprotected, it assumes the input is validated
+   * and all required ports are filled.
+   * Start should never really be called directly, the node starts when
+   * input is ready.
+   *
+   * @param {Function} fn
+   * @param {String} name
+   * @emits Node#error
+   * @emits Node#require
+   * @emits Node#expose
+   * @private
+   */
+
+
+  _createClass(xNode, [{
+    key: 'clearInput',
+    value: function clearInput(port) {
+      delete this.input[port];
+    }
+
+    /**
+     *
+     * Test whether this is a preloaded node.
+     *
+     * @private
+     */
+
+  }, {
+    key: '_isPreloaded',
+    value: function _isPreloaded(ports) {
+      if (typeof this.fn === 'function') {
+        return true;
+      }
+
+      for (var port in ports.input) {
+        if (ports.input.hasOwnProperty(port)) {
+          if (ports.input[port].fn) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    }
+  }]);
+
+  return xNode;
+}(BaseNode);
+
+mixin(xNode, $callbackWrapper, $context, $delegate, $fill, $output, $port, $shutdown, $runOnce, $start);
+
+xNode.SYNC_NOT_FILLED = false;
+xNode.ALL_CONNECTED_NOT_FILLED = false;
+
+module.exports = xNode;
+},{"./BaseNode":1,"./mixin":44,"./node/callbackWrapper":57,"./node/context":58,"./node/delegate":59,"./node/fill":60,"./node/output":61,"./node/port":62,"./node/runOnce":63,"./node/shutdown":64,"./node/start":65,"./sandbox/node":78,"object-forof":97}],46:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -600,7 +5322,7 @@ var Context = function () {
 }();
 
 module.exports = Context;
-},{"../../events/node":5,"object-forof":42}],9:[function(require,module,exports){
+},{"../../events/node":21,"object-forof":97}],47:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -731,7 +5453,7 @@ var Control = function () {
 }();
 
 module.exports = Control;
-},{"../../events/node":5,"debug":26,"object-forof":42}],10:[function(require,module,exports){
+},{"../../events/node":21,"debug":"debug","object-forof":97}],48:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -781,7 +5503,7 @@ var NodeError = function () {
 }();
 
 module.exports = NodeError;
-},{"../../events/node":5,"util":91}],11:[function(require,module,exports){
+},{"../../events/node":21,"util":146}],49:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -821,7 +5543,7 @@ var EventMixin = function () {
 }();
 
 module.exports = EventMixin;
-},{"../../packet":19}],12:[function(require,module,exports){
+},{"../../packet":66}],50:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -916,7 +5638,7 @@ var Export = function () {
 }();
 
 module.exports = Export;
-},{}],13:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -943,7 +5665,7 @@ var IsStartable = function () {
 }();
 
 module.exports = IsStartable;
-},{"object-forof":42}],14:[function(require,module,exports){
+},{"object-forof":97}],52:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1039,7 +5761,7 @@ var Meta = function () {
 }();
 
 module.exports = Meta;
-},{"object-forof":42}],15:[function(require,module,exports){
+},{"object-forof":97}],53:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1429,8 +6151,7 @@ var Ports = function () {
 }();
 
 module.exports = Ports;
-
-},{"../../events/node":5,"../../packet":19,"../../port":20,"debug":26,"object-forof":42}],16:[function(require,module,exports){
+},{"../../events/node":21,"../../packet":66,"../../port":68,"debug":"debug","object-forof":97}],54:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1465,7 +6186,7 @@ var Process = function () {
 }();
 
 module.exports = Process;
-},{}],17:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -1507,7 +6228,7 @@ var Report = function () {
 }();
 
 module.exports = Report;
-},{}],18:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -1558,7 +6279,724 @@ var toJSON = function () {
 }();
 
 module.exports = toJSON;
-},{}],19:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
+'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Packet = require('../packet');
+var Events = require('../events/node');
+var util = require('util');
+
+var CallbackWrapper = function () {
+  function CallbackWrapper() {
+    _classCallCheck(this, CallbackWrapper);
+  }
+
+  _createClass(CallbackWrapper, [{
+    key: '_callbackWrapper',
+
+    /**
+     *
+     * Generic Callback wrapper
+     *
+     * Will collect the arguments and pass them on to the next node
+     *
+     * So technically the next node is the callback.
+     *
+     * Parameters are defined on the output as ports.
+     *
+     * Each callback argument must be defined as output port
+     * in the callee's schema
+     *
+     * e.g.
+     *
+     *  node style callback:
+     *
+     *  ports.output: { err: ..., result: ... }
+     *
+     *  connect style callback:
+     *
+     *  ports.output: { req: ..., res: ..., next: ... }
+     *
+     * The order of appearance of arguments must match those of the ports within
+     * the json schema.
+     *
+     * TODO: Within the schema you must define the correct type otherwise output
+     * will be refused
+     *
+     *
+     * @private
+     */
+    // PUT THIS INTO A DIFFERENT NODE TYPE, SEPERATE THE DIFFERENT FLAVOURS
+    value: function _callbackWrapper() {
+      var obj = {};
+      var ports = this.outPorts;
+
+      for (var i = 0; i < arguments.length; i++) {
+        if (!ports[i]) {
+          this.event(Events.ERROR, {
+            msg: Error(util.format('Unexpected extra port of type %s', _typeof(arguments[i]) === 'object' ? arguments[i].constructor.name : _typeof(arguments[i])))
+          });
+        } else {
+          obj[ports[i]] = Packet.create(arguments[i]);
+        }
+      }
+      this._output(obj);
+    }
+  }]);
+
+  return CallbackWrapper;
+}();
+
+module.exports = CallbackWrapper;
+},{"../events/node":21,"../packet":66,"util":146}],58:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var debug = require('debug')('chix:node');
+var Packet = require('../packet');
+var Events = require('../events/node');
+
+var Context = function () {
+  function Context() {
+    _classCallCheck(this, Context);
+  }
+
+  _createClass(Context, [{
+    key: '$setContextProperty',
+    value: function $setContextProperty(port, data, trigger) {
+      debug('%s:%s set context', this.identifier, port);
+      if (data === undefined) {
+        throw Error('Refused to $setContextProperty to undefined');
+      }
+      var p = void 0;
+      if (Packet.isPacket(data)) {
+        p = data;
+      } else {
+        p = Packet.create(data, this.getPortType('input', port)).setOwner(this);
+      }
+      this.getInputPort(port).setContext(p, trigger);
+    }
+  }, {
+    key: 'clearContextProperty',
+    value: function clearContextProperty(port) {
+      debug('%s:%s clear context', this.identifier, port);
+
+      this.getInputPort(port).clearContext();
+
+      this.event(Events.CONTEXTCLEAR, {
+        node: this,
+        port: port
+      });
+    }
+  }]);
+
+  return Context;
+}();
+
+module.exports = Context;
+},{"../events/node":21,"../packet":66,"debug":"debug"}],59:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Delegate = function () {
+  function Delegate() {
+    _classCallCheck(this, Delegate);
+  }
+
+  _createClass(Delegate, [{
+    key: '_delegate',
+
+    /**
+     *
+     * Execute the delegated callback for this node.
+     *
+     * [fs, 'readFile', '/etc/passwd']
+     *
+     * will execute:
+     *
+     * fs['readFile']('/etc/passwd', this.callbackWrapper)
+     *
+     * @param {Object} output
+     * @emits Node#branching
+     * @private
+     */
+    // PUT THIS INTO A DIFFERENT NODE TYPE, SEPERATE THE DIFFERENT FLAVOURS
+    value: function _delegate(output) {
+      var fn = output.splice(0, 1).pop();
+      var method = output.splice(0, 1).pop();
+      output.push(this._callbackWrapper.bind(this));
+      fn[method].apply(fn, output);
+    }
+  }]);
+
+  return Delegate;
+}();
+
+module.exports = Delegate;
+},{}],60:[function(require,module,exports){
+'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Port = require('../port');
+var forOf = require('object-forof');
+var debug = require('debug')('chix:node');
+var PacketContainer = require('../packetContainer');
+var Events = require('../events/node');
+
+var Fill = function () {
+  function Fill() {
+    _classCallCheck(this, Fill);
+  }
+
+  _createClass(Fill, [{
+    key: 'onPortFill',
+    value: function onPortFill() {
+      var _this = this;
+
+      debug('%s onPortFill', this.identifier);
+
+      if (this.status === 'hold') {
+        this.__halted = true;
+        this.event(Events.PORTFILL, this);
+
+        return;
+      }
+
+      if (this.status !== 'running') {
+        throw Error('onPortFill: node must be in `running` state, current state: ' + this.status);
+      }
+
+      var inputPorts = this.ports.input;
+
+      this.notFilled = [];
+      var res = forOf(function (name, port) {
+        if (port.isSync()) {
+          var ret = port.isFilled();
+          if (ret) {
+            debug('%s.%s: ready using `%s`', _this.identifier, name, Port.Message[ret]);
+            return true;
+          }
+          debug('%s.%s: not ready', _this.identifier, name);
+          _this.notFilled.push(name);
+          return undefined;
+        }
+        // async is always ready
+        debug('%s.%s: ready using `%s`', _this.identifier, name, 'async always ready');
+        return true;
+      }, inputPorts).length;
+
+      if (res === this.inPorts.length) {
+        debug('%s:onPortFill running', this.identifier);
+
+        this.setStatus('running');
+
+        // need an emit here to indicate running
+        // can also run shutdown then first.
+
+        if (this.async) {
+          var atLeastOneAsyncFilled = forOf(function (portName, port) {
+            return port.isAsync() && port.isFilled() || undefined;
+          }, inputPorts).length;
+
+          if (atLeastOneAsyncFilled) {
+            (function () {
+              _this.event(Events.EXECUTE);
+
+              var input = {};
+
+              forOf(function (name, port) {
+                if (port.isSync()) {
+                  input[name] = port.read();
+                } else if (port.isFilled()) {
+                  input[name] = port.read();
+                }
+              }, inputPorts);
+
+              var params = void 0;
+              try {
+                params = PacketContainer.create(input);
+              } catch (e) {
+                console.log('%s: INPUT TRIED TO MERGE', _this.identifier, JSON.stringify(input, null, 2));
+                throw Error('stop');
+                /*
+                this.emit('error', {
+                  node: this,
+                  // todo: should be named 'error' and be an error everywhere
+                  msg: e
+                })
+                this.event(Events.PORTFILL, this)
+                return false
+                */
+              }
+
+              forOf(function (name, port) {
+                // input[name] because already read() above (isFilled() === false)
+                if (!port.isSync() && input[name]) {
+                  debug('%s.%s: execute %s', _this.identifier, name, port.fn.name);
+                  port.run(params, _this.state); // this state?
+                  _this.state = _this.nodebox.state = port.fn.state;
+                }
+              }, inputPorts);
+            })();
+          } else {
+            this.event(Events.PORTFILL, this);
+            return false;
+          }
+        } else {
+          var _ret2 = function () {
+            _this.event(Events.EXECUTE);
+            var input = {};
+            forOf(function (portName, port) {
+              input[portName] = port.read();
+            }, inputPorts);
+
+            var params = void 0;
+            try {
+              params = PacketContainer.create(input);
+            } catch (e) {
+              _this.emit('error', {
+                node: _this,
+                // todo: should be named 'error' and be an error everywhere
+                msg: e
+              });
+              _this.event(Events.PORTFILL, _this);
+              return {
+                v: false
+              };
+            }
+            _this.__start(params);
+          }();
+
+          if ((typeof _ret2 === 'undefined' ? 'undefined' : _typeof(_ret2)) === "object") return _ret2.v;
+        }
+
+        this.runCount++;
+
+        this.event(Events.EXECUTED, {
+          node: this
+          // port: port
+        });
+
+        // Cleanup all these events
+        this.complete();
+
+        this.event(Events.PORTFILL, this);
+
+        return true;
+      } else {
+        debug('%s:onPortFill ports: %s not ready', this.identifier, this.notFilled);
+        this.event(Events.PORTFILL, this);
+      }
+    }
+  }]);
+
+  return Fill;
+}();
+
+module.exports = Fill;
+},{"../events/node":21,"../packetContainer":67,"../port":68,"debug":"debug","object-forof":97}],61:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var forOf = require('object-forof');
+
+var Output = function () {
+  function Output() {
+    _classCallCheck(this, Output);
+  }
+
+  _createClass(Output, [{
+    key: '_asyncOutput',
+
+    /**
+     *
+     * This node handles the output of the `blackbox`
+     *
+     * It is specific to the API of the internal Chix node function.
+     *
+     * out = { port1: data, port2: data }
+     * out = [fs.readFile, arg1, arg2 ]
+     *
+     * Upon output the input will be freed.
+     *
+     * @param {Object} output
+     * @private
+     */
+    value: function _asyncOutput(output) {
+      var _this = this;
+
+      // delegate and object output has
+      // synchronous output on _all_ ports
+      // however we do not know if we we're called from
+      // the function type of output..
+      forOf(function (port, p) {
+        return _this.sendPortOutput(port, p);
+      }, output);
+    }
+
+    /**
+     *
+     * Output
+     *
+     * Directs the output to the correct handler.
+     *
+     * If output is a function it is handled by asyncOutput.
+     *
+     * If it's an array, it means it's the shorthand variant
+     *
+     * e.g. output = [fs, 'readFile']
+     *
+     * This will be handled by the delegate() method.
+     *
+     * Otherwise it is a normal output object containing the output for the ports.
+     *
+     * e.g. { out1: ...,  out2: ...,  error: ... } etc.
+     *
+     * TODO: not sure if this should always call complete.
+     *
+     * @param {Object} output
+     * @private
+     */
+
+  }, {
+    key: '_output',
+    value: function _output(output) {
+      var _this2 = this;
+
+      if (typeof output === 'function') {
+        output.call(this, this._asyncOutput.bind(this));
+        return;
+      }
+
+      if (Array.isArray(output)) {
+        this._delegate(output);
+        return;
+      }
+
+      forOf(function (port, p) {
+        return _this2.sendPortOutput(port, p);
+      }, output);
+    }
+  }]);
+
+  return Output;
+}();
+
+module.exports = Output;
+},{"object-forof":97}],62:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var debug = require('debug')('chix:node');
+var PortBox = require('../sandbox/port');
+
+var Port = function () {
+  function Port() {
+    _classCallCheck(this, Port);
+  }
+
+  _createClass(Port, [{
+    key: '_createPortBox',
+
+    /**
+     *
+     * Executes the async variant
+     *
+     * state is the only variable which will persist.
+     *
+     * @param {string} fn - Portbox Function Body
+     * @returns {PortBox}
+     * @private
+     */
+    value: function _createPortBox(fn, name) {
+      debug('%s: creating portbox `%s`', this.identifier, name);
+
+      var portbox = new PortBox(name);
+      portbox.set('state', this.nodebox.state);
+      portbox.set('output', this._asyncOutput.bind(this));
+
+      // also absorbes already required.
+      portbox.require(this.dependencies.npm, true);
+      portbox.expose(this.expose, this.CHI);
+
+      if (typeof fn !== 'function') {
+        fn = fn.slice(fn.indexOf('{') + 1, fn.lastIndexOf('}'));
+        portbox.compile(fn);
+      } else {
+        portbox.fill(fn);
+      }
+
+      return portbox;
+    }
+  }, {
+    key: '$portIsFilled',
+    value: function $portIsFilled(port) {
+      return this.ports.input[port].isFilled();
+    }
+  }, {
+    key: 'handlePortSettings',
+    value: function handlePortSettings(port) {
+      if (this.ports.input.hasOwnProperty(port)) {}
+    }
+  }]);
+
+  return Port;
+}();
+
+module.exports = Port;
+},{"../sandbox/port":79,"debug":"debug"}],63:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var debug = require('debug')('chix:node');
+var Events = require('../events/node');
+
+var RunOnce = function () {
+  function RunOnce() {
+    _classCallCheck(this, RunOnce);
+  }
+
+  _createClass(RunOnce, [{
+    key: '_runOnce',
+
+    /**
+     *
+     * Runs the node
+     *
+     * @emits Node#nodeTimeout
+     * @emits Node#start
+     * @emits Node#executed
+     * @private
+     */
+    value: function _runOnce() {
+      var t = setTimeout(function () {
+        debug('%s: node timeout', this.identifier);
+
+        /**
+         * Timeout Event.
+         *
+         * @event Node#nodeTimeout
+         * @type {object}
+         * @property {object} node - An export of this node
+         */
+        this.event(Events.TIMEOUT, {
+          node: this.export()
+        });
+      }.bind(this), this.nodeTimeout);
+
+      /**
+       * Start Event.
+       *
+       * @event Node#start
+       * @type {object}
+       * @property {object} node - An export of this node
+       */
+      this.event(Events.START, {
+        node: this.export()
+      });
+
+      // this.nodebox.runInNewContext(this.sandbox)
+
+      // this.setStatus('running')
+
+      this.nodebox.run();
+      this.state = this.nodebox.state;
+
+      debug('%s:%s executed', this.identifier, this.nodebox.fn.name);
+
+      clearTimeout(t);
+
+      this.active = false;
+
+      this._output(this.nodebox.output);
+    }
+  }]);
+
+  return RunOnce;
+}();
+
+module.exports = RunOnce;
+},{"../events/node":21,"debug":"debug"}],64:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Events = require('../events/node');
+
+var Shutdown = function () {
+  function Shutdown() {
+    _classCallCheck(this, Shutdown);
+  }
+
+  _createClass(Shutdown, [{
+    key: 'shutdown',
+
+    /**
+     *
+     * Runs the shutdown method of the blackbox
+     *
+     * An asynchronous node can define a shutdown function:
+     *
+     *   on.shutdown = function() {
+     *
+     *     // do shutdown stuff
+     *
+     *   }
+     *
+     * When a network shuts down, this function will be called.
+     * To make sure all nodes shutdown gracefully.
+     *
+     * e.g. A node starting a http server can use this
+     *      method to shutdown the server.
+     *
+     * @param {function} cb
+     * @returns {undefined}
+     * @public
+     */
+    value: function shutdown(cb) {
+      if (this.nodebox.on && this.nodebox.on.shutdown) {
+        // TODO: nodes now do nothing with the callback, they should..
+        // otherwise we will hang
+        this.nodebox.on.shutdown(cb);
+
+        // TODO: send the nodebox, or just the node export?
+        this.event(Events.SHUTDOWN, this.nodebox);
+      } else {
+        if (cb) {
+          cb();
+        }
+      }
+    }
+  }, {
+    key: 'hasShutdown',
+    value: function hasShutdown() {
+      // shutdown is not picked up.
+      // console.log(this.nodebox.fn.toString())
+      return this.nodebox.on && this.nodebox.on.shutdown;
+    }
+  }]);
+
+  return Shutdown;
+}();
+
+module.exports = Shutdown;
+},{"../events/node":21}],65:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var debug = require('debug')('chix:actor');
+var Events = require('../events/node');
+
+// THIS STUFF IS INCORRECT.
+// is more of a load method then a run each and everytime thing
+// actually why not just use the compile() to make it compiled.
+// Weird... :-)
+
+var Start = function () {
+  function Start() {
+    _classCallCheck(this, Start);
+  }
+
+  _createClass(Start, [{
+    key: 'start',
+    value: function start() {
+      var sb = void 0;
+      if (['created', 'running', 'stopped'].indexOf(this.status) >= 0) {
+        this.setStatus('started');
+        debug('%s: running on start', this.identifier);
+        if (this.nodebox.on.start) {
+          // Run onStart functionality first
+          if (typeof this.nodebox.on.start === 'function') {
+            sb = this._createPortBox(this.nodebox.on.start);
+          } else {
+            sb = this._createPortBox(this.nodebox.on.start.toString());
+          }
+          sb.run(this);
+          this.nodebox.state = this.state = sb.state;
+        }
+
+        this.event(Events.STARTED, {
+          node: this.export()
+        });
+
+        this.setStatus('running');
+      } else {
+        // ok enough for now
+        if (this.status !== 'running') {
+          throw Error('Only can start node which is in the `created`, current status: ' + this.status);
+        }
+      }
+    }
+  }, {
+    key: '__start',
+    value: function __start(params) {
+      if (this.active) {
+        debug('%s: node still active delaying', this.identifier);
+        this._delay = this._delay + this.interval;
+        setTimeout(function () {
+          this.__start(params);
+        }.bind(this), 500 + this._delay);
+        return false;
+      }
+
+      // set active state.
+      this.active = true;
+
+      // document, is for servers etc, next run must shut the old one down
+      if (!this.async) {
+        if (this.nodebox.on) {
+          if (this.nodebox.on.shutdown) {
+            debug('%s: running shutdown', this.identifier);
+            this.shutdown();
+          }
+        }
+      }
+
+      this.nodebox.set('$', params);
+
+      // done before compile.
+      // this.nodebox.output = this.async ? this._asyncOutput.bind(this) : {}
+
+      this._runOnce();
+    }
+  }]);
+
+  return Start;
+}();
+
+module.exports = Start;
+},{"../events/node":21,"debug":"debug"}],66:[function(require,module,exports){
 'use strict';
 
 // TODO: only has to be a pointer packet if it's actually used.
@@ -1906,7 +7344,133 @@ var Packet = function () {
 }();
 
 module.exports = Packet;
-},{"debug":26,"json-ptr":34,"object-forof":42}],20:[function(require,module,exports){
+},{"debug":"debug","json-ptr":90,"object-forof":97}],67:[function(require,module,exports){
+'use strict';
+
+// packet container to be used within components.
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var forOf = require('object-forof');
+var Packet = require('./packet');
+
+/**
+ * API:
+ *
+ * const x = new PacketContainer(input)
+ * x.in1
+ * x.in1 = 'my-value'
+ */
+var reserved = ['isPacket', 'get', 'read', 'write', 'create', 'clone'];
+
+var PacketContainer = function () {
+  function PacketContainer(params) {
+    var _this = this;
+
+    _classCallCheck(this, PacketContainer);
+
+    this.params = params || {};
+    this._meta = {};
+    forOf(function (name, p) {
+      if (!Packet.isPacket(p)) {
+        throw Error('Packet expected got ' + (typeof p === 'undefined' ? 'undefined' : _typeof(p)) + ' for param ' + name);
+      }
+      // merge meta
+      if (reserved.indexOf(name) === -1) {
+        Object.defineProperty(_this, name, {
+          enumerable: true,
+          get: function get() {
+            return p.read();
+          },
+          set: function set(val) {
+            p.write(p.owner, val);
+          }
+        });
+        // meta
+        Packet.metaMerge(_this._meta, p._meta);
+      } else {
+        throw Error('Parameter name \'' + name + '\' not allowed');
+      }
+    }, this.params);
+
+    // merge meta for all packets
+    forOf(function (name, p) {
+      Object.assign(p._meta, _this._meta);
+    }, this.params);
+  }
+
+  /**
+   * Determines whether the value is a Packet
+   *
+   * @param {Any} p - Value to test
+   * @returns {*}
+   */
+
+
+  _createClass(PacketContainer, [{
+    key: 'isPacket',
+    value: function isPacket(p) {
+      return Packet.isPacket(p);
+    }
+
+    /**
+     *
+     * @param {String} name - Param name
+     * @returns {*}
+     */
+
+  }, {
+    key: 'get',
+    value: function get(name) {
+      return this.params[name];
+    }
+  }, {
+    key: 'clone',
+    value: function clone(name, val) {
+      var p = this.params[name];
+      var cp = p.clone(p.owner);
+
+      if (p === cp) {
+        throw Error('They the same');
+      }
+      if (val) {
+        cp.write(p.owner, val);
+      }
+      return cp;
+    }
+  }, {
+    key: 'read',
+    value: function read(name) {
+      return this.params[name].read();
+    }
+  }, {
+    key: 'write',
+    value: function write(name, val) {
+      return this.params[name].write(this.params[name].owner, val);
+    }
+  }, {
+    key: 'create',
+    value: function create(val, type) {
+      var p = Packet.create(val, type);
+      Object.assign(p._meta, this._meta);
+      return p;
+    }
+  }], [{
+    key: 'create',
+    value: function create(params) {
+      return new PacketContainer(params);
+    }
+  }]);
+
+  return PacketContainer;
+}();
+
+module.exports = PacketContainer;
+},{"./packet":66,"object-forof":97}],68:[function(require,module,exports){
 'use strict';
 
 /* eslint-disable no-new-func */
@@ -2274,7 +7838,7 @@ Port.NOTREQUIRED = 6;
 Port.Message = ['not filled', 'connection filled', 'connection persisted', 'direct fill', 'context', 'default', 'required'];
 
 module.exports = Port;
-},{"./common/parent":2,"./mixin":7,"./port/factory":22,"./validate":25,"events":86,"object-forof":42}],21:[function(require,module,exports){
+},{"./common/parent":13,"./mixin":44,"./port/factory":73,"./validate":81,"events":141,"object-forof":97}],69:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -2390,7 +7954,350 @@ var AsyncInputPort = function (_InputPort) {
 }(InputPort);
 
 module.exports = AsyncInputPort;
-},{"./input":23}],22:[function(require,module,exports){
+},{"./input":74}],70:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var InputPort = require('../input');
+
+var ExternalInputPort = function (_InputPort) {
+  _inherits(ExternalInputPort, _InputPort);
+
+  function ExternalInputPort(def, internalPort) {
+    _classCallCheck(this, ExternalInputPort);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ExternalInputPort).call(this, def));
+
+    _this.nodeId = def.nodeId;
+    _this.name = def.name;
+    _this._port = internalPort;
+
+    if (def) {
+      if (def.hasOwnProperty('default')) {
+        _this.setDefault(def.default);
+      }
+
+      if (def.context) {
+        _this.setContext(def.context);
+      }
+    }
+    return _this;
+  }
+
+  _createClass(ExternalInputPort, [{
+    key: 'isSync',
+    value: function isSync() {
+      return true;
+    }
+  }, {
+    key: 'receive',
+    value: function receive(p, index) {
+      this._port.receive(p, index);
+      return this;
+      // throw Error('Receive is bypassed')
+    }
+  }, {
+    key: 'fill',
+    value: function fill() {
+      throw Error('Fill is bypassed');
+    }
+  }, {
+    key: 'isFilled',
+    value: function isFilled() {
+      return this._port.isFilled();
+    }
+  }, {
+    key: 'isRequired',
+    value: function isRequired() {}
+  }, {
+    key: 'read',
+    value: function read() {
+      this._port.read();
+      return undefined;
+    }
+  }, {
+    key: 'connect',
+    value: function connect(link) {
+      this._port.connect();
+      return this;
+    }
+  }, {
+    key: 'plug',
+    value: function plug(target) {
+      this._port.plug(target);
+      return this;
+    }
+  }, {
+    key: 'disconnect',
+    value: function disconnect(link) {
+      this._port.disconnect(link);
+    }
+  }, {
+    key: 'unplug',
+    value: function unplug(target) {
+      this._port.unplug(target);
+    }
+  }, {
+    key: 'clearInput',
+    value: function clearInput() {
+      if (this._port) {
+        this._port.clearInput();
+      }
+      return this;
+    }
+  }, {
+    key: 'setDefault',
+    value: function setDefault(val) {
+      if (this._port) {
+        this._port.setDefault(val);
+      }
+      return this;
+    }
+  }, {
+    key: 'hasDefault',
+    value: function hasDefault() {
+      this._port.hasDefault();
+    }
+  }, {
+    key: 'clearDefault',
+    value: function clearDefault() {
+      this._port.clearDefault();
+      return this;
+    }
+  }, {
+    key: 'setContext',
+    value: function setContext(val) {
+      if (this._port) {
+        this._port.setContext(val);
+      }
+      return this;
+    }
+  }, {
+    key: 'hasContext',
+    value: function hasContext(val) {
+      return this._port.hasContext(val);
+    }
+  }, {
+    key: 'clearContext',
+    value: function clearContext() {
+      this._port.clearContext();
+      return this;
+    }
+  }, {
+    key: 'setPersist',
+    value: function setPersist(val) {
+      this._port.setPersist(val);
+      return this;
+    }
+  }, {
+    key: 'hasPersist',
+    value: function hasPersist() {
+      return this._port.hasPersist();
+    }
+  }, {
+    key: 'clearPersist',
+    value: function clearPersist() {
+      this._port.clearPersist();
+      return this;
+    }
+  }, {
+    key: 'destroy',
+    value: function destroy() {
+      this._port.destroy();
+    }
+  }]);
+
+  return ExternalInputPort;
+}(InputPort);
+
+module.exports = ExternalInputPort;
+},{"../input":74}],71:[function(require,module,exports){
+'use strict';
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var OutputPort = require('../output');
+var Events = require('../../events/port');
+
+var ExternalOutputPort = function (_OutputPort) {
+  _inherits(ExternalOutputPort, _OutputPort);
+
+  function ExternalOutputPort(def, internalPort) {
+    _classCallCheck(this, ExternalOutputPort);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ExternalOutputPort).call(this, def));
+
+    _this.nodeId = def.nodeId;
+    _this.name = def.name;
+    _this.type = internalPort.type;
+    _this._port = internalPort;
+    internalPort.on(Events.DATA, function (p) {
+      return _this.write(p);
+    });
+    return _this;
+  }
+
+  return ExternalOutputPort;
+}(OutputPort);
+
+module.exports = ExternalOutputPort;
+},{"../../events/port":23,"../output":75}],72:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var InputPort = require('../input');
+
+var ExternalStartPort = function (_InputPort) {
+  _inherits(ExternalStartPort, _InputPort);
+
+  function ExternalStartPort(def, actor) {
+    _classCallCheck(this, ExternalStartPort);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ExternalStartPort).call(this, def));
+
+    _this.nodeId = def.nodeId;
+    _this.name = def.name;
+    _this.actor = actor;
+    return _this;
+  }
+
+  _createClass(ExternalStartPort, [{
+    key: 'isSync',
+    value: function isSync() {
+      return true;
+    }
+  }, {
+    key: 'receive',
+    value: function receive(p, index) {
+      this.actor.push();
+      return this;
+    }
+  }, {
+    key: 'fill',
+    value: function fill() {
+      throw Error('Fill is bypassed');
+    }
+  }, {
+    key: 'isFilled',
+    value: function isFilled() {
+      return _get(Object.getPrototypeOf(ExternalStartPort.prototype), 'isFilled', this).call(this);
+    }
+  }, {
+    key: 'isRequired',
+    value: function isRequired() {
+      return false;
+    }
+  }, {
+    key: 'read',
+    value: function read() {
+      _get(Object.getPrototypeOf(ExternalStartPort.prototype), 'read', this).call(this);
+      return undefined;
+    }
+  }, {
+    key: 'connect',
+    value: function connect(link) {
+      _get(Object.getPrototypeOf(ExternalStartPort.prototype), 'connect', this).call(this);
+      return this;
+    }
+  }, {
+    key: 'plug',
+    value: function plug(target) {
+      _get(Object.getPrototypeOf(ExternalStartPort.prototype), 'plug', this).call(this, target);
+      return this;
+    }
+  }, {
+    key: 'disconnect',
+    value: function disconnect(link) {
+      _get(Object.getPrototypeOf(ExternalStartPort.prototype), 'disconnect', this).call(this, link);
+    }
+  }, {
+    key: 'unplug',
+    value: function unplug(target) {
+      _get(Object.getPrototypeOf(ExternalStartPort.prototype), 'unplug', this).call(this, target);
+    }
+  }, {
+    key: 'clearInput',
+    value: function clearInput() {
+      _get(Object.getPrototypeOf(ExternalStartPort.prototype), 'clearInput', this).call(this);
+      return this;
+    }
+  }, {
+    key: 'setDefault',
+    value: function setDefault() {
+      throw Error('Default not supported');
+    }
+  }, {
+    key: 'hasDefault',
+    value: function hasDefault() {
+      throw Error('Default not supported');
+    }
+  }, {
+    key: 'clearDefault',
+    value: function clearDefault() {
+      throw Error('Default not supported');
+    }
+  }, {
+    key: 'setContext',
+    value: function setContext(val) {
+      throw Error('Context not supported');
+    }
+  }, {
+    key: 'hasContext',
+    value: function hasContext(val) {
+      throw Error('Context not supported');
+    }
+  }, {
+    key: 'clearContext',
+    value: function clearContext() {
+      throw Error('Context not supported');
+    }
+  }, {
+    key: 'setPersist',
+    value: function setPersist(val) {
+      throw Error('Persist not supported');
+    }
+  }, {
+    key: 'hasPersist',
+    value: function hasPersist() {
+      throw Error('Persist not supported');
+    }
+  }, {
+    key: 'clearPersist',
+    value: function clearPersist() {
+      throw Error('Persist not supported');
+    }
+  }, {
+    key: 'destroy',
+    value: function destroy() {
+      _get(Object.getPrototypeOf(ExternalStartPort.prototype), 'destroy', this).call(this);
+    }
+  }]);
+
+  return ExternalStartPort;
+}(InputPort);
+
+module.exports = ExternalStartPort;
+},{"../input":74}],73:[function(require,module,exports){
 'use strict';
 
 function factory(type, def) {
@@ -2408,7 +8315,7 @@ function factory(type, def) {
 }
 
 module.exports = factory;
-},{"./asyncInput":21,"./input":23,"./output":24}],23:[function(require,module,exports){
+},{"./asyncInput":69,"./input":74,"./output":75}],74:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -2845,7 +8752,7 @@ var InputPort = function (_Port) {
 }(Port);
 
 module.exports = InputPort;
-},{"../events/connector":4,"../events/port":6,"../packet":19,"../port":20,"debug":26}],24:[function(require,module,exports){
+},{"../events/connector":17,"../events/port":23,"../packet":66,"../port":68,"debug":"debug"}],75:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -2990,7 +8897,830 @@ var OutputPort = function (_Port) {
 
 module.exports = OutputPort;
 }).call(this,require('_process'))
-},{"../events/port":6,"../packet":19,"../port":20,"_process":88,"debug":26}],25:[function(require,module,exports){
+},{"../events/port":23,"../packet":66,"../port":68,"_process":143,"debug":"debug"}],76:[function(require,module,exports){
+(function (process){
+'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var uuid = require('uuid').v4;
+var EventEmitter = require('events').EventEmitter;
+var Events = require('../events/pm');
+var NodeEvents = require('../events/node');
+var debug = require('debug')('chix:pm');
+
+var onExit = [];
+if (process.on) {
+  // old browserify
+  process.on('exit', function onExitHandlerProcessManager() {
+    onExit.forEach(function (instance) {
+      var processes = Array.from(instance.processes.values()).reverse();
+
+      processes.forEach(function (_process) {
+        if (_process.type === 'node') {
+          if (_process.notFilled.length) {
+            debug('%s: did not run. notFilled: %s', _process.identifier, _process.notFilled);
+          }
+        }
+      });
+    });
+  });
+}
+
+/**
+ *
+ * Default Process Manager
+ *
+ * @constructor
+ * @public
+ *
+ */
+
+var ProcessManager = function (_EventEmitter) {
+  _inherits(ProcessManager, _EventEmitter);
+
+  function ProcessManager() {
+    _classCallCheck(this, ProcessManager);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ProcessManager).call(this));
+
+    _this.processes = new Map();
+    onExit.push(_this);
+    _this.onProcessStartHandler = _this.onProcessStartHandler.bind(_this);
+    _this.onProcessStopHandler = _this.onProcessStopHandler.bind(_this);
+    _this.onProcessStatusHandler = _this.onProcessStatusHandler.bind(_this);
+    _this.processErrorHandler = _this.processErrorHandler.bind(_this);
+    return _this;
+  }
+
+  _createClass(ProcessManager, [{
+    key: 'getMainGraph',
+    value: function getMainGraph() {
+      return this.getMainGraphs().pop();
+    }
+  }, {
+    key: 'getMainGraphs',
+    value: function getMainGraphs() {
+      var main = [];
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = this.processes.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var _process2 = _step.value;
+
+          if (_process2.type === 'flow' && !_process2.hasParent()) {
+            main.push(_process2);
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      return main;
+    }
+  }, {
+    key: 'onProcessStartHandler',
+    value: function onProcessStartHandler(event) {
+      this.emit(Events.START_PROCESS, event.node);
+    }
+  }, {
+    key: 'onProcessStopHandler',
+    value: function onProcessStopHandler(event) {
+      this.emit(Events.STOP_PROCESS, event.node);
+    }
+  }, {
+    key: 'onProcessStatusHandler',
+    value: function onProcessStatusHandler(event) {
+      this.emit(Events.PROCESS_STATUS, event);
+    }
+  }, {
+    key: 'register',
+    value: function register(node) {
+      if (node.pid) {
+        throw new Error('Refusing to add node with existing process id');
+      }
+
+      var pid = uuid();
+      node.setPid(pid);
+      this.processes.set(pid, node);
+
+      node.on(NodeEvents.START.name, this.onProcessStartHandler);
+      node.on(NodeEvents.STOP.name, this.onProcessStopHandler);
+      node.on(NodeEvents.STATUSUPDATE.name, this.onProcessStatusHandler);
+      node.on(NodeEvents.ERROR.name, this.processErrorHandler);
+
+      this.emit(Events.ADD_PROCESS, node);
+    }
+
+    /**
+     *
+     * Process Error Handler.
+     *
+     * The only errors we receive come from the nodes themselves.
+     * It's also garanteed if we receive an error the process itself
+     * Is already within an error state.
+     *
+     */
+
+  }, {
+    key: 'processErrorHandler',
+    value: function processErrorHandler(event) {
+      /* TODO: re-enable
+      if (event.node.status !== 'error') {
+        console.log('STATUS', event.node.status)
+        throw Error('Process is not within error state', event.node.status)
+      }
+      */
+
+      // Emit it, humans must solve this.
+      console.log('PM Error', event);
+      this.emit(Events.ERROR, event);
+    }
+  }, {
+    key: 'changePid',
+    value: function changePid(from, to) {
+      if (this.processes.has(from)) {
+        this.processes.set(to, this.processes.get(from));
+        this.processes.delete(from);
+      } else {
+        throw Error('Process id not found');
+      }
+
+      this.emit(Events.CHANGE_PID, {
+        from: from,
+        to: to
+      });
+    }
+  }, {
+    key: 'getProcess',
+    value: function getProcess(pid) {
+      if (this.processes.has(pid)) {
+        return this.processes.get(pid);
+      }
+      throw Error('Process id not found');
+    }
+
+    // TODO: improve start, stop, hold, release logic..
+
+  }, {
+    key: 'start',
+    value: function start(node) {
+      // allow by pid and by node object
+      var pid = (typeof node === 'undefined' ? 'undefined' : _typeof(node)) === 'object' ? node.pid : node;
+      var process = this.getProcess(pid);
+      if (process.type === 'flow') {
+        process.start();
+      } else {
+        process.release();
+      }
+    }
+  }, {
+    key: 'stop',
+    value: function stop(node, cb) {
+      // allow by pid and by node object
+      var pid = (typeof node === 'undefined' ? 'undefined' : _typeof(node)) === 'object' ? node.pid : node;
+
+      var process = this.getProcess(pid);
+      if (process.type === 'flow') {
+        process.stop(cb);
+      } else {
+        process.hold(cb);
+      }
+    }
+
+    // TODO: just deleting is not enough.
+    // links also contains the pids
+    // on remove process those links should also be removed.
+
+  }, {
+    key: 'unregister',
+    value: function unregister(node, cb) {
+      if (!node.pid) {
+        throw new Error('Process id not found');
+      }
+
+      var _onUnregister = function onUnregister(node, cb) {
+        node.removeListener(NodeEvents.START.name, this.onProcessStartHandler);
+        node.removeListener(NodeEvents.STOP.name, this.onProcessStopHandler);
+        node.removeListener(NodeEvents.STATUSUPDATE.name, this.onProcessStatusHandler);
+        node.removeListener(NodeEvents.ERROR.name, this.processErrorHandler);
+
+        this.processes.delete(node.pid);
+
+        // remove pid
+        delete node.pid;
+
+        if (cb) {
+          cb(node);
+        }
+
+        this.emit(Events.REMOVE_PROCESS, node);
+      }.bind(this, node, cb);
+
+      var process = this.getProcess(node.pid);
+
+      if (process.type === 'flow') {
+        // wait for `subgraph` to be finished
+        this.stop(node, _onUnregister);
+      } else {
+        node.shutdown(_onUnregister);
+      }
+    }
+
+    /**
+     *
+     * Get Process
+     * Either by id or it's pid.
+     *
+     */
+
+  }, {
+    key: 'get',
+    value: function get(pid) {
+      return this.processes.get(pid);
+    }
+  }, {
+    key: 'getById',
+    value: function getById(id, actor) {
+      return this.findBy('id', id, actor);
+    }
+  }, {
+    key: 'findBy',
+    value: function findBy(prop, value, actor) {
+      var found = void 0;
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = this.processes.values()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var _process3 = _step2.value;
+
+          if (_process3[prop] === value && (!actor || actor.hasNode(_process3.id))) {
+            if (found) {
+              console.log(this.processes);
+              throw Error('conflict: multiple ' + prop + 's matching ' + value);
+            }
+            found = _process3;
+          }
+        }
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2.return) {
+            _iterator2.return();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
+        }
+      }
+
+      return found;
+    }
+  }, {
+    key: 'filterByStatus',
+    value: function filterByStatus(status) {
+      return this.filterBy('status', status);
+    }
+  }, {
+    key: 'filterBy',
+    value: function filterBy(prop, value) {
+      var filtered = [];
+
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
+
+      try {
+        for (var _iterator3 = this.processes.values()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var _process4 = _step3.value;
+
+          if (_process4[prop] === value) {
+            filtered.push(_process4);
+          }
+        }
+      } catch (err) {
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion3 && _iterator3.return) {
+            _iterator3.return();
+          }
+        } finally {
+          if (_didIteratorError3) {
+            throw _iteratorError3;
+          }
+        }
+      }
+
+      return filtered;
+    }
+  }]);
+
+  return ProcessManager;
+}(EventEmitter);
+
+module.exports = ProcessManager;
+}).call(this,require('_process'))
+},{"../events/node":21,"../events/pm":22,"_process":143,"debug":"debug","events":141,"uuid":99}],77:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var DefaultContextProvider = require('./context/defaultProvider');
+
+/**
+ *
+ * We will run inside an instance.
+ *
+ * At the moment the run context is purely the callback.
+ * TODO: which fails hard
+ *
+ */
+
+var Run = function () {
+  function Run(actor, callback) {
+    _classCallCheck(this, Run);
+
+    this.actor = actor;
+
+    // Used with callback handling
+    // Keeps track of the number of exposed output ports
+    this.outputPorts = [];
+
+    // data we will give to the callback
+    this.output = {};
+    this.outputCount = 0;
+
+    this.callback = callback;
+
+    if (!actor.contextProvider) {
+      actor.contextProvider = new DefaultContextProvider();
+    }
+
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = actor.nodes.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var node = _step.value;
+
+        // Als deze node in onze view zit
+        if (actor.view.indexOf(node.id) >= 0) {
+          if (this.callback && node.ports && node.ports.output) {
+            for (var key in node.ports.output) {
+              // this is related to actions.
+              // expose bestaat niet meer, de integrerende flow
+              // krijgt gewoon de poorten nu.
+              if (node.ports.output.hasOwnProperty(key)) {
+                if (node.ports.output[key].expose) {
+                  this.outputPorts.push(key);
+                }
+              }
+            }
+
+            node.on('output', this.handleOutput.bind(this));
+          }
+        }
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+
+    if (this.callback && !this.outputPorts.length) {
+      throw new Error('No exposed output ports available for callback');
+    }
+
+    if (actor.trigger) {
+      actor.sendIIP(actor.trigger, '');
+    }
+  }
+
+  _createClass(Run, [{
+    key: 'handleOutput',
+    value: function handleOutput(data) {
+      if (this.outputPorts.indexOf(data.port) >= 0) {
+        if (!this.output.hasOwnProperty(data.node.id)) {
+          this.output[data.node.id] = {};
+        }
+
+        this.output[data.node.id][data.port] = data.out;
+
+        this.outputCount++;
+
+        if (this.outputPorts.length === this.outputCount) {
+          this.outputCount = 0; // reset
+
+          this.callback.apply(this.actor, [this.output]);
+
+          this.output = {};
+        }
+      }
+    }
+  }]);
+
+  return Run;
+}();
+
+module.exports = Run;
+},{"./context/defaultProvider":16}],78:[function(require,module,exports){
+(function (process,global){
+'use strict';
+
+/* global window */
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var IOBox = require('iobox');
+var path = require('path');
+
+// taken from underscore.string.js
+function _underscored(str) {
+  // also underscore dot
+  return str.replace(/([a-z\d])([A-Z]+)/g, '$1_$2').replace(/[\.\-\s]+/g, '_').toLowerCase();
+}
+
+/**
+ *
+ * NodeBox
+ *
+ * @constructor
+ * @public
+ *
+ */
+
+var NodeBox = function (_IOBox) {
+  _inherits(NodeBox, _IOBox);
+
+  function NodeBox(name) {
+    _classCallCheck(this, NodeBox);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(NodeBox).call(this, name));
+
+    _this.name = name || 'NodeBox';
+    _this.define();
+    return _this;
+  }
+
+  _createClass(NodeBox, [{
+    key: 'define',
+    value: function define() {
+      // Define the structure
+      this.addArg('input', {});
+      this.addArg('$', {});
+      this.addArg('output', {});
+      this.addArg('state', {});
+      this.addArg('done', null);
+      this.addArg('cb', null);
+      // this.addArg('console', console)
+
+      this.addArg('on', {
+        input: {}
+      }); // dynamic construction
+
+      // what to return from the function
+      this.addReturn('output');
+      this.addReturn('state');
+      this.addReturn('on');
+    }
+
+    /**
+     *
+     * Add requires to the sandbox.
+     *
+     * xNode should use check = true and then have
+     * a try catch block.
+     *
+     * @param {Object} requires
+     * @param {Boolean} check
+     */
+
+  }, {
+    key: 'require',
+    value: function (_require) {
+      function require(_x, _x2) {
+        return _require.apply(this, arguments);
+      }
+
+      require.toString = function () {
+        return _require.toString();
+      };
+
+      return require;
+    }(function (requires, check) {
+      // the generic sandbox should do the same logic
+      // for adding the requires but should not check if
+      // they are available.
+      var ukey = void 0;
+
+      // 'myrequire': '<version'
+      for (var key in requires) {
+        if (requires.hasOwnProperty(key)) {
+          // only take last part e.g. chix-flow/SomeThing-> some_thing
+          ukey = _underscored(key.split('/').pop());
+
+          this.emit('require', { require: key });
+
+          if (check !== false) {
+            if (typeof requires[key] !== 'string') {
+              // assume it's already required.
+              // the npm installed versions use this.
+              // e.g. nodule-template
+              this.addArg(ukey, requires[key]);
+            } else {
+              try {
+                var p = path.resolve(process.cwd(), 'node_modules', key);
+                this.addArg(ukey, require(p));
+              } catch (e) {
+                this.addArg(ukey, require(key));
+              }
+            }
+          } else {
+            // just register it, used for generate
+            this.addArg(ukey, undefined);
+          }
+        }
+      }
+    })
+  }, {
+    key: 'expose',
+    value: function expose(_expose) {
+      // created to allow window to be exposed to a node.
+      // only meant to be used for dom nodes.
+      var g = typeof window === 'undefined' ? global : window;
+
+      if (_expose) {
+        for (var i = 0; i < _expose.length; i++) {
+          this.emit('expose', {
+            expose: _expose[i]
+          });
+
+          if (_expose[i] === 'window') {
+            this.addArg('win', window);
+          } else if (_expose[i] === 'self') {
+            this.addArg('self', this);
+          } else {
+            // Do not re-expose anything already going in
+            if (!this.args.hasOwnProperty(_expose[i])) {
+              this.addArg(_expose[i], g[_expose[i]]);
+            }
+          }
+        }
+      }
+    }
+  }, {
+    key: 'compile',
+    value: function compile(fn) {
+      return _get(Object.getPrototypeOf(NodeBox.prototype), 'compile', this).call(this, fn, true // return as object
+      );
+    }
+
+    /**
+     *
+     * Runs the sandbox.
+     *
+     */
+
+  }, {
+    key: 'run',
+    value: function run(bind) {
+      var res = _get(Object.getPrototypeOf(NodeBox.prototype), 'run', this).apply(this, [bind]);
+      var ret = void 0;
+
+      // puts the result back into our args/state
+      // TODO: I do not think this is needed?
+      for (var k in res) {
+        if (k === 'return') {
+          ret = res.return;
+        } else if (res.hasOwnProperty(k)) {
+          this.set(k, res[k]);
+        }
+      }
+      return ret; // original return value
+    }
+  }]);
+
+  return NodeBox;
+}(IOBox);
+
+module.exports = NodeBox;
+}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"_process":143,"iobox":84,"path":142}],79:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var NodeBox = require('./node');
+
+/**
+ *
+ * PortBox
+ *
+ * @constructor
+ * @public
+ *
+ */
+
+var PortBox = function (_NodeBox) {
+  _inherits(PortBox, _NodeBox);
+
+  function PortBox(name) {
+    _classCallCheck(this, PortBox);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PortBox).call(this, name));
+
+    _this.name = name || 'PortBox';
+    return _this;
+  }
+
+  _createClass(PortBox, [{
+    key: 'define',
+    value: function define() {
+      // Define the structure
+      this.addArg('data', null);
+      this.addArg('source', null); // not sure..
+      this.addArg('state', {});
+      this.addArg('input', {});
+      this.addArg('$', {});
+      this.addArg('output', null); // output function should be set manually
+
+      // what to return from the function.
+      this.addReturn('state');
+    }
+  }]);
+
+  return PortBox;
+}(NodeBox);
+
+module.exports = PortBox;
+},{"./node":78}],80:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var EventEmitter = require('events').EventEmitter;
+var Events = require('./events/setting');
+
+/**
+ *
+ * Setting
+ *
+ * Both used by Connector and xLink
+ *
+ * @constructor
+ * @public
+ *
+ */
+
+var Setting = function (_EventEmitter) {
+  _inherits(Setting, _EventEmitter);
+
+  function Setting(settings) {
+    _classCallCheck(this, Setting);
+
+    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Setting).call(this));
+
+    for (var key in settings) {
+      if (settings.hasOwnProperty(key)) {
+        _this.set(key, settings[key]);
+      }
+    }
+    return _this;
+  }
+
+  /**
+   *
+   * Set
+   *
+   * Sets a setting
+   *
+   * @param {String} name
+   * @param {Any} val
+   */
+
+
+  _createClass(Setting, [{
+    key: 'set',
+    value: function set(name, val) {
+      if (undefined !== val) {
+        if (!this.setting) {
+          this.setting = {};
+        }
+        this.setting[name] = val;
+
+        this.emit(Events.CHANGE, this, 'setting', this.setting);
+      }
+    }
+
+    /**
+     *
+     * Get
+     *
+     * Returns the setting or undefined.
+     *
+     * @returns {Any}
+     */
+
+  }, {
+    key: 'get',
+    value: function get(name) {
+      return this.setting ? this.setting[name] : undefined;
+    }
+
+    /**
+     *
+     * Delete a setting
+     *
+     * @returns {Any}
+     */
+
+  }, {
+    key: 'del',
+    value: function del(name) {
+      if (this.setting && this.setting.hasOwnProperty(name)) {
+        delete this.setting[name];
+      }
+    }
+
+    /**
+     *
+     * Check whether a setting is set.
+     *
+     * @returns {Any}
+     */
+
+  }, {
+    key: 'has',
+    value: function has(name) {
+      return this.setting && this.setting.hasOwnProperty(name);
+    }
+  }]);
+
+  return Setting;
+}(EventEmitter);
+
+module.exports = Setting;
+},{"./events/setting":24,"events":141}],81:[function(require,module,exports){
 'use strict';
 
 var jsongate = require('json-gate');
@@ -3154,376 +9884,636 @@ module.exports = {
   nodeDefinition: validateNodeDefinition,
   nodeDefinitions: _checkIds
 };
-},{"../schemas/link.json":43,"../schemas/map.json":44,"../schemas/node.json":45,"instance-of":28,"json-gate":31,"lodash/isPlainObject":39}],26:[function(require,module,exports){
+},{"../schemas/link.json":100,"../schemas/map.json":101,"../schemas/node.json":102,"instance-of":83,"json-gate":87,"lodash/isPlainObject":95}],82:[function(require,module,exports){
+'use strict'
+
+const EventEmitter = require('events').EventEmitter
+const util = require('util')
 
 /**
- * This is the web browser implementation of `debug()`.
  *
- * Expose `debug()` as the module.
- */
-
-exports = module.exports = require('./debug');
-exports.log = log;
-exports.formatArgs = formatArgs;
-exports.save = save;
-exports.load = load;
-exports.useColors = useColors;
-exports.storage = 'undefined' != typeof chrome
-               && 'undefined' != typeof chrome.storage
-                  ? chrome.storage.local
-                  : localstorage();
-
-/**
- * Colors.
- */
-
-exports.colors = [
-  'lightseagreen',
-  'forestgreen',
-  'goldenrod',
-  'dodgerblue',
-  'darkorchid',
-  'crimson'
-];
-
-/**
- * Currently only WebKit-based Web Inspectors, Firefox >= v31,
- * and the Firebug extension (any Firefox version) are known
- * to support "%c" CSS customizations.
+ * Loader
  *
- * TODO: add a `localStorage` variable to explicitly enable/disable colors
- */
-
-function useColors() {
-  // is webkit? http://stackoverflow.com/a/16459606/376773
-  return ('WebkitAppearance' in document.documentElement.style) ||
-    // is firebug? http://stackoverflow.com/a/398120/376773
-    (window.console && (console.firebug || (console.exception && console.table))) ||
-    // is firefox >= v31?
-    // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-    (navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31);
-}
-
-/**
- * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
- */
-
-exports.formatters.j = function(v) {
-  return JSON.stringify(v);
-};
-
-
-/**
- * Colorize log arguments if enabled.
+ * This is the base loader class
+ * Ít can be used to implement a definition loader
+ * for Chix
  *
  * @api public
+ * @author Rob Halff <rob.halff@gmail.com>
+ * @constructor
  */
+function Loader () {
+  this.dependencies = {}
 
-function formatArgs() {
-  var args = arguments;
-  var useColors = this.useColors;
-
-  args[0] = (useColors ? '%c' : '')
-    + this.namespace
-    + (useColors ? ' %c' : ' ')
-    + args[0]
-    + (useColors ? '%c ' : ' ')
-    + '+' + exports.humanize(this.diff);
-
-  if (!useColors) return args;
-
-  var c = 'color: ' + this.color;
-  args = [args[0], c, 'color: inherit'].concat(Array.prototype.slice.call(args, 1));
-
-  // the final "%c" is somewhat tricky, because there could be other
-  // arguments passed either before or after the %c, so we need to
-  // figure out the correct index to insert the CSS into
-  var index = 0;
-  var lastC = 0;
-  args[0].replace(/%[a-z%]/g, function(match) {
-    if ('%%' === match) return;
-    index++;
-    if ('%c' === match) {
-      // we only are interested in the *last* %c
-      // (the user may have provided their own)
-      lastC = index;
-    }
-  });
-
-  args.splice(lastC, 0, c);
-  return args;
+  /**
+   *
+   * Format:
+   *
+   * Keeps track of all known nodeDefinitions.
+   *
+   * {
+   *  'http://....': { // url in this case is the identifier
+   *
+   *    fs: {
+   *       readFile:  <definition>
+   *       writeFile: <definition>
+   *    }
+   *
+   *  }
+   *
+   * }
+   *
+   */
+  this.nodeDefinitions = {}
 }
 
+util.inherits(Loader, EventEmitter)
+
 /**
- * Invokes `console.log()` when available.
- * No-op when `console.log` is not a "function".
  *
+ * This is the main method all child classes should implement.
+ *
+ * @param {Object} graphs
+ * @param {Function} callback
  * @api public
  */
-
-function log() {
-  // this hackery is required for IE8/9, where
-  // the `console.log` function doesn't have 'apply'
-  return 'object' === typeof console
-    && console.log
-    && Function.prototype.apply.call(console.log, console, arguments);
+Loader.prototype.load = function (graphs, callback /*, update dependencies*/) {
+  callback(null, {
+    providerLocation: '',
+    nodeDefinitions: this.nodeDefinitions
+  })
 }
 
 /**
- * Save `namespaces`.
  *
- * @param {String} namespaces
- * @api private
- */
-
-function save(namespaces) {
-  try {
-    if (null == namespaces) {
-      exports.storage.removeItem('debug');
-    } else {
-      exports.storage.debug = namespaces;
-    }
-  } catch(e) {}
-}
-
-/**
- * Load `namespaces`.
+ * Add node definitions
  *
- * @return {String} returns the previously persisted debug modes
- * @api private
- */
-
-function load() {
-  var r;
-  try {
-    r = exports.storage.debug;
-  } catch(e) {}
-  return r;
-}
-
-/**
- * Enable namespaces listed in `localStorage.debug` initially.
- */
-
-exports.enable(load());
-
-/**
- * Localstorage attempts to return the localstorage.
+ * Used to `statically` add nodeDefinitions.
  *
- * This is necessary because safari throws
- * when a user disables cookies/localstorage
- * and you attempt to access it.
- *
- * @return {LocalStorage}
- * @api private
- */
-
-function localstorage(){
-  try {
-    return window.localStorage;
-  } catch (e) {}
-}
-
-},{"./debug":27}],27:[function(require,module,exports){
-
-/**
- * This is the common logic for both the Node.js and web browser
- * implementations of `debug()`.
- *
- * Expose `debug()` as the module.
- */
-
-exports = module.exports = debug;
-exports.coerce = coerce;
-exports.disable = disable;
-exports.enable = enable;
-exports.enabled = enabled;
-exports.humanize = require('ms');
-
-/**
- * The currently active debug mode names, and names to skip.
- */
-
-exports.names = [];
-exports.skips = [];
-
-/**
- * Map of special "%n" handling functions, for the debug "format" argument.
- *
- * Valid key names are a single, lowercased letter, i.e. "n".
- */
-
-exports.formatters = {};
-
-/**
- * Previously assigned color.
- */
-
-var prevColor = 0;
-
-/**
- * Previous log timestamp.
- */
-
-var prevTime;
-
-/**
- * Select a color.
- *
- * @return {Number}
- * @api private
- */
-
-function selectColor() {
-  return exports.colors[prevColor++ % exports.colors.length];
-}
-
-/**
- * Create a debugger with the given `namespace`.
- *
- * @param {String} namespace
- * @return {Function}
+ * @param {String} identifier
+ * @param {Object} nodeDefs
  * @api public
  */
-
-function debug(namespace) {
-
-  // define the `disabled` version
-  function disabled() {
-  }
-  disabled.enabled = false;
-
-  // define the `enabled` version
-  function enabled() {
-
-    var self = enabled;
-
-    // set `diff` timestamp
-    var curr = +new Date();
-    var ms = curr - (prevTime || curr);
-    self.diff = ms;
-    self.prev = prevTime;
-    self.curr = curr;
-    prevTime = curr;
-
-    // add the `color` if not set
-    if (null == self.useColors) self.useColors = exports.useColors();
-    if (null == self.color && self.useColors) self.color = selectColor();
-
-    var args = Array.prototype.slice.call(arguments);
-
-    args[0] = exports.coerce(args[0]);
-
-    if ('string' !== typeof args[0]) {
-      // anything else let's inspect with %o
-      args = ['%o'].concat(args);
+Loader.prototype.addNodeDefinitions = function (identifier, nodeDefs) {
+  if (Array.isArray(nodeDefs)) {
+    for (let i = 0; i < nodeDefs.length; i++) {
+      this.addNodeDefinition(identifier, nodeDefs[i])
     }
-
-    // apply any `formatters` transformations
-    var index = 0;
-    args[0] = args[0].replace(/%([a-z%])/g, function(match, format) {
-      // if we encounter an escaped % then don't increase the array index
-      if (match === '%%') return match;
-      index++;
-      var formatter = exports.formatters[format];
-      if ('function' === typeof formatter) {
-        var val = args[index];
-        match = formatter.call(self, val);
-
-        // now we need to remove `args[index]` since it's inlined in the `format`
-        args.splice(index, 1);
-        index--;
+  } else {
+    for (let ns in nodeDefs) {
+      if (nodeDefs.hasOwnProperty(ns)) {
+        for (let name in nodeDefs[ns]) {
+          if (nodeDefs[ns].hasOwnProperty(name)) {
+            this.addNodeDefinition(identifier, nodeDefs[ns][name])
+          }
+        }
       }
-      return match;
-    });
-
-    if ('function' === typeof exports.formatArgs) {
-      args = exports.formatArgs.apply(self, args);
-    }
-    var logFn = enabled.log || exports.log || console.log.bind(console);
-    logFn.apply(self, args);
-  }
-  enabled.enabled = true;
-
-  var fn = exports.enabled(namespace) ? enabled : disabled;
-
-  fn.namespace = namespace;
-
-  return fn;
-}
-
-/**
- * Enables a debug mode by namespaces. This can include modes
- * separated by a colon and wildcards.
- *
- * @param {String} namespaces
- * @api public
- */
-
-function enable(namespaces) {
-  exports.save(namespaces);
-
-  var split = (namespaces || '').split(/[\s,]+/);
-  var len = split.length;
-
-  for (var i = 0; i < len; i++) {
-    if (!split[i]) continue; // ignore empty strings
-    namespaces = split[i].replace(/\*/g, '.*?');
-    if (namespaces[0] === '-') {
-      exports.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
-    } else {
-      exports.names.push(new RegExp('^' + namespaces + '$'));
     }
   }
 }
 
 /**
- * Disable debug output.
  *
+ * Add a node definition
+ *
+ * @param {String} identifier
+ * @param {Object} nodeDef
  * @api public
  */
+Loader.prototype.addNodeDefinition = function (identifier, nodeDef) {
+  if (!nodeDef.hasOwnProperty('ns')) {
+    throw new Error([
+      'Nodefinition for',
+      identifier,
+      'lacks an ns property'
+    ].join(' '))
+  }
 
-function disable() {
-  exports.enable('');
+  if (!nodeDef.hasOwnProperty('name')) {
+    throw new Error([
+      'Nodefinition for',
+      identifier,
+      'lacks an name property'
+    ].join(' '))
+  }
+
+  // store the provider url along with the nodeDefinition
+  // Needed for fetching back from storage.
+  nodeDef.provider = identifier
+
+  if (nodeDef.type !== 'flow') {
+    // Do normal nodeDefinition stuff
+    this.dependencies = this._parseDependencies(this.dependencies, nodeDef)
+  } else {
+    // also setting default provider here?
+    // check this later, if addNodeDefinition(s) is used
+    // there will otherwise be no default provider.
+    // where is default provider, in chix-loader-remote.. err..
+    // I think addNodefinition(s) should set it maybe
+    // It's also a bit weird, because if you only add them manually
+    // there ain't really an url or path.
+    if (!nodeDef.providers || Object.keys(nodeDef.providers).length === 0) {
+      nodeDef.providers = {
+        '@': {
+          url: identifier
+        }
+      }
+    }
+  }
+
+  if (!this.nodeDefinitions.hasOwnProperty(identifier)) {
+    this.nodeDefinitions[identifier] = {}
+  }
+
+  if (!this.nodeDefinitions[identifier].hasOwnProperty(nodeDef.ns)) {
+    this.nodeDefinitions[identifier][nodeDef.ns] = {}
+  }
+
+  if (!this.nodeDefinitions[identifier][nodeDef.ns]
+    .hasOwnProperty([nodeDef.name])) {
+    this.nodeDefinitions[identifier][nodeDef.ns][nodeDef.name] = nodeDef
+  }
+}
+
+Loader.prototype._parseDependencies = function (dependencies, nodeDef) {
+  let r
+  let type
+
+  if (nodeDef.require) {
+    throw Error(
+      nodeDef.ns + '/' + nodeDef.name +
+      ': nodeDef.require is DEPRECATED, use nodeDef.dependencies'
+    )
+  }
+
+  if (nodeDef.dependencies) {
+    for (type in nodeDef.dependencies) {
+      if (nodeDef.dependencies.hasOwnProperty(type)) {
+        for (r in nodeDef.dependencies[type]) {
+          if (nodeDef.dependencies[type].hasOwnProperty(r)) {
+            if (type === 'npm') {
+              if (nodeDef.dependencies.npm[r] !== 'builtin') {
+                // translate to require string, bower should do the same
+                //
+                // I think this should be delayed, to when the actual
+                // require takes place.
+                /*
+                requireString = r + '@' + nodeDef.dependencies.npm[r]
+                if (requires.indexOf(requireString) === -1) {
+                  requires.push(requireString)
+                }
+                */
+                if (!dependencies.hasOwnProperty('npm')) {
+                  dependencies.npm = {}
+                }
+
+                // TODO: check for duplicates and pick the latest one.
+                dependencies.npm[r] = nodeDef.dependencies.npm[r]
+              }
+            } else if (type === 'bower') {
+              if (!dependencies.hasOwnProperty('bower')) {
+                dependencies.bower = {}
+              }
+
+              // TODO: check for duplicates and pick the latest one.
+              dependencies.bower[r] = nodeDef.dependencies.bower[r]
+            } else {
+              throw Error('Unkown package manager:' + type)
+            }
+          }
+        }
+      }
+    }
+  }
+  return dependencies
+}
+
+Loader.prototype.saveNodeDefinition = function () {
+  throw new Error([
+    this.constructor.name,
+    'must implement a save method'
+  ].join(' '))
 }
 
 /**
- * Returns true if the given mode name is enabled, false otherwise.
  *
+ * Ok now it becomes intresting.
+ *
+ * We will read the definition and are going to detect whether this
+ * definition is about a flow, if it is about a flow.
+ * We are also going to load those definitions, unless we already
+ * have that definition ofcourse.
+ *
+ * This way we only have to provide the actor with ourselves.
+ * The loader. The loader will then already know about all the
+ * node definitions it needs. This keeps the actor simpler.
+ * All it has to do is .getNodeDefinition() wherever in
+ * the hierarchy it is.
+ *
+ */
+
+/**
+ *
+ * Check whether we have the definition
+ *
+ * @param {String} providerUrl
+ * @param {String} ns
  * @param {String} name
- * @return {Boolean}
  * @api public
  */
-
-function enabled(name) {
-  var i, len;
-  for (i = 0, len = exports.skips.length; i < len; i++) {
-    if (exports.skips[i].test(name)) {
-      return false;
-    }
-  }
-  for (i = 0, len = exports.names.length; i < len; i++) {
-    if (exports.names[i].test(name)) {
-      return true;
-    }
-  }
-  return false;
+Loader.prototype.hasNodeDefinition = function (providerUrl, ns, name) {
+  return this.nodeDefinitions.hasOwnProperty(providerUrl) &&
+    this.nodeDefinitions[providerUrl].hasOwnProperty(ns) &&
+    this.nodeDefinitions[providerUrl][ns].hasOwnProperty(name)
 }
 
 /**
- * Coerce `val`.
  *
- * @param {Mixed} val
- * @return {Mixed}
- * @api private
+ * Easier method to just get an already loaded definition
+ * TODO: Unrafel getNodeDefinition and make it simpler
+ *
+ * Anyway, this is the way, we do not want to keep a store of id's
+ * in the loader also, so getById can go also.
  */
-
-function coerce(val) {
-  if (val instanceof Error) return val.stack || val.message;
-  return val;
+Loader.prototype.getNodeDefinitionFrom = function (provider, ns, name) {
+  if (this.hasNodeDefinition(provider, ns, name)) {
+    return this.nodeDefinitions[provider][ns][name]
+  }
 }
 
-},{"ms":40}],28:[function(require,module,exports){
+// npm loader returns a different source
+Loader.prototype.getNodeSource = Loader.prototype.getNodeDefinitionFrom
+
+/**
+ *
+ * Loads the NodeDefinition for a node.
+ *
+ * In order to do so each node must know the provider url
+ * it was loaded from.
+ *
+ * This is normally not stored directly into flows,
+ * but the flow is saved with the namespaces in used.
+ *
+ * TODO: this really should just be (provider, name, ns, version)
+ * Else use the load method.
+ *
+ * ah this is the exact same as loadDefnition only without callback.
+ *
+ */
+Loader.prototype.getNodeDefinition = function (node, map) {
+  const def = this.loadNodeDefinition(node, map)
+
+  // merge the schema of the internal node.
+  if (node.type === 'flow') {
+    this._mergeSchema(def) // in place
+  }
+
+  return def
+}
+
+// this is still the map so nodes are an array
+// saves us from having to maintain a nodes list.
+// making this mergeSchema more self-reliant
+Loader.prototype.findNodeWithinGraph = function (nodeId, graph) {
+  for (let i = 0; i < graph.nodes.length; i++) {
+    if (nodeId === graph.nodes[i].id) {
+      // ok that's the node, but still it needs to be resolved
+      // we need to get it's definition
+      return graph.nodes[i]
+    }
+  }
+
+  throw Error('Could not find internal node within graph')
+}
+
+Loader.prototype._mergeSchema = function (graph) {
+  for (let type in graph.ports) {
+    if (graph.ports.hasOwnProperty(type)) {
+      for (let port in graph.ports[type]) {
+        if (graph.ports[type].hasOwnProperty(port)) {
+          const externalPort = graph.ports[type][port]
+          if (externalPort.hasOwnProperty('nodeId')) {
+            const internalDef = this.getNodeDefinition(
+              this.findNodeWithinGraph(externalPort.nodeId, graph),
+              graph
+            )
+            const copy = JSON.parse(
+              JSON.stringify(internalDef.ports[type][externalPort.name])
+            )
+            copy.title = externalPort.title
+            copy.name = externalPort.name
+            copy.nodeId = externalPort.nodeId
+            graph.ports[type][port] = copy
+          } else {
+            // not pointing to an internal node. :start etc.
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ *
+ * Recursivly returns the requires.
+ *
+ * Assumes the map, node is already loaded.
+ *
+ * Note: Will break if node.provider is an url already.
+ *
+ * @private
+ */
+Loader.prototype._collectDependencies = function (dependencies, def) {
+  const self = this
+  def.nodes.forEach(function (node) {
+    let provider
+
+    // Just makes this a simple function, used in several locations.
+    if (/:\/\//.test(node.provider)) {
+      provider = node.provider
+    } else {
+      var da = node.provider ? node.provider : '@'
+      provider = def.providers[da].url || def.providers[da].path
+    }
+
+    const nDef = self.nodeDefinitions[provider][node.ns][node.name]
+    if (node.type === 'flow') {
+      dependencies = self._collectDependencies(dependencies, nDef)
+    } else {
+      dependencies = self._parseDependencies(dependencies, nDef)
+    }
+  })
+
+  return dependencies
+}
+
+/**
+ *
+ * Get the dependencies for a certain provider.
+ *
+ * @param {Object} def
+ * @private
+ */
+Loader.prototype._loadDependencies = function (def) {
+  let dependencies = {}
+
+  if (def.type === 'flow') {
+    dependencies = this._collectDependencies(dependencies, def)
+    return dependencies
+  } else {
+    dependencies = this._parseDependencies(dependencies, def)
+    return dependencies
+  }
+}
+
+// Loader itself only expects preloaded nodes.
+// There is no actual load going on.
+// Remote loader does implement loading.
+Loader.prototype.loadNode = function (providerDef, cb) {
+  const provider = providerDef.providerLocation
+  const ns = providerDef.ns
+  const name = providerDef.name
+  if (this.nodeDefinitions[provider] &&
+    this.nodeDefinitions[provider].hasOwnProperty(ns) &&
+    this.nodeDefinitions[provider][ns].hasOwnProperty(name)) {
+    cb(null, {
+      nodeDef: this.nodeDefinitions[provider][ns][name]
+    })
+  } else {
+    cb(
+      Error(
+        util.format('Could not load node %s/%s from %s', ns, name, provider)
+      )
+    )
+  }
+}
+
+Loader.prototype.loadNodeDefinitionFrom = function (provider, ns, name, callback) {
+  const self = this
+
+  // I want cumulative dependencies.
+  // Instead of only knowing all dependencies known
+  // or only the dependency from the current node.
+  // self.load could send this within the callback
+  // and then also remember the dependency from this single node.
+  // for self.load it's the second argument of the callback.
+  let dependencies = {}
+
+  this.loadNode({
+    ns: ns,
+    name: name,
+    url: provider.replace('{ns}', ns).replace('{name}', name),
+    providerLocation: provider
+  }, loadNodeCallback)
+
+  function loadNodeCallback (err, res) {
+    if (err) {
+      throw err
+    }
+
+    const nodeDef = res.nodeDef
+    // res.providerLocation
+
+    dependencies = self._parseDependencies(dependencies, nodeDef)
+
+    // quick hacking
+    if (!self.nodeDefinitions[provider]) {
+      self.nodeDefinitions[provider] = {}
+    }
+    if (!self.nodeDefinitions[provider].hasOwnProperty(ns)) {
+      self.nodeDefinitions[provider][ns] = {}
+    }
+    self.nodeDefinitions[provider][ns][name] = nodeDef
+
+    if (nodeDef.type === 'flow') {
+      self.load(nodeDef, function (/* err, ret */) {
+        callback(
+          self.nodeDefinitions[provider][ns][name],
+          self._loadDependencies(
+            self.nodeDefinitions[provider][ns][name]
+          )
+        )
+      }, false, dependencies)
+    } else {
+      callback(
+        self.nodeDefinitions[provider][ns][name],
+        self._loadDependencies(
+          self.nodeDefinitions[provider][ns][name]
+        )
+      )
+    }
+  }
+}
+
+// Ok this, seems weird, it is loading the map?
+// I give it a node which has either a provider as short key
+// or the full url, the map is needed to resolve that.
+// but then I start loading the full map.
+// which seems weird, to say the least.
+Loader.prototype.loadNodeDefinition = function (node, map, callback) {
+  let location
+  let provider
+  const self = this
+
+  if (node.provider && node.provider.indexOf('://') >= 0) {
+    // it's already an url
+    location = node.provider
+  } else if (!node.provider && (!map || !map.providers)) {
+    // for direct additions (only @ is possible)
+    location = '@'
+  } else {
+    if (!map) {
+      throw Error(
+        'loadNodeDefinition needs a map or a node with a full provider url'
+      )
+    }
+
+    if (node.provider) {
+      // 'x': ..
+      provider = map.providers[node.provider]
+    } else {
+      provider = map.providers['@']
+    }
+
+    // fix: find provider by path or url, has to do with provider
+    // already resolved (sub.sub.graphs)
+    if (!provider) {
+      for (let key in map.providers) {
+        if (map.providers[key].url === node.provider ||
+          map.providers[key].path === node.provider) {
+          provider = map.providers[key]
+        }
+      }
+      if (!provider) {
+        throw Error('unable to find provider')
+      }
+    }
+
+    if (provider.hasOwnProperty('path')) {
+      location = provider.path
+    } else if (provider.hasOwnProperty('url')) {
+      location = provider.url
+    } else {
+      throw new Error('Do not know how to handle provider')
+    }
+
+    // Remember the provider, this is important to call getDefinition
+    // at a later stage, see actor.addMap and createNode.
+    // createNode is called without a map.
+    // not perfect this, so redo this later.
+    // when empty maps are added, createNode should also be
+    // able to figure out where it's definitions are.
+    // this means the map should be preloaded.
+    // This preload should be done with an URL not with @
+    // The along with that getNodeDefinitionFrom(providerUrl)
+    // should be used. providerUrl is the only way subgraphs
+    // are indexed correctly '@' by itself is not unique enough
+    // to serve as a provider key. it is for single graphs but
+    // is not useable anything beyond that.
+    // Also however when a graph is saved the expanded
+    // urls should be translated back into short form (fix that)
+    // by looking up the provider within providers and putting
+    // the key back where now the expanded url is.
+    node.provider = location
+  }
+
+  if (!this.nodeDefinitions.hasOwnProperty(location) ||
+    !this.nodeDefinitions[location].hasOwnProperty(node.ns) ||
+    !this.nodeDefinitions[location][node.ns].hasOwnProperty(node.name)) {
+    if (!callback) {
+      return false
+    } else {
+      // not sure.. node has a full url.
+      // but it's not loaded, then we ask to load the full map.
+      // which works if provider is x but not if it's already expanded.
+      //
+      this.load(map, function () {
+        callback(self.nodeDefinitions[location][node.ns][node.name])
+      })
+    }
+  } else {
+    if (callback) {
+      callback(this.nodeDefinitions[location][node.ns][node.name])
+    } else {
+      return this.nodeDefinitions[location][node.ns][node.name]
+    }
+  }
+}
+
+/**
+ *
+ * Get dependencies for the type given.
+ *
+ * type is either `npm` or `bower`
+ *
+ * If no type is given will return all dependencies.
+ *
+ * Note: this method changed in behavior, used to be
+ *  what _loadDependencies is now. which used to be getRequires()...
+ *
+ * @param {string} type
+ * @public
+ */
+Loader.prototype.getDependencies = function (type) {
+  if (type) {
+    if (this.dependencies.hasOwnProperty(type)) {
+      return this.dependencies[type]
+    } else {
+      return {}
+    }
+  } else {
+    return this.dependencies
+  }
+}
+
+/**
+ *
+ * Checks whether there are any dependencies.
+ *
+ * Type can be `npm` or `bower`
+ *
+ * If no type is given it will tell whether there are *any* dependencies
+ *
+ * @param {string} type
+ * @public
+ **/
+Loader.prototype.hasDependencies = function (type) {
+  if (type) {
+    if (this.dependencies.hasOwnProperty(type)) {
+      return Object.keys(this.dependencies[type]).length
+    }
+  } else {
+    for (let _type in this.dependencies) {
+      if (this.dependencies.hasOwnProperty(_type)) {
+        if (this.hasDependencies(_type)) {
+          return true
+        }
+      }
+    }
+  }
+  return false
+}
+
+/**
+ *
+ * Get Nodedefinitions
+ *
+ * Optionally with a provider url so it returns only the node definitions
+ * at that provider.
+ *
+ * @param {String} provider (Optional)
+ */
+Loader.prototype.getNodeDefinitions = function (provider) {
+  if (provider) {
+    return this.nodeDefinitions[provider]
+  } else {
+    return this.nodeDefinitions
+  }
+}
+
+module.exports = Loader
+
+},{"events":141,"util":146}],83:[function(require,module,exports){
 module.exports = function InstanceOf(obj, type) {
   if(obj === null) return false;
   if(type === 'array') type = 'Array';
@@ -3538,7 +10528,284 @@ module.exports = function InstanceOf(obj, type) {
   }
 };
 
-},{}],29:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
+'use strict';
+
+var util = require('util');
+var EventEmitter = require('events').EventEmitter;
+
+/**
+ *
+ * IO Box
+ *
+ * @param {String} name
+ */
+var IOBox = function (name, args, returns) {
+
+  if (!(this instanceof IOBox)) {
+    return new IOBox(name, args, returns);
+  }
+
+  EventEmitter.apply(this, arguments);
+
+  this.name = name || 'UNNAMED';
+
+  // to ensure correct order
+  this._keys = [];
+
+  args = args || [];
+  returns = returns || [];
+
+  this.setup(args, returns);
+
+};
+
+util.inherits(IOBox, EventEmitter);
+
+/**
+ *
+ * Setup
+ *
+ * @param {Array} args
+ * @param {Array} returns
+ */
+IOBox.prototype.setup = function (args, returns) {
+
+  var i;
+
+  this.args = {};
+  this.returns = [];
+  this.fn = undefined;
+
+  // setup the empty input arguments object
+  for (i = 0; i < args.length; i++) {
+    this.addArg(args[i], undefined);
+  }
+
+  for (i = 0; i < returns.length; i++) {
+    this.addReturn(returns[i]);
+  }
+};
+
+/**
+ *
+ * Used to access the properties at the top level,
+ * but still be able to get all relevant arguments
+ * at once using this.args
+ *
+ * @param {String} key
+ * @param {Mixed} initial
+ */
+IOBox.prototype.addArg = function (key, initial) {
+
+  Object.defineProperty(this, key, {
+    set: function (val) {
+      this.args[key] = val;
+    },
+    get: function () {
+      return this.args[key];
+    }
+  });
+
+  this._keys.push(key);
+
+  this[key] = initial; // can be undefined
+
+};
+
+IOBox.prototype.addReturn = function (r) {
+  if (this.returns.indexOf(r) === -1) {
+    if (this._keys.indexOf(r) !== -1) {
+      this.returns.push(r);
+    }
+    else {
+      throw Error([
+        'Output `',
+        r,
+        '` is not one of',
+        this._keys.join(', ')
+      ].join(' '));
+    }
+  }
+};
+
+/**
+ *
+ * Sets a property of the sandbox.
+ * Because the keys determine what arguments will
+ * be generated for the function, it is important
+ * we keep some kind of control over what is set.
+ *
+ * @param {String} key
+ * @param {Mixed} value
+ *
+ */
+IOBox.prototype.set = function (key, value) {
+
+  if (this.args.hasOwnProperty(key)) {
+    this.args[key] = value;
+  }
+  else {
+    throw new Error([
+      'Will not set unknown property',
+      key
+    ].join(' '));
+  }
+};
+
+/**
+ *
+ * Compiles and returns the generated function.
+ *
+ * @param {String} fn
+ * @param {Boolean} asObject
+ * @return {String}
+ */
+IOBox.prototype.compile = function (fn, asObject) {
+
+  if (!this.code) {
+    this.generate(fn ? fn.trim() : fn, asObject);
+  }
+
+  this.fn = new Function(this.code)();
+
+  return this.fn;
+
+};
+
+/**
+ *
+ * Fill with a precompiled function
+ *
+ * Return type in this case is determined by compiled function
+ *
+ * @param {String} fn
+ * @return {String}
+ */
+IOBox.prototype.fill = function (fn) {
+
+  // argument signature check?
+
+  this.fn = fn;
+
+  return this.fn;
+
+};
+
+/**
+ *
+ * Wraps the function in yet another function
+ *
+ * This way it's possible to get the original return.
+ *
+ * @param {String} fn
+ * @return {String}
+ */
+IOBox.prototype._returnWrap = function (fn) {
+  return ['function() {', fn, '}.call(this)'].join('\n');
+};
+/**
+ *
+ * Clear generated code
+ */
+IOBox.prototype.clear = function () {
+  this.code = null;
+};
+
+/**
+ *
+ * Generates the function.
+ *
+ * This can be used directly
+ *
+ * @param {String} fn
+ * @param {Boolean} asObject
+ * @return {String}
+ */
+IOBox.prototype.generate = function (fn, asObject) {
+
+  this.code = [
+    'return function ',
+    this.name,
+    '(',
+    this._keys.join(','),
+    ') {\n',
+    'var r = ', // r goes to 'return'
+    this._returnWrap(fn),
+    '; return ',
+    asObject ? this._asObject() : this._asArray(),
+    '; }'
+  ].join('');
+
+  return this.code;
+};
+
+/**
+ *
+ * Return output as array.
+ *
+ * @return {String}
+ */
+IOBox.prototype._asArray = function () {
+  return '[' + this.returns.join(',') + ',r]';
+};
+
+/**
+ *
+ * Return output as object.
+ *
+ * @return {String}
+ */
+IOBox.prototype._asObject = function () {
+  var ret = [];
+  for (var i = 0; i < this.returns.length; i++) {
+    ret.push(this.returns[i] + ':' + this.returns[i]);
+  }
+  ret.push('return:' + 'r');
+
+  return '{' + ret.join(',') + '}';
+};
+
+/**
+ *
+ * Renders the function to string.
+ *
+ * @return {String}
+ */
+IOBox.prototype.toString = function () {
+  if (this.fn) return this.fn.toString();
+  return this.fn;
+};
+
+/**
+ *
+ * Runs the generated function
+ *
+ * @param {Mixed} bind   Context to bind to the function
+ * @return {Mixed}
+ */
+IOBox.prototype.run = function (bind) {
+
+  var v = [];
+  var k;
+
+  for (k in this.args) {
+    if (this.args.hasOwnProperty(k)) {
+      v[this._keys.indexOf(k)] = this.args[k];
+    }
+    else {
+      throw new Error('unknown input ' + k);
+    }
+  }
+
+  // returns the output, format depends on the `compile` step
+  return this.fn.apply(bind, v);
+
+};
+
+module.exports = IOBox;
+
+},{"events":141,"util":146}],85:[function(require,module,exports){
 exports.getType = function (obj) {
 	switch (Object.prototype.toString.call(obj)) {
 		case '[object String]':
@@ -3639,7 +10906,7 @@ exports.deepEquals = function (obj1, obj2) {
 	}
 };
 
-},{}],30:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 var RE_0_TO_100 = '([1-9]?[0-9]|100)';
 var RE_0_TO_255 = '([1-9]?[0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])';
 
@@ -3735,7 +11002,7 @@ var formats = {
 
 exports.formats = formats;
 
-},{}],31:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 var validateSchema = require('./valid-schema'),
 	validateObject = require('./valid-object');
 
@@ -3752,7 +11019,7 @@ module.exports.createSchema = function (schema) {
 	return new Schema(schema);
 }
 
-},{"./valid-object":32,"./valid-schema":33}],32:[function(require,module,exports){
+},{"./valid-object":88,"./valid-schema":89}],88:[function(require,module,exports){
 var formats = require('./formats').formats;
 var common = require('./common'),
 	getType = common.getType,
@@ -4137,7 +11404,7 @@ module.exports = function(obj, schema, done) {
 	}
 };
 
-},{"./common":29,"./formats":30}],33:[function(require,module,exports){
+},{"./common":85,"./formats":86}],89:[function(require,module,exports){
 var formats = require('./formats').formats;
 var common = require('./common'),
 	getType = common.getType,
@@ -4419,7 +11686,7 @@ module.exports = function(schema) {
 	validateSchema(schema, []);
 };
 
-},{"./common":29,"./formats":30,"./valid-object":32}],34:[function(require,module,exports){
+},{"./common":85,"./formats":86,"./valid-object":88}],90:[function(require,module,exports){
 'use strict';
 
 (function() {
@@ -4936,7 +12203,7 @@ module.exports = function(schema) {
   }
 }).call(Function('return this')()); // eslint-disable-line no-new-func
 
-},{}],35:[function(require,module,exports){
+},{}],91:[function(require,module,exports){
 var overArg = require('./_overArg');
 
 /** Built-in value references. */
@@ -4944,7 +12211,7 @@ var getPrototype = overArg(Object.getPrototypeOf, Object);
 
 module.exports = getPrototype;
 
-},{"./_overArg":37}],36:[function(require,module,exports){
+},{"./_overArg":93}],92:[function(require,module,exports){
 /**
  * Checks if `value` is a host object in IE < 9.
  *
@@ -4966,7 +12233,7 @@ function isHostObject(value) {
 
 module.exports = isHostObject;
 
-},{}],37:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 /**
  * Creates a unary function that invokes `func` with its argument transformed.
  *
@@ -4983,7 +12250,7 @@ function overArg(func, transform) {
 
 module.exports = overArg;
 
-},{}],38:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 /**
  * Checks if `value` is object-like. A value is object-like if it's not `null`
  * and has a `typeof` result of "object".
@@ -5014,7 +12281,7 @@ function isObjectLike(value) {
 
 module.exports = isObjectLike;
 
-},{}],39:[function(require,module,exports){
+},{}],95:[function(require,module,exports){
 var getPrototype = require('./_getPrototype'),
     isHostObject = require('./_isHostObject'),
     isObjectLike = require('./isObjectLike');
@@ -5086,134 +12353,7 @@ function isPlainObject(value) {
 
 module.exports = isPlainObject;
 
-},{"./_getPrototype":35,"./_isHostObject":36,"./isObjectLike":38}],40:[function(require,module,exports){
-/**
- * Helpers.
- */
-
-var s = 1000;
-var m = s * 60;
-var h = m * 60;
-var d = h * 24;
-var y = d * 365.25;
-
-/**
- * Parse or format the given `val`.
- *
- * Options:
- *
- *  - `long` verbose formatting [false]
- *
- * @param {String|Number} val
- * @param {Object} options
- * @return {String|Number}
- * @api public
- */
-
-module.exports = function(val, options){
-  options = options || {};
-  if ('string' == typeof val) return parse(val);
-  return options.long
-    ? long(val)
-    : short(val);
-};
-
-/**
- * Parse the given `str` and return milliseconds.
- *
- * @param {String} str
- * @return {Number}
- * @api private
- */
-
-function parse(str) {
-  str = '' + str;
-  if (str.length > 10000) return;
-  var match = /^((?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|years?|yrs?|y)?$/i.exec(str);
-  if (!match) return;
-  var n = parseFloat(match[1]);
-  var type = (match[2] || 'ms').toLowerCase();
-  switch (type) {
-    case 'years':
-    case 'year':
-    case 'yrs':
-    case 'yr':
-    case 'y':
-      return n * y;
-    case 'days':
-    case 'day':
-    case 'd':
-      return n * d;
-    case 'hours':
-    case 'hour':
-    case 'hrs':
-    case 'hr':
-    case 'h':
-      return n * h;
-    case 'minutes':
-    case 'minute':
-    case 'mins':
-    case 'min':
-    case 'm':
-      return n * m;
-    case 'seconds':
-    case 'second':
-    case 'secs':
-    case 'sec':
-    case 's':
-      return n * s;
-    case 'milliseconds':
-    case 'millisecond':
-    case 'msecs':
-    case 'msec':
-    case 'ms':
-      return n;
-  }
-}
-
-/**
- * Short format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
- */
-
-function short(ms) {
-  if (ms >= d) return Math.round(ms / d) + 'd';
-  if (ms >= h) return Math.round(ms / h) + 'h';
-  if (ms >= m) return Math.round(ms / m) + 'm';
-  if (ms >= s) return Math.round(ms / s) + 's';
-  return ms + 'ms';
-}
-
-/**
- * Long format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
- */
-
-function long(ms) {
-  return plural(ms, d, 'day')
-    || plural(ms, h, 'hour')
-    || plural(ms, m, 'minute')
-    || plural(ms, s, 'second')
-    || ms + ' ms';
-}
-
-/**
- * Pluralization helper.
- */
-
-function plural(ms, n, name) {
-  if (ms < n) return;
-  if (ms < n * 1.5) return Math.floor(ms / n) + ' ' + name;
-  return Math.ceil(ms / n) + ' ' + name + 's';
-}
-
-},{}],41:[function(require,module,exports){
+},{"./_getPrototype":91,"./_isHostObject":92,"./isObjectLike":94}],96:[function(require,module,exports){
 function isObject(o) { return typeof o === 'object'; }
 module.exports = function objk (fn, o0, argLength) {
   var res = []
@@ -5331,7 +12471,7 @@ module.exports = function objk (fn, o0, argLength) {
   return res
 }
 
-},{}],42:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 var opti = require('./10')
 
 module.exports = function forOf (fn, obj) {
@@ -5371,7 +12511,227 @@ module.exports = function forOf (fn, obj) {
   return opti(fn, obj, argLength)
 }
 
-},{"./10":41}],43:[function(require,module,exports){
+},{"./10":96}],98:[function(require,module,exports){
+(function (global){
+
+var rng;
+
+if (global.crypto && crypto.getRandomValues) {
+  // WHATWG crypto-based RNG - http://wiki.whatwg.org/wiki/Crypto
+  // Moderately fast, high quality
+  var _rnds8 = new Uint8Array(16);
+  rng = function whatwgRNG() {
+    crypto.getRandomValues(_rnds8);
+    return _rnds8;
+  };
+}
+
+if (!rng) {
+  // Math.random()-based (RNG)
+  //
+  // If all else fails, use Math.random().  It's fast, but is of unspecified
+  // quality.
+  var  _rnds = new Array(16);
+  rng = function() {
+    for (var i = 0, r; i < 16; i++) {
+      if ((i & 0x03) === 0) r = Math.random() * 0x100000000;
+      _rnds[i] = r >>> ((i & 0x03) << 3) & 0xff;
+    }
+
+    return _rnds;
+  };
+}
+
+module.exports = rng;
+
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],99:[function(require,module,exports){
+//     uuid.js
+//
+//     Copyright (c) 2010-2012 Robert Kieffer
+//     MIT License - http://opensource.org/licenses/mit-license.php
+
+// Unique ID creation requires a high quality random # generator.  We feature
+// detect to determine the best RNG source, normalizing to a function that
+// returns 128-bits of randomness, since that's what's usually required
+var _rng = require('./rng');
+
+// Maps for number <-> hex string conversion
+var _byteToHex = [];
+var _hexToByte = {};
+for (var i = 0; i < 256; i++) {
+  _byteToHex[i] = (i + 0x100).toString(16).substr(1);
+  _hexToByte[_byteToHex[i]] = i;
+}
+
+// **`parse()` - Parse a UUID into it's component bytes**
+function parse(s, buf, offset) {
+  var i = (buf && offset) || 0, ii = 0;
+
+  buf = buf || [];
+  s.toLowerCase().replace(/[0-9a-f]{2}/g, function(oct) {
+    if (ii < 16) { // Don't overflow!
+      buf[i + ii++] = _hexToByte[oct];
+    }
+  });
+
+  // Zero out remaining bytes if string was short
+  while (ii < 16) {
+    buf[i + ii++] = 0;
+  }
+
+  return buf;
+}
+
+// **`unparse()` - Convert UUID byte array (ala parse()) into a string**
+function unparse(buf, offset) {
+  var i = offset || 0, bth = _byteToHex;
+  return  bth[buf[i++]] + bth[buf[i++]] +
+          bth[buf[i++]] + bth[buf[i++]] + '-' +
+          bth[buf[i++]] + bth[buf[i++]] + '-' +
+          bth[buf[i++]] + bth[buf[i++]] + '-' +
+          bth[buf[i++]] + bth[buf[i++]] + '-' +
+          bth[buf[i++]] + bth[buf[i++]] +
+          bth[buf[i++]] + bth[buf[i++]] +
+          bth[buf[i++]] + bth[buf[i++]];
+}
+
+// **`v1()` - Generate time-based UUID**
+//
+// Inspired by https://github.com/LiosK/UUID.js
+// and http://docs.python.org/library/uuid.html
+
+// random #'s we need to init node and clockseq
+var _seedBytes = _rng();
+
+// Per 4.5, create and 48-bit node id, (47 random bits + multicast bit = 1)
+var _nodeId = [
+  _seedBytes[0] | 0x01,
+  _seedBytes[1], _seedBytes[2], _seedBytes[3], _seedBytes[4], _seedBytes[5]
+];
+
+// Per 4.2.2, randomize (14 bit) clockseq
+var _clockseq = (_seedBytes[6] << 8 | _seedBytes[7]) & 0x3fff;
+
+// Previous uuid creation time
+var _lastMSecs = 0, _lastNSecs = 0;
+
+// See https://github.com/broofa/node-uuid for API details
+function v1(options, buf, offset) {
+  var i = buf && offset || 0;
+  var b = buf || [];
+
+  options = options || {};
+
+  var clockseq = options.clockseq !== undefined ? options.clockseq : _clockseq;
+
+  // UUID timestamps are 100 nano-second units since the Gregorian epoch,
+  // (1582-10-15 00:00).  JSNumbers aren't precise enough for this, so
+  // time is handled internally as 'msecs' (integer milliseconds) and 'nsecs'
+  // (100-nanoseconds offset from msecs) since unix epoch, 1970-01-01 00:00.
+  var msecs = options.msecs !== undefined ? options.msecs : new Date().getTime();
+
+  // Per 4.2.1.2, use count of uuid's generated during the current clock
+  // cycle to simulate higher resolution clock
+  var nsecs = options.nsecs !== undefined ? options.nsecs : _lastNSecs + 1;
+
+  // Time since last uuid creation (in msecs)
+  var dt = (msecs - _lastMSecs) + (nsecs - _lastNSecs)/10000;
+
+  // Per 4.2.1.2, Bump clockseq on clock regression
+  if (dt < 0 && options.clockseq === undefined) {
+    clockseq = clockseq + 1 & 0x3fff;
+  }
+
+  // Reset nsecs if clock regresses (new clockseq) or we've moved onto a new
+  // time interval
+  if ((dt < 0 || msecs > _lastMSecs) && options.nsecs === undefined) {
+    nsecs = 0;
+  }
+
+  // Per 4.2.1.2 Throw error if too many uuids are requested
+  if (nsecs >= 10000) {
+    throw new Error('uuid.v1(): Can\'t create more than 10M uuids/sec');
+  }
+
+  _lastMSecs = msecs;
+  _lastNSecs = nsecs;
+  _clockseq = clockseq;
+
+  // Per 4.1.4 - Convert from unix epoch to Gregorian epoch
+  msecs += 12219292800000;
+
+  // `time_low`
+  var tl = ((msecs & 0xfffffff) * 10000 + nsecs) % 0x100000000;
+  b[i++] = tl >>> 24 & 0xff;
+  b[i++] = tl >>> 16 & 0xff;
+  b[i++] = tl >>> 8 & 0xff;
+  b[i++] = tl & 0xff;
+
+  // `time_mid`
+  var tmh = (msecs / 0x100000000 * 10000) & 0xfffffff;
+  b[i++] = tmh >>> 8 & 0xff;
+  b[i++] = tmh & 0xff;
+
+  // `time_high_and_version`
+  b[i++] = tmh >>> 24 & 0xf | 0x10; // include version
+  b[i++] = tmh >>> 16 & 0xff;
+
+  // `clock_seq_hi_and_reserved` (Per 4.2.2 - include variant)
+  b[i++] = clockseq >>> 8 | 0x80;
+
+  // `clock_seq_low`
+  b[i++] = clockseq & 0xff;
+
+  // `node`
+  var node = options.node || _nodeId;
+  for (var n = 0; n < 6; n++) {
+    b[i + n] = node[n];
+  }
+
+  return buf ? buf : unparse(b);
+}
+
+// **`v4()` - Generate random UUID**
+
+// See https://github.com/broofa/node-uuid for API details
+function v4(options, buf, offset) {
+  // Deprecated - 'format' argument, as supported in v1.2
+  var i = buf && offset || 0;
+
+  if (typeof(options) == 'string') {
+    buf = options == 'binary' ? new Array(16) : null;
+    options = null;
+  }
+  options = options || {};
+
+  var rnds = options.random || (options.rng || _rng)();
+
+  // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
+  rnds[6] = (rnds[6] & 0x0f) | 0x40;
+  rnds[8] = (rnds[8] & 0x3f) | 0x80;
+
+  // Copy bytes to buffer, if provided
+  if (buf) {
+    for (var ii = 0; ii < 16; ii++) {
+      buf[i + ii] = rnds[ii];
+    }
+  }
+
+  return buf || unparse(rnds);
+}
+
+// Export public API
+var uuid = v4;
+uuid.v1 = v1;
+uuid.v4 = v4;
+uuid.parse = parse;
+uuid.unparse = unparse;
+
+module.exports = uuid;
+
+},{"./rng":98}],100:[function(require,module,exports){
 module.exports={
   "type": "object",
   "title": "Chiχ Link",
@@ -5442,7 +12802,7 @@ module.exports={
   "additionalProperties": false
 }
 
-},{}],44:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 module.exports={
   "type":"object",
   "title":"Chiχ Map",
@@ -5597,7 +12957,7 @@ module.exports={
   "additionalProperties": false
 }
 
-},{}],45:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 module.exports={
   "type":"object",
   "title":"Chiχ Nodes",
@@ -5686,10 +13046,106 @@ module.exports={
   "additionalProperties": false
 }
 
-},{}],46:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
+module.exports={
+  "type":"object",
+  "title":"Chiχ Stage",
+  "properties":{
+    "id": {
+      "type":"string",
+      "required": false
+    },
+    "env": {
+      "type":"string",
+      "required": false
+    },
+    "title": {
+      "type":"string",
+      "required": true
+    },
+    "description": {
+      "type":"string",
+      "required": true
+    },
+    "actors": {
+      "type":"array",
+      "title":"Actors",
+      "required": true,
+      "items": {
+        "type": "object",
+        "title": "Actor",
+        "properties":{
+          "id": {
+            "type":"string",
+            "required": true
+          },
+          "ns": {
+            "type":"string",
+            "required": true
+          },
+          "name": {
+            "type":"string",
+            "required": true
+          },
+          "version": {
+            "type":"string",
+            "required": false
+          },
+          "context": {
+            "type":"object",
+            "required": false
+          }
+        }
+      }
+    },
+    "links": {
+      "type":"array",
+      "title":"Links",
+      "required": true,
+      "items": {
+        "type": "object",
+        "title": "Link",
+        "properties":{
+          "id": {
+            "type":"string",
+            "required": false
+          },
+          "source": {
+            "type":"string",
+            "required": true
+          },
+          "target": {
+            "type":"string",
+            "required": true
+          },
+          "out": {
+            "type":"string",
+            "required": false
+          },
+          "in": {
+            "type":"string",
+            "required": false
+          },
+          "settings": {
+            "persist": {
+              "type":"boolean",
+              "required": false
+            },
+            "cyclic": {
+              "type":"boolean",
+              "required": false
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+},{}],104:[function(require,module,exports){
 module.exports = require('./build/ReactNode').default
 
-},{"./build/ReactNode":47}],47:[function(require,module,exports){
+},{"./build/ReactNode":105}],105:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -5965,7 +13421,7 @@ var ReactNode = function (_XNode) {
 }(_BaseNode2.default);
 
 exports.default = ReactNode;
-},{"./loadComponent":48,"chix-flow/lib/BaseNode":1,"chix-flow/lib/packet":19,"debug":49,"events":86,"object-forof":59,"react":85}],48:[function(require,module,exports){
+},{"./loadComponent":106,"chix-flow/lib/BaseNode":1,"chix-flow/lib/packet":66,"debug":"debug","events":141,"object-forof":114,"react":140}],106:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -5993,11 +13449,7 @@ function loadComponent(node) {
 
   throw Error('A ReactNode must require only one component');
 }
-},{}],49:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"./debug":50,"dup":26}],50:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27,"ms":57}],51:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 "use strict";
 
 /**
@@ -6036,7 +13488,7 @@ emptyFunction.thatReturnsArgument = function (arg) {
 };
 
 module.exports = emptyFunction;
-},{}],52:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 (function (process){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
@@ -6058,7 +13510,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = emptyObject;
 }).call(this,require('_process'))
-},{"_process":88}],53:[function(require,module,exports){
+},{"_process":143}],109:[function(require,module,exports){
 (function (process){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
@@ -6110,7 +13562,7 @@ function invariant(condition, format, a, b, c, d, e, f) {
 
 module.exports = invariant;
 }).call(this,require('_process'))
-},{"_process":88}],54:[function(require,module,exports){
+},{"_process":143}],110:[function(require,module,exports){
 (function (process){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
@@ -6160,7 +13612,7 @@ var keyMirror = function keyMirror(obj) {
 
 module.exports = keyMirror;
 }).call(this,require('_process'))
-},{"./invariant":53,"_process":88}],55:[function(require,module,exports){
+},{"./invariant":109,"_process":143}],111:[function(require,module,exports){
 "use strict";
 
 /**
@@ -6195,7 +13647,7 @@ var keyOf = function keyOf(oneKeyObj) {
 };
 
 module.exports = keyOf;
-},{}],56:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-2015, Facebook, Inc.
@@ -6264,13 +13716,11 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = warning;
 }).call(this,require('_process'))
-},{"./emptyFunction":51,"_process":88}],57:[function(require,module,exports){
-arguments[4][40][0].apply(exports,arguments)
-},{"dup":40}],58:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41}],59:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"./10":58,"dup":42}],60:[function(require,module,exports){
+},{"./emptyFunction":107,"_process":143}],113:[function(require,module,exports){
+arguments[4][96][0].apply(exports,arguments)
+},{"dup":96}],114:[function(require,module,exports){
+arguments[4][97][0].apply(exports,arguments)
+},{"./10":113,"dup":97}],115:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -6330,7 +13780,7 @@ var KeyEscapeUtils = {
 };
 
 module.exports = KeyEscapeUtils;
-},{}],61:[function(require,module,exports){
+},{}],116:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -6454,7 +13904,7 @@ var PooledClass = {
 
 module.exports = PooledClass;
 }).call(this,require('_process'))
-},{"./reactProdInvariant":82,"_process":88,"fbjs/lib/invariant":53}],62:[function(require,module,exports){
+},{"./reactProdInvariant":137,"_process":143,"fbjs/lib/invariant":109}],117:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -6546,7 +13996,7 @@ var React = {
 
 module.exports = React;
 }).call(this,require('_process'))
-},{"./ReactChildren":63,"./ReactClass":64,"./ReactComponent":65,"./ReactDOMFactories":68,"./ReactElement":69,"./ReactElementValidator":70,"./ReactPropTypes":74,"./ReactPureComponent":76,"./ReactVersion":77,"./onlyChild":81,"_process":88,"fbjs/lib/warning":56,"object-assign":84}],63:[function(require,module,exports){
+},{"./ReactChildren":118,"./ReactClass":119,"./ReactComponent":120,"./ReactDOMFactories":123,"./ReactElement":124,"./ReactElementValidator":125,"./ReactPropTypes":129,"./ReactPureComponent":131,"./ReactVersion":132,"./onlyChild":136,"_process":143,"fbjs/lib/warning":112,"object-assign":139}],118:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -6738,7 +14188,7 @@ var ReactChildren = {
 };
 
 module.exports = ReactChildren;
-},{"./PooledClass":61,"./ReactElement":69,"./traverseAllChildren":83,"fbjs/lib/emptyFunction":51}],64:[function(require,module,exports){
+},{"./PooledClass":116,"./ReactElement":124,"./traverseAllChildren":138,"fbjs/lib/emptyFunction":107}],119:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -7473,7 +14923,7 @@ var ReactClass = {
 
 module.exports = ReactClass;
 }).call(this,require('_process'))
-},{"./ReactComponent":65,"./ReactElement":69,"./ReactNoopUpdateQueue":71,"./ReactPropTypeLocationNames":72,"./ReactPropTypeLocations":73,"./reactProdInvariant":82,"_process":88,"fbjs/lib/emptyObject":52,"fbjs/lib/invariant":53,"fbjs/lib/keyMirror":54,"fbjs/lib/keyOf":55,"fbjs/lib/warning":56,"object-assign":84}],65:[function(require,module,exports){
+},{"./ReactComponent":120,"./ReactElement":124,"./ReactNoopUpdateQueue":126,"./ReactPropTypeLocationNames":127,"./ReactPropTypeLocations":128,"./reactProdInvariant":137,"_process":143,"fbjs/lib/emptyObject":108,"fbjs/lib/invariant":109,"fbjs/lib/keyMirror":110,"fbjs/lib/keyOf":111,"fbjs/lib/warning":112,"object-assign":139}],120:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -7594,7 +15044,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = ReactComponent;
 }).call(this,require('_process'))
-},{"./ReactNoopUpdateQueue":71,"./canDefineProperty":78,"./reactProdInvariant":82,"_process":88,"fbjs/lib/emptyObject":52,"fbjs/lib/invariant":53,"fbjs/lib/warning":56}],66:[function(require,module,exports){
+},{"./ReactNoopUpdateQueue":126,"./canDefineProperty":133,"./reactProdInvariant":137,"_process":143,"fbjs/lib/emptyObject":108,"fbjs/lib/invariant":109,"fbjs/lib/warning":112}],121:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2016-present, Facebook, Inc.
@@ -7939,7 +15389,7 @@ var ReactComponentTreeHook = {
 
 module.exports = ReactComponentTreeHook;
 }).call(this,require('_process'))
-},{"./ReactCurrentOwner":67,"./reactProdInvariant":82,"_process":88,"fbjs/lib/invariant":53,"fbjs/lib/warning":56}],67:[function(require,module,exports){
+},{"./ReactCurrentOwner":122,"./reactProdInvariant":137,"_process":143,"fbjs/lib/invariant":109,"fbjs/lib/warning":112}],122:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -7971,7 +15421,7 @@ var ReactCurrentOwner = {
 };
 
 module.exports = ReactCurrentOwner;
-},{}],68:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -8144,7 +15594,7 @@ var ReactDOMFactories = {
 
 module.exports = ReactDOMFactories;
 }).call(this,require('_process'))
-},{"./ReactElement":69,"./ReactElementValidator":70,"_process":88}],69:[function(require,module,exports){
+},{"./ReactElement":124,"./ReactElementValidator":125,"_process":143}],124:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-present, Facebook, Inc.
@@ -8511,7 +15961,7 @@ ReactElement.REACT_ELEMENT_TYPE = REACT_ELEMENT_TYPE;
 
 module.exports = ReactElement;
 }).call(this,require('_process'))
-},{"./ReactCurrentOwner":67,"./canDefineProperty":78,"_process":88,"fbjs/lib/warning":56,"object-assign":84}],70:[function(require,module,exports){
+},{"./ReactCurrentOwner":122,"./canDefineProperty":133,"_process":143,"fbjs/lib/warning":112,"object-assign":139}],125:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-present, Facebook, Inc.
@@ -8742,7 +16192,7 @@ var ReactElementValidator = {
 
 module.exports = ReactElementValidator;
 }).call(this,require('_process'))
-},{"./ReactComponentTreeHook":66,"./ReactCurrentOwner":67,"./ReactElement":69,"./ReactPropTypeLocations":73,"./canDefineProperty":78,"./checkReactTypeSpec":79,"./getIteratorFn":80,"_process":88,"fbjs/lib/warning":56}],71:[function(require,module,exports){
+},{"./ReactComponentTreeHook":121,"./ReactCurrentOwner":122,"./ReactElement":124,"./ReactPropTypeLocations":128,"./canDefineProperty":133,"./checkReactTypeSpec":134,"./getIteratorFn":135,"_process":143,"fbjs/lib/warning":112}],126:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2015-present, Facebook, Inc.
@@ -8841,7 +16291,7 @@ var ReactNoopUpdateQueue = {
 
 module.exports = ReactNoopUpdateQueue;
 }).call(this,require('_process'))
-},{"_process":88,"fbjs/lib/warning":56}],72:[function(require,module,exports){
+},{"_process":143,"fbjs/lib/warning":112}],127:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -8868,7 +16318,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = ReactPropTypeLocationNames;
 }).call(this,require('_process'))
-},{"_process":88}],73:[function(require,module,exports){
+},{"_process":143}],128:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -8891,7 +16341,7 @@ var ReactPropTypeLocations = keyMirror({
 });
 
 module.exports = ReactPropTypeLocations;
-},{"fbjs/lib/keyMirror":54}],74:[function(require,module,exports){
+},{"fbjs/lib/keyMirror":110}],129:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -9325,7 +16775,7 @@ function getClassName(propValue) {
 
 module.exports = ReactPropTypes;
 }).call(this,require('_process'))
-},{"./ReactElement":69,"./ReactPropTypeLocationNames":72,"./ReactPropTypesSecret":75,"./getIteratorFn":80,"_process":88,"fbjs/lib/emptyFunction":51,"fbjs/lib/warning":56}],75:[function(require,module,exports){
+},{"./ReactElement":124,"./ReactPropTypeLocationNames":127,"./ReactPropTypesSecret":130,"./getIteratorFn":135,"_process":143,"fbjs/lib/emptyFunction":107,"fbjs/lib/warning":112}],130:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -9342,7 +16792,7 @@ module.exports = ReactPropTypes;
 var ReactPropTypesSecret = 'SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED';
 
 module.exports = ReactPropTypesSecret;
-},{}],76:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -9385,7 +16835,7 @@ _assign(ReactPureComponent.prototype, ReactComponent.prototype);
 ReactPureComponent.prototype.isPureReactComponent = true;
 
 module.exports = ReactPureComponent;
-},{"./ReactComponent":65,"./ReactNoopUpdateQueue":71,"fbjs/lib/emptyObject":52,"object-assign":84}],77:[function(require,module,exports){
+},{"./ReactComponent":120,"./ReactNoopUpdateQueue":126,"fbjs/lib/emptyObject":108,"object-assign":139}],132:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -9400,7 +16850,7 @@ module.exports = ReactPureComponent;
 'use strict';
 
 module.exports = '15.3.1';
-},{}],78:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -9427,7 +16877,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 module.exports = canDefineProperty;
 }).call(this,require('_process'))
-},{"_process":88}],79:[function(require,module,exports){
+},{"_process":143}],134:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -9517,7 +16967,7 @@ function checkReactTypeSpec(typeSpecs, values, location, componentName, element,
 
 module.exports = checkReactTypeSpec;
 }).call(this,require('_process'))
-},{"./ReactComponentTreeHook":66,"./ReactPropTypeLocationNames":72,"./ReactPropTypesSecret":75,"./reactProdInvariant":82,"_process":88,"fbjs/lib/invariant":53,"fbjs/lib/warning":56}],80:[function(require,module,exports){
+},{"./ReactComponentTreeHook":121,"./ReactPropTypeLocationNames":127,"./ReactPropTypesSecret":130,"./reactProdInvariant":137,"_process":143,"fbjs/lib/invariant":109,"fbjs/lib/warning":112}],135:[function(require,module,exports){
 /**
  * Copyright 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -9559,7 +17009,7 @@ function getIteratorFn(maybeIterable) {
 }
 
 module.exports = getIteratorFn;
-},{}],81:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -9600,7 +17050,7 @@ function onlyChild(children) {
 
 module.exports = onlyChild;
 }).call(this,require('_process'))
-},{"./ReactElement":69,"./reactProdInvariant":82,"_process":88,"fbjs/lib/invariant":53}],82:[function(require,module,exports){
+},{"./ReactElement":124,"./reactProdInvariant":137,"_process":143,"fbjs/lib/invariant":109}],137:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -9640,7 +17090,7 @@ function reactProdInvariant(code) {
 }
 
 module.exports = reactProdInvariant;
-},{}],83:[function(require,module,exports){
+},{}],138:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-present, Facebook, Inc.
@@ -9810,7 +17260,7 @@ function traverseAllChildren(children, callback, traverseContext) {
 
 module.exports = traverseAllChildren;
 }).call(this,require('_process'))
-},{"./KeyEscapeUtils":60,"./ReactCurrentOwner":67,"./ReactElement":69,"./getIteratorFn":80,"./reactProdInvariant":82,"_process":88,"fbjs/lib/invariant":53,"fbjs/lib/warning":56}],84:[function(require,module,exports){
+},{"./KeyEscapeUtils":115,"./ReactCurrentOwner":122,"./ReactElement":124,"./getIteratorFn":135,"./reactProdInvariant":137,"_process":143,"fbjs/lib/invariant":109,"fbjs/lib/warning":112}],139:[function(require,module,exports){
 'use strict';
 /* eslint-disable no-unused-vars */
 var hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -9895,12 +17345,12 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 	return to;
 };
 
-},{}],85:[function(require,module,exports){
+},{}],140:[function(require,module,exports){
 'use strict';
 
 module.exports = require('./lib/React');
 
-},{"./lib/React":62}],86:[function(require,module,exports){
+},{"./lib/React":117}],141:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10204,7 +17654,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],87:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -10432,7 +17882,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":88}],88:[function(require,module,exports){
+},{"_process":143}],143:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -10614,7 +18064,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],89:[function(require,module,exports){
+},{}],144:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -10639,14 +18089,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],90:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],91:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -11236,7911 +18686,384 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":90,"_process":88,"inherits":89}],92:[function(require,module,exports){
-arguments[4][1][0].apply(exports,arguments)
-},{"./common/parent":104,"./common/status":105,"./mixin":135,"./node/base/context":137,"./node/base/control":138,"./node/base/error":139,"./node/base/event":140,"./node/base/export":141,"./node/base/isStartable":142,"./node/base/meta":143,"./node/base/ports":144,"./node/base/process":145,"./node/base/report":146,"./node/base/toJSON":147,"dup":1,"events":86}],93:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var uuid = require('uuid').v4;
-var IoHandler = require('./io/handler');
-var ProcessManager = require('./process/manager');
-var DefaultContextProvider = require('./context/defaultProvider');
-var Loader = require('chix-loader');
-var EventEmitter = require('events');
-
-var mixin = require('./mixin');
-var $Control = require('./actor/control');
-var $IIP = require('./actor/iip');
-var $Link = require('./actor/link');
-var $Node = require('./actor/node');
-var $Map = require('./actor/map');
-var $Meta = require('./actor/meta');
-var $Parent = require('./common/parent');
-var $Port = require('./actor/port');
-var $Process = require('./actor/process');
-var $Report = require('./actor/report');
-// const $Action = require('./actor/action')
-
-/**
- *
- * Actor
- *
- * The Actor is responsible of managing a flow
- * it links and it's nodes.
- *
- * A node contains the actual programming logic.
- *
- * @public
- * @author Rob Halff <rob.halff@gmail.com>
- * @constructor
- */
-
-var Actor = function (_EventEmitter) {
-  _inherits(Actor, _EventEmitter);
-
-  function Actor() {
-    _classCallCheck(this, Actor);
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Actor).call(this));
-
-    _this.ioHandler = undefined;
-    _this.processManager = undefined;
-    _this.view = [];
-    _this.identifier = 'actor:main';
-
-    // default to own id, map can overwrite
-    _this.id = uuid();
-
-    _this.type = 'flow';
-
-    _this.links = new Map();
-    _this.iips = new Map();
-    _this.status = undefined;
-    _this.nodes = new Map();
-
-    /**
-     *
-     * Added by default.
-     *
-     * If others need to be used they should be set before addMap()
-     *
-     */
-    _this.setIoHandler(new IoHandler());
-    _this.setProcessManager(new ProcessManager());
-    _this.setLoader(new Loader());
-    _this.addContextProvider(new DefaultContextProvider());
-    return _this;
-  }
-
-  /**
-   *
-   * Create an actor
-   *
-   * @public
-   */
-
-
-  _createClass(Actor, [{
-    key: 'addLoader',
-
-
-    /**
-     *
-     * Adds the definition Loader
-     *
-     * This provides an api to get the required node definitions.
-     *
-     * The loader should already be init'ed
-     *
-     * e.g. the remote loader will already have loaded the definitions.
-     * and is ready to respond to getNodeDefinition(ns, name, type, provider)
-     *
-     * e.g. An async loader could do something like this:
-     *
-     *   loader(flow, function() { actor.addLoader(loader); }
-     *
-     * With a sync loader it will just look like:
-     *
-     * actor.addLoader(loader)
-     *
-     * @public
-     */
-    value: function addLoader(loader) {
-      this.loader = loader;
-      return this;
-    }
-
-    /**
-     *
-     * Add IO Handler.
-     *
-     * The IO Handler handles all the input and output.
-     *
-     * @param {IOHandler} handler
-     * @public
-     *
-     */
-
-  }, {
-    key: 'addIoHandler',
-    value: function addIoHandler(handler) {
-      this.ioHandler = handler;
-
-      return this;
-    }
-
-    /**
-     *
-     * Add Process Manager.
-     *
-     * The Process Manager holds all processes.
-     *
-     * @param {Object} manager
-     * @public
-     *
-     */
-
-  }, {
-    key: 'addProcessManager',
-    value: function addProcessManager(manager) {
-      this.processManager = manager;
-
-      return this;
-    }
-
-    /**
-     *
-     * Add a new context provider.
-     *
-     * A context provider pre-processes the raw context
-     *
-     * This is useful for example when using the command line.
-     * All nodes which do not have context set can be asked for context.
-     *
-     * E.g. database credentials could be prompted for after which all
-     *      input is fullfilled and the flow will start to run.
-     *
-     * @param {ContextProvider} provider
-     * @private
-     *
-     */
-
-  }, {
-    key: 'addContextProvider',
-    value: function addContextProvider(provider) {
-      this.contextProvider = provider;
-
-      return this;
-    }
-  }], [{
-    key: 'create',
-    value: function create(map, loader, ioHandler, processManager) {
-      var actor = new Actor();
-      loader = loader || new Loader();
-      processManager = processManager || new ProcessManager();
-      ioHandler = ioHandler || new IoHandler();
-      actor.addLoader(loader);
-      actor.addIoHandler(ioHandler);
-      actor.addProcessManager(processManager);
-      actor.addMap(map);
-
-      return actor;
-    }
-  }]);
-
-  return Actor;
-}(EventEmitter);
-
-Actor.prototype.setLoader = Actor.prototype.addLoader;
-Actor.prototype.setContextProvider = Actor.prototype.addContextProvider;
-Actor.prototype.setIoHandler = Actor.prototype.addIoHandler;
-Actor.prototype.setProcessManager = Actor.prototype.addProcessManager;
-
-mixin(Actor, $Control, $IIP, $Link, $Map, $Meta, $Node, $Parent, $Port, $Process, $Report
-// $Action
-);
-module.exports = Actor;
-},{"./actor/control":94,"./actor/iip":95,"./actor/link":96,"./actor/map":97,"./actor/meta":98,"./actor/node":99,"./actor/port":100,"./actor/process":101,"./actor/report":102,"./common/parent":104,"./context/defaultProvider":107,"./io/handler":129,"./mixin":135,"./process/manager":167,"chix-loader":177,"events":86,"uuid":429}],94:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Status = require('./status');
-var debug = require('debug')('chix:actor');
-var Connector = require('../connector');
-var Run = require('../run');
-var Events = require('../events/flow');
-
-var Control = function () {
-  function Control() {
-    _classCallCheck(this, Control);
-  }
-
-  _createClass(Control, [{
-    key: 'hold',
-
-    /**
-     *
-     * Holds a Node
-     *
-     * @param {String} id
-     * @public
-     */
-    value: function hold(id) {
-      this.getNode(id).hold();
-
-      return this;
-    }
-
-    /**
-     *
-     * Pushes the Actor
-     *
-     * Will send :start to all nodes without input
-     * and all nodes which have all their input ports
-     * filled by context already.
-     *
-     * @public
-     */
-
-  }, {
-    key: 'push',
-    value: function push() {
-      if (this.status !== 'created') {
-        throw Error('To push actor must be in created state, current status ' + this.status);
-      }
-      this.setStatus(Status.RUNNING);
-      debug('%s: push()', this.identifier);
-
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
-
-      try {
-        for (var _iterator = this.nodes.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var node = _step.value;
-
-          if (node.isStartable()) {
-            var iip = new Connector();
-            iip.plug(node.id, ':start');
-            this.sendIIP(iip, '');
-          }
-        }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
-      }
-
-      this.setStatus('running');
-
-      return this;
-    }
-
-    /**
-     *
-     * Starts the actor
-     *
-     * @param {Boolean} push
-     * @fires Flow#start
-     * @public
-     */
-
-  }, {
-    key: 'start',
-    value: function start(push) {
-      // this.status = Status.RUNNING
-      if (['created', 'running', 'stopped'].indexOf(this.status) >= 0) {
-        this.setStatus('created');
-        debug('%s: start', this.identifier);
-
-        // this.sendIIPsOutstanding()
-        // this.clearIIPs()
-
-        var _iteratorNormalCompletion2 = true;
-        var _didIteratorError2 = false;
-        var _iteratorError2 = undefined;
-
-        try {
-          for (var _iterator2 = this.nodes.values()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-            var node = _step2.value;
-
-            // skip normal nodes now, because they auto start
-            // flows, do need to start here
-            if (node.type !== 'node') {
-              node.start();
-            } else {
-              // manually evaluate node
-              // TODO: get this right once and for all.
-              // this also removes the need for attaching to the start ports.
-              // :start port is just optional, it's actually synoniem to 'wait until you're told you're ready'
-              if (true || push) {
-                node.onPortFill();
-                this.setStatus(Status.RUNNING);
-              }
-            }
-          }
-        } catch (err) {
-          _didIteratorError2 = true;
-          _iteratorError2 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion2 && _iterator2.return) {
-              _iterator2.return();
-            }
-          } finally {
-            if (_didIteratorError2) {
-              throw _iteratorError2;
-            }
-          }
-        }
-
-        if (push !== false) {
-          // this.push()
-        } else {
-          this.setStatus('started');
-        }
-
-        this.event(Events.START, {
-          node: this
-        });
-
-        return this;
-      }
-
-      throw Error('To start actor must be in created state, current status: ' + this.status);
-    }
-
-    /**
-     *
-     * Stops the actor
-     *
-     * Use a callback to make sure it is stopped.
-     *
-     * Will set the status to `stopped`
-     *
-     * Any outstanding IIPs will be cleared.
-     *
-     * Emits the `stop` event when done.
-     *
-     * @param {Function} cb - Callback
-     * @fires Flow#stop
-     * @public
-     */
-
-  }, {
-    key: 'stop',
-    value: function stop(cb) {
-      var self = this;
-
-      this.status = Status.STOPPED;
-
-      if (this.ioHandler) {
-        this.ioHandler.reset(function resetCallbackIoHandler() {
-          // close ports opened by iips
-          self.clearIIPs();
-
-          self.event(Events.STOP, {
-            node: self
-          });
-
-          if (cb) {
-            cb();
-          }
-
-          // hack, remove it all together possibly
-          self.ioHandler._shutdown = false;
-        });
-      } else {
-        if (cb) {
-          cb();
-        }
-      }
-    }
-
-    /**
-     * Will pause the actor
-     *
-     * Will set status to `stopped`(?)
-     *
-     * And will hold() all nodes.
-     *
-     * Graphs in their turn will put all their nodes on hold()
-     *
-     * @returns {Control}
-     */
-
-  }, {
-    key: 'pause',
-    value: function pause() {
-      this.status = Status.STOPPED;
-
-      var _iteratorNormalCompletion3 = true;
-      var _didIteratorError3 = false;
-      var _iteratorError3 = undefined;
-
-      try {
-        for (var _iterator3 = this.nodes.values()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-          var node = _step3.value;
-
-          node.hold();
-        }
-      } catch (err) {
-        _didIteratorError3 = true;
-        _iteratorError3 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion3 && _iterator3.return) {
-            _iterator3.return();
-          }
-        } finally {
-          if (_didIteratorError3) {
-            throw _iteratorError3;
-          }
-        }
-      }
-
-      return this;
-    }
-
-    /**
-     *
-     * Resumes the actor
-     *
-     * Will set it's own status to `running`
-     *
-     * All nodes which are on hold will resume again.
-     *
-     * @public
-     */
-
-  }, {
-    key: 'resume',
-    value: function resume() {
-      this.status = Status.RUNNING;
-
-      var _iteratorNormalCompletion4 = true;
-      var _didIteratorError4 = false;
-      var _iteratorError4 = undefined;
-
-      try {
-        for (var _iterator4 = this.nodes.values()[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-          var node = _step4.value;
-
-          node.release();
-        }
-      } catch (err) {
-        _didIteratorError4 = true;
-        _iteratorError4 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion4 && _iterator4.return) {
-            _iterator4.return();
-          }
-        } finally {
-          if (_didIteratorError4) {
-            throw _iteratorError4;
-          }
-        }
-      }
-
-      return this;
-    }
-
-    /**
-     *
-     * Get the current status
-     *
-     * @public
-     */
-
-  }, {
-    key: 'getStatus',
-    value: function getStatus() {
-      return this.status;
-    }
-
-    /**
-     *
-     * Releases a node if it was on hold
-     *
-     * @param {String} id - Id of node to release
-     * @public
-     */
-
-  }, {
-    key: 'release',
-    value: function release(id) {
-      return this.getNode(id).release();
-    }
-
-    /**
-     *
-     * Resets this instance so it can be re-used
-     *
-     * Will call reset() on all nodes
-     *
-     * Graphs in their turn will reset() all their nodes
-     *
-     * Note: The registered loader is left untouched.
-     *
-     * @public
-     */
-
-  }, {
-    key: 'reset',
-    value: function reset() {
-      var _iteratorNormalCompletion5 = true;
-      var _didIteratorError5 = false;
-      var _iteratorError5 = undefined;
-
-      try {
-        for (var _iterator5 = this.nodes.values()[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-          var node = _step5.value;
-
-          node.reset();
-        }
-
-        // if nothing has started yet
-        // there is no ioHandler
-      } catch (err) {
-        _didIteratorError5 = true;
-        _iteratorError5 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion5 && _iterator5.return) {
-            _iterator5.return();
-          }
-        } finally {
-          if (_didIteratorError5) {
-            throw _iteratorError5;
-          }
-        }
-      }
-
-      if (this.ioHandler) {
-        this.ioHandler.reset();
-      }
-
-      return this;
-    }
-
-    /**
-     * Clears this graph from it's nodes
-     *
-     * Use the callback function to ensure all nodes are removed
-     *
-     * @param {Function} cb - Callback
-     */
-
-  }, {
-    key: 'clear',
-    value: function clear(cb) {
-      if (!cb) {
-        throw Error('clear expects a callback');
-      }
-
-      var self = this;
-      var cnt = 0;
-      var total = this.nodes.size;
-
-      function removeNodeHandler() {
-        cnt++;
-        if (cnt === total) {
-          self.nodes = new Map();
-          cb();
-        }
-      }
-
-      if (total === 0) {
-        cb();
-      } else {
-        // remove node will automatically remove all links
-        var _iteratorNormalCompletion6 = true;
-        var _didIteratorError6 = false;
-        var _iteratorError6 = undefined;
-
-        try {
-          for (var _iterator6 = this.nodes.values()[Symbol.iterator](), _step6; !(_iteratorNormalCompletion6 = (_step6 = _iterator6.next()).done); _iteratorNormalCompletion6 = true) {
-            var node = _step6.value;
-
-            // will remove links also.
-            this.removeNode(node.id, removeNodeHandler);
-          }
-        } catch (err) {
-          _didIteratorError6 = true;
-          _iteratorError6 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion6 && _iterator6.return) {
-              _iterator6.return();
-            }
-          } finally {
-            if (_didIteratorError6) {
-              throw _iteratorError6;
-            }
-          }
-        }
-      }
-    }
-
-    /**
-     *
-     * Run the current flow
-     *
-     * The flow starts by providing the ports with their context.
-     *
-     * Nodes which have all their ports filled by context will run immediatly.
-     *
-     * Others will wait until their unfilled ports are filled by connections.
-     *
-     * If a port is not required and context was given and there are
-     * no connections on it, it will not block the node from running.
-     *
-     * If a map has actions defined, run expects an action name to run.
-     *
-     * Combinations:
-     *
-     *   - run()
-     *     run flow without callback
-     *
-     *   - run(callback)
-     *     run with callback
-     *
-     *   - action('actionName').run()
-     *     run action without callback
-     *
-     *   - action('actionName').run(callback)
-     *     run action with callback
-     *
-     * The callback will receive the output of the (last) node(s)
-     * Determined by which output ports are exposed.
-     *
-     * If we pass the exposed output, it can contain output from anywhere.
-     *
-     * If a callback is defined but there are no exposed output ports.
-     * The callback will never fire.
-     *
-     * @public
-     */
-
-  }, {
-    key: 'run',
-    value: function run(callback) {
-      return new Run(this, callback);
-    }
-  }]);
-
-  return Control;
-}();
-
-module.exports = Control;
-},{"../connector":106,"../events/flow":109,"../run":168,"./status":103,"debug":178}],95:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Packet = require('../packet');
-var Connector = require('../connector');
-var Link = require('../link');
-var forOf = require('object-forof');
-var Events = require('../events/flow');
-
-var IIP = function () {
-  function IIP() {
-    _classCallCheck(this, IIP);
-  }
-
-  _createClass(IIP, [{
-    key: 'createIIP',
-
-    /**
-     *
-     * Create an IIP
-     *
-     * Optionally with `options` for the port:
-     *
-     * e.g. { persist: true }
-     *
-     * Optionally with `source` information
-     *
-     * e.g. { index: 1 } // index for array port
-     *
-     * @param {Object} iip
-     * @fires Flow#addIIP
-     * @returns {xLink}
-     */
-    value: function createIIP(iip) {
-      var xLink = Link.create({
-        source: {
-          id: this.id, // we are the sender
-          port: ':iip'
-        },
-        target: iip.target
-      });
-
-      xLink.set('dispose', true);
-
-      if (iip.data === undefined) {
-        throw Error('IIP data is `undefined`');
-      }
-
-      xLink.data = iip.data;
-
-      this.event(Events.ADDIIP, xLink.toJSON());
-
-      return xLink;
-    }
-
-    /**
-     * Connect an IIP
-     *
-     * @param {Object|Link} iip
-     * @returns {*}
-     */
-
-  }, {
-    key: 'connectIIP',
-    value: function connectIIP(iip) {
-      if (iip.target.constructor.name !== 'Connector') {
-        (function () {
-          var target = new Connector();
-          target.plug(iip.target.id, iip.target.port);
-          forOf(function (key, setting) {
-            return target.set(key, setting);
-          }, iip.target.setting);
-          iip.target = target;
-        })();
-      }
-
-      // TODO: iip should contain their own unique id
-      if (!this.id) {
-        throw Error('Actor must contain an id');
-      }
-
-      return this.addLink(iip);
-    }
-
-    /**
-     *
-     * Send IIPs
-     *
-     * Creates, connects and sends an IIPs
-     *
-     * @param {Object} iips
-     * @public
-     */
-
-  }, {
-    key: 'sendIIPs',
-    value: function sendIIPs(iips) {
-      var links = iips.map(this.createIIP.bind(this)).map(this.connectIIP.bind(this)).map(this.__sendIIP.bind(this));
-
-      return links;
-    }
-
-    /**
-     *
-     * Send IIPs present in this.iips
-     *
-     * Used by the runtime, which first adds them
-     * next when the graph is started they will be used.
-     *
-     * @private
-     */
-
-  }, {
-    key: 'sendIIPsOutstanding',
-    value: function sendIIPsOutstanding() {
-      for (var iip in this.iips.values()) {
-        this.__sendIIP(iip);
-      }
-    }
-
-    /*
-     * Send a single IIP to a port.
-     *
-     * Note: If multiple IIPs have to be send use sendIIPs instead.
-     *
-     * Source is mainly for testing, but essentially it allows you
-     * to imposter a sender as long as you send along the right
-     * id and source port name.
-     *
-     * Source is also used to set an index[] for array ports.
-     * However, if you send multiple iips for an array port
-     * they should be send as a group using sendIIPs
-     *
-     * This is because they should be added in reverse order.
-     * Otherwise the process will start too early.
-     *
-     * @param {Connector} target
-     * @param {Object} data
-     * @public
-     */
-
-  }, {
-    key: 'sendIIP',
-    value: function sendIIP(target, data) {
-      // TODO: just create a unique id for the IIP, do not use the graph id
-      if (!this.id) {
-        throw Error('Actor must contain an id');
-      }
-
-      if (undefined === data) {
-        throw Error('Refused to send IIP without data');
-      }
-
-      var ln = {
-        source: {
-          id: this.id, // we are the sender
-          pid: this.pid,
-          port: ':iip'
-        },
-        target: target,
-        data: data
-      };
-
-      var xLink = this.createIIP(ln);
-
-      this.connectIIP(xLink);
-
-      this.__sendIIP(xLink);
-
-      return xLink;
-    }
-  }, {
-    key: '__sendIIP',
-    value: function __sendIIP(xLink) {
-      var p = Packet.create(
-      // JSON.parse(JSON.stringify(xLink.data)),
-      xLink.data,
-      // target port type
-      this.getNode(xLink.target.id).getPortType('input', xLink.target.port));
-
-      xLink.source.write(p);
-
-      // remove data bit.
-      // delete xLink.data
-    }
-
-    /**
-     * clearIIP
-     *
-     * Unplugs, disconnects and removes an IIP
-     *
-     * When an IIP is connected and the data is send
-     * this method removes/unregisters the IIP again.
-     *
-     * @param {Link} link
-     * @fires Flow#removeIIP
-     */
-
-  }, {
-    key: 'clearIIP',
-    value: function clearIIP(link) {
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
-
-      try {
-        for (var _iterator = this.iips.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var oldLink = _step.value;
-
-          // source is always us so do not have to check it.
-          // source will have to be checked when iip has it's own id.
-          if ((oldLink.source.port === ':iip' || oldLink.target.port === link.target.port || oldLink.target.port === ':start' // huge uglyness
-          ) && oldLink.target.id === link.target.id) {
-            this.unplugPort('input', oldLink.target);
-
-            this.ioHandler.disconnect(oldLink);
-
-            this.iips.delete(oldLink.id);
-
-            // TODO: just rename this to clearIIP
-            this.event(Events.REMOVEIIP, oldLink);
-          }
-        }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
-      }
-    }
-
-    /**
-     *
-     * Clear IIPs
-     *
-     * If target is specified, only those iips will be cleared.
-     */
-
-  }, {
-    key: 'clearIIPs',
-    value: function clearIIPs(target) {
-      var _iteratorNormalCompletion2 = true;
-      var _didIteratorError2 = false;
-      var _iteratorError2 = undefined;
-
-      try {
-        for (var _iterator2 = this.iips.values()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var iip = _step2.value;
-
-          if (!target || target.id === iip.target.id && target.port === iip.target.port) {
-            this.clearIIP(iip);
-          }
-        }
-      } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion2 && _iterator2.return) {
-            _iterator2.return();
-          }
-        } finally {
-          if (_didIteratorError2) {
-            throw _iteratorError2;
-          }
-        }
-      }
-    }
-  }]);
-
-  return IIP;
-}();
-
-module.exports = IIP;
-},{"../connector":106,"../events/flow":109,"../link":134,"../packet":157,"object-forof":253}],96:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var debug = require('debug')('chix:actor');
-var util = require('util');
-var Events = require('../events/flow');
-
-var Link = function () {
-  function Link() {
-    _classCallCheck(this, Link);
-  }
-
-  _createClass(Link, [{
-    key: 'addLink',
-
-    /**
-     * Adds a link from nodes port to the other
-     *
-     * Each link is registered with the IOHandler
-     *
-     * Emits the addLink event
-     *
-     * @param {xLink} link
-     * @fires Flow#addLink
-     */
-    value: function addLink(link) {
-      debug('%s: addLink()', this.identifier);
-      var sourceNode = void 0;
-
-      if (link.constructor.name !== 'Link') {
-        throw Error('Link must be of type Link');
-      }
-
-      var existingLink = this.findLink(link);
-      if (existingLink) {
-        console.log('WARNING: link already added, FIXME');
-        this.event(Events.ADDLINK, existingLink);
-        return existingLink;
-      }
-
-      // CHANGE THIS, source id should not be the graph id but a unique id.
-      if (link.source.id !== this.id) {
-        // Warn: IIP has our own id
-        sourceNode = this.getNode(link.source.id);
-        if (!sourceNode.portExists('output', link.source.port)) {
-          throw Error(util.format('Source node (%s:%s) does not have an output port named `%s`\n\n' + '\tOutput ports available:\t%s\n', sourceNode.ns, sourceNode.name, link.source.port, Object.keys(sourceNode.ports.output).join(', ')));
-        }
-      }
-
-      var targetNode = this.getNode(link.target.id);
-
-      debug('%s: %s %s -> %s %s', this.identifier, sourceNode ? sourceNode.identifier : '', link.source ? link.source.port : '', link.target.port, targetNode.identifier);
-
-      if (link.target.port !== ':start' && !targetNode.portExists('input', link.target.port)) {
-        throw Error(util.format('Target node (%s:%s) does not have an input port named `%s`\n\n' + '\tInput ports available:\t%s\n', targetNode.ns, targetNode.name, link.target.port, Object.keys(targetNode.ports.input).join(', ')));
-      }
-
-      // const targetNode = this.getNode(link.target.id)
-
-      // FIXME: rewriting sync property
-      // to contain the process id of the node it's pointing
-      // to not just the nodeId defined within the graph
-      if (link.target.has('sync')) {
-        link.target.set('sync', this.getNode(link.target.get('sync')).pid);
-      }
-
-      link.graphId = this.id;
-      link.graphPid = this.pid;
-
-      var self = this;
-
-      if (link.source.id) {
-        if (link.source.id === this.id) {
-          link.setSourcePid(this.pid || this.id);
-        } else {
-          link.setSourcePid(this.getNode(link.source.id).pid);
-        }
-      }
-
-      link.setTargetPid(this.getNode(link.target.id).pid);
-
-      // remember our own links, so we can remove them
-      // if it has data it's an iip
-      if (undefined !== link.data) {
-        this.iips.set(link.id, link);
-      } else {
-        this.links.set(link.id, link);
-      }
-
-      this.ioHandler.connect(link);
-
-      this.plugPort('input', link.target);
-
-      if (link.source.id !== this.id) {
-        this.plugPort('output', link.source);
-      }
-
-      // outputs are not plugged, also look at ioHandler.connect
-
-      link.on('change', function changeLink(link) {
-        self.event(Events.CHANGELINK, link);
-      });
-
-      // bit inconsistent with event.node
-      // should be event.link
-      this.event(Events.ADDLINK, link);
-
-      return link;
-    }
-
-    /**
-     * Get link by it's id
-     *
-     * @param {String} id - Id of the link
-     * @returns {*}
-     */
-
-  }, {
-    key: 'getLink',
-    value: function getLink(id) {
-      return this.links.get(id);
-    }
-
-    /**
-     * Find a link by it's structure.
-     *
-     * Can be used to find the link when it's ID is unknown
-     *
-     * @param {Object} ln
-     * @returns {T}
-     */
-
-  }, {
-    key: 'findLink',
-    value: function findLink(ln) {
-      return Array.from(this.links).find(function (_link) {
-        var link = Object.assign({ source: {} }, _link);
-        if (ln.source.id === link.source.id && ln.target.id === link.target.id && ln.source.port === link.source.port && ln.target.port === link.target.port) {
-          return (!ln.source.setting.index || ln.source.setting.index === link.source.setting.index) && (!ln.target.setting.index || ln.target.setting.index === link.target.setting.index);
-        }
-      });
-    }
-
-    /**
-     *
-     * Removes link
-     *
-     * Disconnects the link from the IOHandler and removes it.
-     *
-     * @param {Link} ln
-     * @fires Flow#removeLink
-     * @public
-     */
-
-  }, {
-    key: 'removeLink',
-    value: function removeLink(ln) {
-      // we should be able to find a link without id.
-      var what = 'links';
-
-      var link = this.links.get(ln.id);
-      if (!link) {
-        link = this.iips.get(ln.id);
-        if (!link) {
-          // throw Error('Cannot find link')
-          // TODO: Seems to happen with ip directly to subgraph (non-fatal)
-          console.warn('FIXME: cannot find link');
-          return this;
-        }
-        what = 'iips';
-      }
-
-      this.unplugPort('input', link.target);
-      if (link.source.id !== this.id) {
-        this.unplugPort('output', link.source);
-      }
-
-      this.ioHandler.disconnect(link);
-
-      // io handler could do this.
-      // removelink on the top-level actor/graph
-      // is not very useful
-
-      if (this[what].has(link.id)) {
-        var oldLink = this[what].get(link.id);
-
-        this[what].delete(link.id);
-
-        this.event(Events.REMOVELINK, oldLink);
-
-        return this;
-      }
-      throw Error('Unable to remove link with id: ' + link.id);
-    }
-  }]);
-
-  return Link;
-}();
-
-module.exports = Link;
-},{"../events/flow":109,"debug":178,"util":91}],97:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var debug = require('debug')('chix:actor');
-var util = require('util');
-var validate = require('../validate');
-var Link = require('../link');
-
-var Map = function () {
-  function Map() {
-    _classCallCheck(this, Map);
-  }
-
-  _createClass(Map, [{
-    key: 'addMap',
-
-    /**
-     * Reads a map from JSON
-     *
-     * Will validate the JSON first then creates the nodes and it's links
-     *
-     * If the map itself contains nodeDefinitions those will be added to
-     * the loader.
-     *
-     * If the map itself does not have a provider property set it will
-     * be set to '@', which means internal lookup.
-     *
-     * A default view will be setup unmasking all nodes.
-     *
-     * If this Actor is the main actor it's status will be set to `created`
-     *
-     * If this Actor was not yet registered with the Process Manager it will be registered.
-     *
-     * @param {Object} map
-     * @public
-     *
-     */
-    value: function addMap(map) {
-      var _this = this;
-
-      debug('%s: addMap()', this.identifier);
-      try {
-        validate.flow(map);
-      } catch (e) {
-        if (map.title) {
-          throw Error(util.format('Flow `%s`: %s', map.title, e.message));
-        } else {
-          throw Error(util.format('Flow %s:%s: %s', map.ns, map.name, e.message));
-        }
-      }
-
-      if (map.id) {
-        // xFlow contains it, direct actors don't perse
-        this.id = map.id;
-      }
-
-      // allow a map to carry it's own definitions
-      if (map.nodeDefinitions) {
-        this.loader.addNodeDefinitions('@', map.nodeDefinitions);
-      }
-
-      // add nodes and links one by one so there is more control
-      map.nodes.forEach(function (node) {
-        if (!node.id) {
-          throw new Error(util.format('Node lacks an id: %s:%s', node.ns, node.name));
-        }
-
-        // give the node a default provider.
-        if (!node.provider) {
-          if (map.providers && map.providers.hasOwnProperty('@')) {
-            node.provider = map.providers['@'].url;
-          }
-        }
-
-        var def = _this.loader.getNodeDefinition(node, map);
-        if (!def) {
-          throw new Error(util.format('Failed to get node definition for %s:%s', node.ns, node.name));
-        }
-
-        debug('%s: Creating node %s:%s', _this.identifier, node.ns, node.name);
-        _this.createNode(node, def);
-      });
-
-      if (map.hasOwnProperty('links')) {
-        map.links.forEach(function (link) {
-          _this.addLink(Link.create(link));
-        });
-      }
-
-      for (var i = 0; i < map.nodes.length; i++) {
-        this.view.push(map.nodes[i].id);
-      }
-
-      // fix later
-      if (this.constructor.name === 'Actor') {
-        this.setStatus('created');
-      }
-
-      if (!this.pid) {
-        // re-run
-        this.processManager.register(this);
-      }
-
-      return this;
-    }
-  }]);
-
-  return Map;
-}();
-
-module.exports = Map;
-},{"../link":134,"../validate":172,"debug":178,"util":91}],98:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Events = require('../events/flow');
-
-var Meta = function () {
-  function Meta() {
-    _classCallCheck(this, Meta);
-  }
-
-  _createClass(Meta, [{
-    key: 'setMeta',
-
-    /**
-     * Will set a meta property for the node specified by nodeId
-     *
-     * A meta property can contain any sort of value.
-     *
-     * @param {String} nodeId - The nodeId
-     * @param {String} key - The meta key
-     * @param {Any} value - The meta value
-     * @fires Flow#metadata
-     */
-    value: function setMeta(nodeId, key, value) {
-      var node = this.getNode(nodeId);
-
-      node.setMeta(key, value);
-
-      this.event(Events.METADATA, {
-        id: this.id,
-        node: node.export()
-      });
-    }
-  }]);
-
-  return Meta;
-}();
-
-module.exports = Meta;
-},{"../events/flow":109}],99:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var XNode = require('../node');
-var validate = require('../validate');
-var debug = require('debug')('chix:actor');
-var util = require('util');
-var Events = require('../events/flow');
-
-var Node = function () {
-  function Node() {
-    _classCallCheck(this, Node);
-  }
-
-  _createClass(Node, [{
-    key: 'createNode',
-
-    /**
-     *
-     * Create/instantiate  a node
-     *
-     * Node at this stage is nothing more then:
-     *
-     *  { ns: "fs", name: "readFile" }
-     *
-     * @param {Object} node - Node as defined within a map
-     * @param {Object} def  - Node Definition
-     * @fires Flow#addNode
-     * @public
-     */
-    value: function createNode(node, def) {
-      if (!def) {
-        throw new Error(util.format('Failed to get node definition for %s:%s', node.ns, node.name));
-      }
-
-      if (!node.id) {
-        throw Error('Node should have an id');
-      }
-
-      if (this.hasNode(node.id)) {
-        console.log('Warning: Node already added, skipping... FIXME');
-        this.event(Events.ADDNODE, { node: this.getNode(node.id) });
-        return this.getNode(node.id);
-      }
-
-      if (!def.ports) {
-        def.ports = {};
-      }
-
-      // merges expose, persist etc, with port definitions.
-      // This is not needed with proper inheritance
-      for (var type in node.ports) {
-        if (node.ports.hasOwnProperty(type) && def.ports.hasOwnProperty(type)) {
-          for (var name in node.ports[type]) {
-            if (node.ports[type].hasOwnProperty(name) && def.ports[type].hasOwnProperty(name)) {
-              for (var property in node.ports[type][name]) {
-                if (node.ports[type][name].hasOwnProperty(property)) {
-                  // add or overwrite it.
-                  def.ports[type][name][property] = node.ports[type][name][property];
-                }
-              }
-            }
-          }
-        }
-      }
-
-      // allow instance to overwrite other node definition data also.
-      // probably make much more overwritable, although many
-      // should not be overwritten, so maybe just keep it this way.
-      if (node.title) {
-        def.title = node.title;
-      }
-
-      if (node.description) {
-        def.description = node.description;
-      }
-
-      var identifier = node.title || [node.ns, '::', node.name, '-', this.nodes.size].join('');
-
-      var _node = void 0;
-
-      if (def.type === 'flow') {
-        var XFlow = require('../flow'); // solve circular reference.
-
-        validate.flow(def);
-
-        _node = new XFlow(node.id, def, identifier, this.loader, // single(ton) instance
-        this.ioHandler, // single(ton) instance
-        this.processManager // single(ton) instance
-        );
-
-        this.nodes.set(node.id, _node);
-
-        debug('%s: created %s', this.identifier, _node.identifier);
-      } else {
-        var cls = def.type || 'xNode';
-
-        if (Node.nodeTypes.hasOwnProperty(cls)) {
-          validate.nodeDefinition(def);
-
-          _node = new Node.nodeTypes[cls](node.id, def, identifier);
-
-          this.nodes.set(node.id, _node);
-
-          debug('%s: created %s', this.identifier, _node.identifier);
-
-          // register and set pid, xFlow/actor adds itself to it (hack)
-          this.processManager.register(this.nodes.get(node.id));
-
-          if (_node.hasShutdown()) {
-            // TODO: implement shutdown
-            _node.on('execute', function () {
-              console.log('will execute');
-            });
-          }
-        } else {
-          throw Error(util.format('Unknown node type: `%s`', cls));
-        }
-      }
-
-      // add parent to both xflow's and node's
-      // not very pure seperation, but it's just very convenient
-      _node.setParent(this);
-
-      if (node.provider) {
-        _node.provider = node.provider;
-      }
-
-      this.contextProvider.addContext(_node, node.context, def.ports.input);
-
-      // CAN BE REMOVED, disposale can be done as soon as the IO manager writes
-      /*
-       _node.on('freePort', function freePortHandlerActor (event) {
-       let links
-       let i
-        debug('%s:%s freePortHandler', self.identifier, event.port)
-        // get all current port connections
-       links = this.portGetConnections(event.port)
-        if (links.length) {
-       if (event.link) {
-       // remove the link belonging to this event
-       if (event.link.has('dispose')) {
-       // TODO: remove cyclic all together, just use core/forEach
-       //  this will cause bugs if you send multiple cyclics because
-       //  the port is never unplugged..
-       if (!event.link.target.has('cyclic')) {
-       self.removeLink(event.link)
-       }
-       }
-       }
-       }
-       })
-       */
-
-      this.event(Events.ADDNODE, { node: _node });
-
-      return _node;
-    }
-
-    /**
-     *
-     * Adds a node to the map.
-     *
-     * The object format is like it's defined within a map.
-     *
-     * Right now this is only used during map loading.
-     *
-     * For dynamic loading care should be taken to make
-     * this node resolvable by the loader.
-     *
-     * Which means the definition should either be found
-     * at the default location defined within the map.
-     * Or the node itself should carry provider information.
-     *
-     * A provider can be defined as:
-     *
-     *  - url:        https://serve.rhcloud.com/flows/{ns}/{name}
-     *  - file:       ./{ns}/{name}
-     *  - namespace:  MyNs
-     *
-     * Namespaces are defined within the map, so MyNs will point to
-     * either the full url or filesystem location.
-     *
-     * Once a map is loaded _all_ nodes will carry the full url individually.
-     * The namespace is just their to simplify the json format and for ease
-     * of maintainance.
-     *
-     *
-     * @param {Object} node
-     * @fires Flow#addNode
-     * @public
-     */
-
-  }, {
-    key: 'addNode',
-    value: function addNode(node, def) {
-      this.createNode(node, def);
-
-      return this;
-    }
-
-    /**
-     *
-     * Renames a node
-     *
-     * Renames the id of a node.
-     * This should not rename the real id.
-     *
-     * @param {string} nodeId
-     * @param {function} cb
-     * @public
-     */
-
-  }, {
-    key: 'renameNode',
-    value: function renameNode(nodeId, cb) {
-      throw Error('renameNode not implemented');
-      // console.log(nodeId, cb)
-    }
-
-    /**
-     *
-     * Removes a node
-     *
-     * @param {string} nodeId
-     * @param {function} cb
-     * @fires Flow#removeNode
-     * @public
-     */
-
-  }, {
-    key: 'removeNode',
-    value: function removeNode(nodeId, cb) {
-      var self = this;
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
-
-      try {
-        for (var _iterator = this.links.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var link = _step.value;
-
-          if (link.source.id === nodeId || link.target.id === nodeId) {
-            this.removeLink(link);
-          }
-        }
-
-        // should wait for IO, especially there is a chance
-        // system events are still spitting.
-        // nodeId is an actual object here, the subgraph.
-
-        // register and set pid
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
-      }
-
-      this.processManager.unregister(this.getNode(nodeId), function unregisterHandlerActor() {
-        var oldNode = self.getNode(nodeId).export();
-
-        self.nodes.delete(nodeId);
-
-        self.event(Events.REMOVENODE, {
-          node: oldNode
-        });
-
-        if (cb) {
-          cb();
-        }
-      });
-    }
-  }, {
-    key: 'removeNodes',
-    value: function removeNodes() {
-      this.clear();
-    }
-
-    /**
-     *
-     * Get all nodes.
-     *
-     * TODO: unnecessary method
-     *
-     * @return {Object} nodes
-     * @public
-     *
-     */
-
-  }, {
-    key: 'getNodes',
-    value: function getNodes() {
-      return this.nodes;
-    }
-
-    /**
-     *
-     * Check if this node exists
-     *
-     * @param {String} id
-     * @return {Object} node
-     * @public
-     */
-
-  }, {
-    key: 'hasNode',
-    value: function hasNode(id) {
-      return this.nodes.has(id);
-    }
-
-    /**
-     *
-     * Get a node by it's id.
-     *
-     * @param {String} id
-     * @return {Object} node
-     * @public
-     */
-
-  }, {
-    key: 'getNode',
-    value: function getNode(id) {
-      if (this.nodes.has(id)) {
-        return this.nodes.get(id);
-      } else {
-        var _iteratorNormalCompletion2 = true;
-        var _didIteratorError2 = false;
-        var _iteratorError2 = undefined;
-
-        try {
-          for (var _iterator2 = this.nodes.values()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-            var node = _step2.value;
-
-            if (node.id === id || node.identifier === id) {
-              return node;
-            }
-          }
-        } catch (err) {
-          _didIteratorError2 = true;
-          _iteratorError2 = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion2 && _iterator2.return) {
-              _iterator2.return();
-            }
-          } finally {
-            if (_didIteratorError2) {
-              throw _iteratorError2;
-            }
-          }
-        }
-      }
-
-      // :iip sets self as source
-      if (id === this.id) {
-        return this;
-      }
-
-      throw new Error(util.format('Node %s does not exist', id));
-    }
-
-    /**
-     *
-     * Register extra node types:
-     *
-     * Current types available are:
-     *
-     *  - ReactNode
-     *  - PolymerNode
-     *
-     */
-
-  }], [{
-    key: 'registerNodeType',
-    value: function registerNodeType(Type) {
-      this.nodeTypes[Type.name] = Type;
-    }
-  }]);
-
-  return Node;
-}();
-
-Node.nodeTypes = {
-  xNode: XNode
-};
-
-module.exports = Node;
-},{"../events/flow":109,"../flow":116,"../node":136,"../validate":172,"debug":178,"util":91}],100:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Port = function () {
-  function Port() {
-    _classCallCheck(this, Port);
-  }
-
-  _createClass(Port, [{
-    key: 'plugPort',
-
-    /**
-     *
-     * Plugs a source into a target node
-     *
-     *
-     * @param {Connector} target
-     */
-    value: function plugPort(type, connector) {
-      return this.getNode(connector.id).getPort(type, connector.port).plug(connector);
-    }
-
-    /**
-     *
-     * Unplugs a port for the node specified.
-     *
-     * @param {Connector} target
-     */
-
-  }, {
-    key: 'unplugPort',
-    value: function unplugPort(type, connector) {
-      if (this.hasNode(connector.id)) {
-        return this.getNode(connector.id).getPort(type, connector.port).unplug(connector);
-      }
-
-      return false;
-    }
-    /**
-     *
-     * Adds a port
-     *
-     * NOT IMPLEMENTED
-     *
-     * @public
-     */
-
-  }, {
-    key: 'addPort',
-    value: function addPort() {
-      return this;
-    }
-
-    /**
-     *
-     * Removes a port
-     *
-     * NOT IMPLEMENTED
-     *
-     * @public
-     */
-
-  }, {
-    key: 'removePort',
-    value: function removePort() {
-      return this;
-    }
-  }]);
-
-  return Port;
-}();
-
-module.exports = Port;
-},{}],101:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Process = function () {
-  function Process() {
-    _classCallCheck(this, Process);
-  }
-
-  _createClass(Process, [{
-    key: 'getNodeByPid',
-
-    /**
-     *
-     * Retrieve a node by it's process id
-     *
-     * @param {String} pid - Process ID
-     * @return {Object} node
-     * @public
-     */
-    value: function getNodeByPid(pid) {
-      return Array.from(this.nodes.values()).find(function (node) {
-        return node.pid === pid;
-      });
-    }
-
-    /**
-     *
-     * Used by the process manager to set our id
-     *
-     */
-
-  }, {
-    key: 'setPid',
-    value: function setPid(pid) {
-      this.pid = pid;
-    }
-  }]);
-
-  return Process;
-}();
-
-module.exports = Process;
-},{}],102:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Report = function () {
-  function Report() {
-    _classCallCheck(this, Report);
-  }
-
-  _createClass(Report, [{
-    key: 'report',
-
-    /**
-     *
-     * JSON Status report about the nodes.
-     *
-     * Mainly meant to debug after shutdown.
-     *
-     * Should handle all stuff one can think of
-     * why `it` doesn't work.
-     *
-     */
-    value: function report() {
-      // let size
-      // const qm = this.ioHandler.queueManager
-
-      var _report = {
-        ok: true,
-        flow: this.id,
-        nodes: [],
-        queues: []
-      };
-
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
-
-      try {
-        for (var _iterator = this.nodes.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var node = _step.value;
-
-          if (node.status !== 'complete') {
-            _report.ok = false;
-            _report.nodes.push({
-              node: node.report()
-            });
-          }
-        }
-
-        /*
-        for (const link of this.links.values()) {
-          if (qm.hasQueue(link.ioid)) {
-            size = qm.size(link.ioid)
-            _report.ok = false
-            _report.queues.push({
-              link: link.toJSON(),
-              port: link.target.port,
-              // super weird, will be undefined if called here.
-              // size: qm.size(link.ioid),
-              size: size,
-              node: this.getNode(link.target.id).report()
-            })
-          }
-        }
-        */
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
-      }
-
-      return _report;
-    }
-  }]);
-
-  return Report;
-}();
-
-module.exports = Report;
-},{}],103:[function(require,module,exports){
-'use strict';
-
-var Status = {};
-Status.STOPPED = 'stopped';
-Status.RUNNING = 'running';
-
-module.exports = Status;
-},{}],104:[function(require,module,exports){
-arguments[4][2][0].apply(exports,arguments)
-},{"dup":2}],105:[function(require,module,exports){
-arguments[4][3][0].apply(exports,arguments)
-},{"../events/node":112,"dup":3}],106:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Setting = require('./setting');
-var debug = require('debug')('chix:connector');
-var Events = require('./events/connector');
-
-/**
- *
- * Connector
- *
- * The thing you plug into a port.
- *
- * Contains information about port and an optional
- * action to perform within the node (subgraph)
- *
- * Can also contains port specific settings.
- *
- * An xLink has a source and a target connector.
- *
- * ................... xLink ....................
- *
- *  -------------------.    .------------------
- * | Source Connector -------  Target Connector |
- *  ------------------'     `------------------
- *
- * When a link is plugged into a node, we do so
- * by plugging the target connector.
- *
- * @constructor
- * @public
- *
- */
-
-var Connector = function (_Setting) {
-  _inherits(Connector, _Setting);
-
-  function Connector(settings) {
-    _classCallCheck(this, Connector);
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Connector).call(this, settings));
-
-    _this.wire = undefined;
-    return _this;
-  }
-
-  /**
-   *
-   * Plug
-   *
-   * TODO: plug is not the correct name
-   *
-   * @param {String} id - TODO: not sure which id, from the node I pressume..
-   * @param {String} port
-   * @param {String} action
-   */
-
-
-  _createClass(Connector, [{
-    key: 'plug',
-    value: function plug(id, port, action) {
-      debug('plug %s:%s', id, port);
-      this.id = id;
-      this.port = port;
-      if (action) {
-        this.action = action;
-      }
-    }
-
-    /**
-     * Write packet to this connector
-     *
-     * @param p
-     * @fires Connector#data
-     */
-
-  }, {
-    key: 'write',
-    value: function write(p) {
-      var index = this.get('index');
-      debug('write %s:%s %s', this.id, this.port, index === undefined ? '' : '[' + index + ']');
-      this.emit(Events.DATA, p, this);
-    }
-
-    /**
-     *
-     * Create
-     *
-     * Creates a connector
-     *
-     * @param {String} id - TODO: not sure which id, from the node I pressume..
-     * @param {String} port
-     * @param {Object} settings
-     * @param {String} action
-     */
-
-  }, {
-    key: 'setPid',
-
-
-    /**
-     *
-     * Register process id this connector handles.
-     *
-     */
-    value: function setPid(pid) {
-      this.pid = pid;
-    }
-  }, {
-    key: 'toJSON',
-    value: function toJSON() {
-      var ret = {
-        id: this.id,
-        port: this.port
-      };
-
-      if (this.setting) {
-        ret.setting = JSON.parse(JSON.stringify(this.setting));
-      }
-
-      if (this.action) {
-        ret.action = this.action;
-      }
-
-      return ret;
-    }
-  }], [{
-    key: 'create',
-    value: function create(id, port, settings, action) {
-      var c = new Connector(settings);
-      c.plug(id, port, action);
-      return c;
-    }
-  }]);
-
-  return Connector;
-}(Setting);
-
-module.exports = Connector;
-},{"./events/connector":108,"./setting":171,"debug":178}],107:[function(require,module,exports){
-'use strict';
-
-/**
- *
- * Default Context Provider
- *
- * @constructor
- * @public
- */
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var DefaultProvider = function () {
-  function DefaultProvider() {
-    _classCallCheck(this, DefaultProvider);
-  }
-
-  _createClass(DefaultProvider, [{
-    key: 'addContext',
-    value: function addContext(node, defaultContext) {
-      if (typeof defaultContext !== 'undefined') {
-        node.addContext(defaultContext);
-      }
-    }
-  }]);
-
-  return DefaultProvider;
-}();
-
-module.exports = DefaultProvider;
-},{}],108:[function(require,module,exports){
-arguments[4][4][0].apply(exports,arguments)
-},{"dup":4}],109:[function(require,module,exports){
-'use strict';
-
-module.exports = {
-  /**
-   * Start event.
-   *
-   * @event Flow#start
-   * @type {object}
-   * @property {node} node - Node being started
-   */
-  START: { name: 'start' },
-
-  /**
-   * Stop event.
-   *
-   * @event Flow#stop
-   * @type {object}
-   * @property {node} node - Node being stopped
-   */
-  STOP: { name: 'stop' },
-
-  /**
-   * Metadata event.
-   *
-   * @event Flow#metadata
-   * @type {object}
-   * @property {id} id - graphId
-   * @property {node} node - node which meta property was set
-   */
-  METADATA: { name: 'metadata' },
-
-  /**
-   * Add IIP event.
-   *
-   * @event Flow#addIIP
-   * @type {Link} Link - IIP Link which was added
-   */
-  ADDIIP: { name: 'addIIP' },
-
-  /**
-   * Remove IIP event.
-   *
-   * @event Flow#removeIIP
-   * @type {Link} oldLink - IIP Link which was removed
-   */
-  REMOVEIIP: { name: 'removeIIP' },
-
-  /**
-   * Add Link event.
-   *
-   * @event Flow#addLink
-   * @type {Link} link - Link which was added
-   */
-  ADDLINK: { name: 'addLink' },
-
-  /**
-   * Change Link event.
-   *
-   * @event Flow#changeLink
-   * @type {Link} link - Link which was changed
-   */
-  CHANGELINK: { name: 'changeLink' },
-
-  /**
-   * Remove Link event.
-   *
-   * @event Flow#removeLink
-   * @type {Link} oldLink - Link which was removed
-   */
-  REMOVELINK: { name: 'removeLink' },
-
-  /**
-   * Add node event.
-   *
-   * @event Flow#addNode
-   * @type {Object}
-   * @property {Node} node - Node which was added
-   */
-  ADDNODE: { name: 'addNode' },
-
-  /**
-   * Remove node event.
-   *
-   * @event Flow#removeNode
-   * @type {Object}
-   * @property {Node} oldNode - Node which was removed
-   */
-  REMOVENODE: { name: 'removeNode' },
-
-  /**
-   * Add Port event.
-   *
-   * @event Flow#addPort
-   * @type {Object}
-   * @property {Node} node - Node to which port was added
-   * @property {String} port - Port name which was added
-   * @property {String} nodeId - Internal nodeId
-   * @property {String} name - Internal Port name
-   * @property {String} type - Type input|output
-   */
-  ADDPORT: { name: 'addPort' },
-
-  /**
-   * Remove Port event.
-   *
-   * @event Flow#removePort
-   * @type {Object}
-   * @property {Node} node - Node to which port was removed
-   * @property {String} port - Port name which was removed
-   * @property {String} type - Type input|output
-   */
-  REMOVEPORT: { name: 'removePort' },
-
-  /**
-   * Rename Port event.
-   *
-   * @event Flow#renamePort
-   * @type {Object}
-   * @property {Node} node - Node which port was changed
-   * @property {String} from - Old port name
-   * @property {String} to - New port name
-   */
-  RENAMEPORT: { name: 'renamePort' },
-
-  /**
-   * Port Output event.
-   *
-   * @event Flow#output
-   * @type {Object}
-   * @property {Node} node - Node
-   * @property {String} port - port name
-   * @property {String} out - Output packet
-   * @property {String} action - Optional current action
-   */
-  OUTPUT: { name: 'output' },
-
-  /**
-   * Port Output event.
-   *
-   * @event Flow#error
-   * @type {Object}
-   * @property {Node} node - Node
-   * @property {Error} msg - The Error
-   */
-  ERROR: { name: 'error', expose: true }
-};
-},{}],110:[function(require,module,exports){
-'use strict';
-
-module.exports = {
-  /**
-   * Send event.
-   *
-   * @event IO#Send
-   * @type {object}
-   * @property {id} id - graphId
-   * @property {node} node - node which meta property was set
-   */
-  SEND: 'send',
-
-  /**
-   * Connect event.
-   *
-   * @event IO#Connect
-   * @type {Link} link - The connected link
-   */
-  CONNECT: 'connect',
-
-  /**
-   * Disconnect event.
-   *
-   * @event IO#Connect
-   * @type {Link} link - The disconnected link
-   */
-  DISCONNECT: 'disconnect',
-
-  /**
-   * Drop event.
-   *
-   * @event IO#Drop
-   * @type {Packet} p - The dropped packet
-   */
-  DROP: 'drop',
-
-  /**
-   * Data event.
-   *
-   * @event IO#Data
-   * @type {Any} data - Plain data contained within the packet
-   */
-  DATA: 'data',
-
-  /**
-   * Packet event.
-   *
-   * @event IO#Packet
-   * @type {Link} link - The Link
-   * @type {Any} data - The packet
-   */
-  PACKET: 'packet',
-
-  /**
-   * Receive event.
-   *
-   * @event IO#Receive
-   * @type {Link} link - The Link which just received data
-   */
-  RECEIVE: 'receive'
-};
-},{}],111:[function(require,module,exports){
-'use strict';
-
-module.exports = {
-  /**
-   * Change event
-   *
-   * @event Link#change
-   * @type {object}
-   */
-  CHANGE: 'change',
-
-  /**
-   * Clear event
-   *
-   * @event Link#clear
-   * @type {object}
-   */
-  CLEAR: 'clear'
-};
-},{}],112:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],113:[function(require,module,exports){
-'use strict';
-
-module.exports = {
-  /**
-   * Add Process event
-   *
-   * @event Process#addProcess
-   * @type {object}
-   * @property {node} node - Added Process
-   */
-  ADD_PROCESS: 'addProcess',
-
-  /**
-   * Remove Process event
-   *
-   * @event Process#removeProcess
-   * @type {object}
-   * @property {node} node - Removed Process
-   */
-  REMOVE_PROCESS: 'removeProcess',
-
-  /**
-   * Start Process event
-   *
-   * @event Process#startProcess
-   * @type {object}
-   * @property {node} node - Process to be started
-   */
-  START_PROCESS: 'startProcess',
-
-  /**
-   * Stop Process event
-   *
-   * @event Process#stopProcess
-   * @type {object}
-   * @property {node} node - Stopped Process
-   */
-  STOP_PROCESS: 'stopProcess',
-
-  /**
-   * Process Status event
-   *
-   * @event Process#processStatus
-   * @type {object}
-   * @property {node} node - Process Status
-   */
-  PROCESS_STATUS: 'processStatus',
-
-  /**
-   * Error event
-   *
-   * @event Process#error
-   * @type {object}
-   * @property {node} node - The errored process
-   */
-  ERROR: 'error',
-
-  /**
-   * Change Pid event
-   *
-   * @event Process#changePid
-   * @type {object}
-   * @property {node} node - Process which pid was changed
-   */
-  CHANGE_PID: 'changePid',
-
-  /**
-   * Report event
-   *
-   * @event Process#report
-   * @type {object}
-   * @property {Object} report - Object containing report
-   */
-  REPORT: 'report'
-};
-},{}],114:[function(require,module,exports){
-arguments[4][6][0].apply(exports,arguments)
-},{"dup":6}],115:[function(require,module,exports){
-'use strict';
-
-module.exports = {
-  /**
-   * Change event
-   *
-   * @event Setting#change
-   * @type {Object}
-   */
-  CHANGE: 'change'
-};
-},{}],116:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Actor = require('./actor');
-var debug = require('debug')('chix:flow');
-
-var mixin = require('./mixin');
-var $Action = require('./flow/action');
-var $Context = require('./flow/context');
-var $Control = require('./flow/control');
-var $Error = require('./flow/error');
-var $Event = require('./node/base/event');
-var $Export = require('./flow/export');
-var $IsStartable = require('./flow/isStartable');
-var $Meta = require('./flow/meta');
-var $Ports = require('./flow/ports');
-var $Process = require('./flow/process');
-var $Status = require('./common/status');
-var $ToJSON = require('./flow/toJSON');
-
-/**
- *
- * This FlowNode extends the Actor.
- *
- * What it mainly does is delegate what it it asked to do
- * To the nodes from the actor.
- *
- * External Interface is not really needed anymore.
- *
- * Because the flow has ports just like a normal node
- *
- * @constructor
- * @public
- *
- */
-
-var Flow = function (_Actor) {
-  _inherits(Flow, _Actor);
-
-  function Flow(id, map, identifier, loader, ioHandler, processManager) {
-    _classCallCheck(this, Flow);
-
-    if (!id) {
-      throw Error('xFlow requires an id');
-    }
-
-    if (!map) {
-      throw Error('xFlow requires a map');
-    }
-
-    // Call the super's constructor
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Flow).apply(this, arguments));
-
-    var self = _this;
-
-    _this._delay = 0;
-
-    if (loader) {
-      _this.loader = loader;
-    }
-
-    if (ioHandler) {
-      _this.ioHandler = ioHandler;
-    }
-
-    if (processManager) {
-      _this.processManager = processManager;
-    }
-
-    // indicates whether this is an action instance.
-    _this.actionName = undefined;
-
-    // TODO: trying to solve provider issue
-    _this.provider = map.provider;
-
-    _this.providers = map.providers;
-
-    _this.actions = {};
-
-    _this.id = id;
-
-    _this.name = map.name;
-
-    _this.type = 'flow';
-
-    _this.title = map.title;
-
-    _this.description = map.description;
-
-    _this.ns = map.ns;
-
-    _this.active = false;
-
-    _this.metadata = map.metadata || {};
-
-    _this.identifier = identifier || [map.ns, ':', map.name].join('');
-
-    // Need to think about how to implement this for flows
-    // this.ports.output[':complete'] = { type: 'any' }
-
-    _this.runCount = 0;
-
-    // this.filled = 0
-
-    _this._interval = 100;
-
-    _this.nodeTimeout = map.nodeTimeout || 3000;
-
-    _this.inputTimeout = typeof map.inputTimeout === 'undefined' ? 3000 : map.inputTimeout;
-
-    _this._hold = false;
-
-    _this._inputTimeout = null;
-
-    _this.ports = map.ports ? JSON.parse(JSON.stringify(map.ports)) : {};
-
-    debug('%s: addMap', _this.identifier);
-    _this.addMap(map);
-
-    _this.initPortOptions = function () {
-      // Init port options.
-      for (var port in self.ports.input) {
-        if (self.ports.input.hasOwnProperty(port)) {
-          // This flow's port
-          var thisPort = self.ports.input[port];
-
-          // set port option
-          if (thisPort.options) {
-            for (var opt in thisPort.options) {
-              if (thisPort.options.hasOwnProperty(opt)) {
-                self.setPortOption('input', port, opt, thisPort.options[opt]);
-              }
-            }
-          }
-        }
-      }
-    };
-
-    _this.createPorts(_this.ports);
-
-    // Just use the same as node is using, merge node & flow & actor functionality.
-    // common mixins.
-    /** @property {Array} inPorts */
-    Object.defineProperty(_this, 'inPorts', {
-      enumerable: true,
-      get: function get() {
-        return Object.keys(this.ports.input);
-      }
-    });
-
-    /** @property {Array} outPorts */
-    Object.defineProperty(_this, 'outPorts', {
-      enumerable: true,
-      get: function get() {
-        return Object.keys(this.ports.output);
-      }
-    });
-
-    // this.setup()
-    // this.initPortOptions()
-
-    // this.listenForOutput()
-
-    _this.setStatus('created');
-    return _this;
-  }
-
-  /**
-   *
-   * Create an xFlow
-   *
-   * Some kind of logic as the actor
-   *
-   * @public
-   */
-
-
-  _createClass(Flow, null, [{
-    key: 'create',
-    value: function create(map, loader, ioHandler, processManager) {
-      var actor = new Flow(map.id, map, map.ns + ':' + map.name, loader, ioHandler, processManager);
-
-      return actor;
-    }
-  }]);
-
-  return Flow;
-}(Actor);
-
-mixin(Actor, $Action, $Context, $Control, $Error, $Event, $Export, $IsStartable, $Meta, $Ports, $Process, $Status, $ToJSON);
-
-module.exports = Flow;
-},{"./actor":93,"./common/status":105,"./flow/action":117,"./flow/context":118,"./flow/control":119,"./flow/error":120,"./flow/export":121,"./flow/isStartable":122,"./flow/meta":123,"./flow/ports":124,"./flow/process":125,"./flow/toJSON":126,"./mixin":135,"./node/base/event":140,"debug":178}],117:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Action = function () {
-  function Action() {
-    _classCallCheck(this, Action);
-  }
-
-  _createClass(Action, [{
-    key: 'action',
-    value: function action(_action) {
-      if (!this.actions.hasOwnProperty(_action)) {
-        throw Error('this.action should return something with the action map');
-        /*
-         const ActionActor = this.action(action)
-          // ActionActor.map.ports = this.ports
-          // not sure what to do with the id and identifier.
-         // I think they should stay the same, for now.
-         //
-         this.actions[action] = new Flow(
-         this.id,
-         // ActionActor, // BROKEN
-         map, // action definition should be here
-         this.identifier + '::' + action
-         )
-          // a bit loose this.
-         this.actions[action].actionName = action
-          //this.actions[action].ports = this.ports
-         */
-      }
-
-      return this.actions[_action];
-    }
-  }, {
-    key: 'isAction',
-    value: function isAction() {
-      return Boolean(this.actionName);
-    }
-  }]);
-
-  return Action;
-}();
-
-module.exports = Action;
-},{}],118:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var debug = require('debug')('chix:flow');
-var forOf = require('object-forof');
-var Events = require('../events/node');
-
-var Context = function () {
-  function Context() {
-    _classCallCheck(this, Context);
-  }
-
-  _createClass(Context, [{
-    key: 'addContext',
-    value: function addContext(context) {
-      var _this = this;
-
-      debug('%s: addContext', this.identifier);
-      forOf(function (port, val) {
-        var portDef = _this.getPortDefinition(port, 'input');
-        _this.getNode(portDef.nodeId).setContextProperty(portDef.name, val);
-      }, context);
-    }
-  }, {
-    key: 'setContextProperty',
-    value: function setContextProperty(port, data) {
-      var portDef = this.getPortDefinition(port, 'input');
-      this.getNode(portDef.nodeId).setContextProperty(portDef.name, data);
-
-      // TODO: test if it succeeded
-      this.event(Events.CONTEXTUPDATE, {
-        node: this,
-        port: port,
-        data: data
-      });
-    }
-  }, {
-    key: 'clearContextProperty',
-    value: function clearContextProperty(port) {
-      var portDef = this.getPortDefinition(port, 'input');
-      this.getNode(portDef.nodeId).clearContextProperty(portDef.name);
-
-      this.event(Events.CONTEXTCLEAR, {
-        node: this,
-        port: port
-      });
-    }
-  }]);
-
-  return Context;
-}();
-
-module.exports = Context;
-},{"../events/node":112,"debug":178,"object-forof":253}],119:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Control = function () {
-  function Control() {
-    _classCallCheck(this, Control);
-  }
-
-  _createClass(Control, [{
-    key: 'complete',
-    value: function complete() {
-      this.ready = false;
-      this.active = false;
-    }
-  }, {
-    key: 'hold',
-    value: function hold() {
-      this._hold = true;
-      this.stop();
-    }
-  }, {
-    key: 'release',
-    value: function release() {
-      this._hold = false;
-      this.resume();
-    }
-  }, {
-    key: 'reset',
-    value: function reset() {
-      this.runCount = 0;
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
-
-      try {
-        for (var _iterator = this.nodes.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var node = _step.value;
-
-          node.reset();
-        }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
-      }
-    }
-  }, {
-    key: 'shutdown',
-    value: function shutdown() {}
-  }, {
-    key: 'destroy',
-    value: function destroy() {
-      var _iteratorNormalCompletion2 = true;
-      var _didIteratorError2 = false;
-      var _iteratorError2 = undefined;
-
-      try {
-        for (var _iterator2 = this.nodes.values()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var node = _step2.value;
-
-          node.destroy();
-        }
-      } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion2 && _iterator2.return) {
-            _iterator2.return();
-          }
-        } finally {
-          if (_didIteratorError2) {
-            throw _iteratorError2;
-          }
-        }
-      }
-    }
-  }]);
-
-  return Control;
-}();
-
-module.exports = Control;
-},{}],120:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var util = require('util');
-var Events = require('../events/link');
-
-var ErrorMixin = function () {
-  function ErrorMixin() {
-    _classCallCheck(this, ErrorMixin);
-  }
-
-  _createClass(ErrorMixin, [{
-    key: 'error',
-    value: function error(node, err) {
-      var _error = util.isError(err) ? err : Error(err);
-
-      var eobj = {
-        node: node.export(),
-        msg: err
-      };
-
-      node.setStatus('error');
-
-      node.event(Events.ERROR, eobj);
-
-      return _error;
-    }
-  }]);
-
-  return ErrorMixin;
-}();
-
-module.exports = ErrorMixin;
-},{"../events/link":111,"util":91}],121:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Export = function () {
-  function Export() {
-    _classCallCheck(this, Export);
-  }
-
-  _createClass(Export, [{
-    key: 'export',
-
-    /**
-     *
-     * Return a serializable export of this flow.
-     *
-     * @public
-     */
-    value: function _export() {
-      return {
-        id: this.id,
-        pid: this.pid,
-        ns: this.ns,
-        name: this.name,
-        identifier: this.identifier,
-        ports: this.ports,
-        // cycles: this.cycles,
-        inPorts: this.inPorts,
-        outPorts: this.outPorts,
-        // filled: this.filled,
-        // context: this.context,
-        active: this.active,
-        provider: this.provider
-        // input: this._filteredInput(),
-        // nodeTimeout: this.nodeTimeout,
-        // inputTimeout: this.inputTimeout
-      };
-    }
-  }]);
-
-  return Export;
-}();
-
-module.exports = Export;
-},{}],122:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var IsStartable = function () {
-  function IsStartable() {
-    _classCallCheck(this, IsStartable);
-  }
-
-  _createClass(IsStartable, [{
-    key: 'isStartable',
-    value: function isStartable() {
-      return true;
-    }
-  }]);
-
-  return IsStartable;
-}();
-
-module.exports = IsStartable;
-},{}],123:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Meta = function () {
-  function Meta() {
-    _classCallCheck(this, Meta);
-  }
-
-  _createClass(Meta, [{
-    key: 'setMetadata',
-    value: function setMetadata(metadata) {
-      this.metadata = metadata;
-      return this;
-    }
-  }, {
-    key: 'setMeta',
-    value: function setMeta(key, value) {
-      this.metadata[key] = value;
-      return this;
-    }
-  }]);
-
-  return Meta;
-}();
-
-module.exports = Meta;
-},{}],124:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var util = require('util');
-var forOf = require('object-forof');
-var ExternalInputPort = require('../port/external/input');
-var ExternalOutputPort = require('../port/external/output');
-var StartPort = require('../port/external/start');
-var Events = require('../events/flow');
-
-var Ports = function () {
-  function Ports() {
-    _classCallCheck(this, Ports);
-  }
-
-  _createClass(Ports, [{
-    key: 'portExists',
-
-    /**
-     *
-     * Checks whether the port exists at the node
-     * this Flow is relaying for.
-     *
-     * @param {String} type
-     * @param {String} port
-     */
-    value: function portExists(type, port) {
-      // this returns whether this port exists for _us_
-      // it only considers the exposed ports.
-      var portDef = this.getPortDefinition(port, type, false);
-      return this.getNode(portDef.nodeId).portExists(type, portDef.name);
-    }
-
-    /**
-     *
-     * Checks whether the port is open at the node
-     * this Flow is relaying for.
-     *
-     * @param {String} port
-     */
-
-  }, {
-    key: 'portIsOpen',
-    value: function portIsOpen(port) {
-      // the port open logic is about _our_ open and exposed ports.
-      // yet ofcourse it should check the real node.
-      // so also delegate.
-      var portDef = this.getPortDefinition(port, 'input');
-      // Todo there is no real true false in portIsOpen?
-      // it will fail hard.
-      return this.getNode(portDef.nodeId).portIsOpen(portDef.name);
-    }
-
-    /**
-     *
-     * Get _this_ Flow's port definition.
-     *
-     * The definition contains the _real_ portname
-     * of the node _this_ port is relaying for.
-     *
-     * @param {String} port
-     */
-
-  }, {
-    key: 'getPortDefinition',
-    value: function getPortDefinition(port, type) {
-      var createStartPort = arguments.length <= 2 || arguments[2] === undefined ? true : arguments[2];
-
-      if (port === ':start' && type === 'input') {
-        // && createStartPort && !this.portExists('input', ':start')) {
-        this.addPort('input', ':start', { type: 'any', name: ':start', required: false });
-      }
-      if (this.ports[type].hasOwnProperty(port)) {
-        return this.ports[type][port];
-      } else {
-        throw new Error(util.format('Unable to find exported port definition for %s port `%s` (%s:%s)\n' + '\tAvailable ports: %s', type, port, this.ns, this.name, Object.keys(this.ports[type]).toString()));
-      }
-    }
-  }, {
-    key: 'getPort',
-    value: function getPort(type, name) {
-      return this.getPortDefinition(name, type);
-    }
-  }, {
-    key: 'getInputPort',
-    value: function getInputPort(name) {
-      return this.getPortDefinition(name, 'input');
-    }
-  }, {
-    key: 'getOutputPort',
-    value: function getOutputPort(name) {
-      return this.getPortDefinition(name, 'output');
-    }
-
-    /**
-     *
-     * Get the port option at the node
-     * this flow is relaying for.
-     *
-     * @param {String} type
-     * @param {String} port
-     * @param {String} option
-     */
-
-  }, {
-    key: 'getPortOption',
-    value: function getPortOption(type, port, option) {
-      // Exposed ports can also have options set.
-      // if this is _our_ port (it is exposed)
-      // just delegate this to the real node.
-      var portDef = this.getPortDefinition(port, type);
-      // Todo there is no real true false in portIsOpen?
-      // it will fail hard.
-      return this.getNode(portDef.nodeId).getPortOption(type, portDef.name, option);
-    }
-
-    /**
-     *
-     * Sets an input port option.
-     *
-     * The node schema for instance can specifiy whether a port is persistent.
-     *
-     * At the moment a connection can override these values.
-     * It's a way of saying I give you this once so take care of it.
-     *
-     * Ok, with forks running this should eventually be much smarter.
-     * If there are long running flows, all instances should have their
-     * ports updated.
-     *
-     * Not sure when setPortOption is called, if it is called during 'runtime'
-     * there is no problem and we could just set it on the current Actor.
-     * I could also just already fix it and update baseActor and all _actors.
-     * which would be sufficient.
-     */
-
-  }, {
-    key: 'setPortOption',
-    value: function setPortOption(type, port, opt, value) {
-      var portDef = this.getPortDefinition(port, type);
-      this.getNode(portDef.nodeId).setPortOption(type, portDef.name, opt, value);
-    }
-  }, {
-    key: 'exposePort',
-    value: function exposePort(type, nodeId, port, name) {
-      var node = this.getNode(nodeId);
-
-      if (node.ports[type]) {
-        for (var p in node.ports[type]) {
-          if (node.ports[type].hasOwnProperty(p)) {
-            if (p === port) {
-              // not sure, is this all info?
-              this.addPort(type, name, {
-                nodeId: nodeId,
-                name: port
-              });
-
-              continue;
-            }
-          }
-        }
-      }
-
-      this.event(Events.ADDPORT, {
-        node: this.export(),
-        nodeId: nodeId,
-        name: port,
-        port: name,
-        type: type
-      });
-    }
-  }, {
-    key: 'removePort',
-    value: function removePort(type, name) {
-      if (this.ports[type][name]) {
-        delete this.ports[type][name];
-
-        this.event(Events.REMOVEPORT, {
-          node: this.export(),
-          port: name,
-          type: type
-        });
-      }
-    }
-  }, {
-    key: 'renamePort',
-    value: function renamePort(type, from, to) {
-      if (this.ports[type][from]) {
-        this.ports[type][to] = this.ports[type][from];
-        this.ports[type][to].name = to;
-
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
-
-        try {
-          for (var _iterator = this.links.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var link = _step.value;
-
-            if (type === 'input' && link.target.id === this.id && link.target.port === from) {
-              link.target.port = to;
-            } else if (type === 'output' && link.source.id === this.id && link.source.port === from) {
-              link.source.port = to;
-            }
-          }
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-              _iterator.return();
-            }
-          } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
-            }
-          }
-        }
-
-        delete this.ports[type][from];
-
-        this.event(Events.RENAMEPORT, {
-          node: this.export(),
-          from: from,
-          to: to,
-          type: type
-        });
-      }
-    }
-  }, {
-    key: 'addPort',
-    value: function addPort(type, name, def) {
-      if (!this.ports[type]) {
-        this.ports[type] = {};
-      }
-
-      if (name === ':start') {
-        this.ports[type][name] = new StartPort(def, this);
-      } else {
-        var internalPort = this.getNode(def.nodeId).getPort(type, def.name);
-
-        if (type === 'input') {
-          this.ports[type][name] = new ExternalInputPort(def, internalPort);
-        } else {
-          this.ports[type][name] = new ExternalOutputPort(def, internalPort);
-        }
-      }
-
-      var _port = this.ports[type][name];
-      _port.setParent(this);
-    }
-
-    /**
-     *
-     * Close the port of the node we are relaying for
-     * and also close our own port.
-     *
-     * @param {String} port
-     */
-
-  }, {
-    key: 'closePort',
-    value: function closePort(port) {
-      // delegate this to the real node
-      // only if this is one of _our_ exposed nodes.
-      var portDef = this.getPortDefinition(port, 'input');
-
-      if (port !== ':start') {
-        this.getNode(portDef.nodeId).closePort(portDef.name);
-      }
-    }
-  }, {
-    key: 'getPortType',
-    value: function getPortType(kind, port) {
-      if (port === ':start') {
-        return 'any';
-      }
-      var portDef = this.getPortDefinition(port, 'input');
-      var type = this.getNode(portDef.nodeId).getPortType(kind, portDef.name);
-      if (type) {
-        return type;
-      } else {
-        throw Error('Unable to determine port type');
-      }
-    }
-  }, {
-    key: 'inputPortAvailable',
-    value: function inputPortAvailable(target) {
-      if (target.action && !this.isAction()) {
-        return this.action(target.action).inputPortAvailable(target);
-      } else {
-        // little bit too much :start hacking..
-        // probably causes the :start problem with clock
-        if (target.port === ':start') {
-          return true;
-        } else {
-          var portDef = this.getPortDefinition(target.port, 'input');
-
-          if (!this.linkMap.has(target.wire.id)) {
-            throw Error('Cannot find internal link within linkMap');
-          }
-
-          return this.getNode(portDef.nodeId).inputPortAvailable(this.linkMap.get(target.wire.id).target);
-        }
-      }
-    }
-
-    /**
-     *
-     * Receive a ports definition and creates the Port instances
-     *
-     * @param {Object} ports
-     * @param {Object} ports.input
-     * @param {Object} ports.output
-     */
-
-  }, {
-    key: 'createPorts',
-    value: function createPorts(ports) {
-      var _this = this;
-
-      ports = ports || {};
-      // initialize both input and output ports might
-      // one of them be empty.
-      if (!ports.input) {
-        ports.input = {};
-      }
-      if (!ports.output) {
-        ports.output = {};
-      }
-
-      this.ports = { input: {}, output: {} };
-      forOf(function (name, def) {
-        return _this.addPort('input', name, def);
-      }, ports.input);
-      forOf(function (name, def) {
-        return _this.addPort('output', name, def);
-      }, ports.output);
-
-      // Always add complete port, :start port will be added dynamicaly
-      // this.addPort('output', ':complete', {name: ':complete', type: 'any'})
-    }
-  }, {
-    key: 'sendPortOutput',
-    value: function sendPortOutput(port, p) {
-      var out = {
-        node: this.export(),
-        port: port,
-        out: p
-      };
-
-      if (this.isAction()) {
-        out.action = this.action;
-      }
-
-      p.release(this);
-
-      this.event(Events.OUTPUT, out);
-    }
-  }]);
-
-  return Ports;
-}();
-
-module.exports = Ports;
-},{"../events/flow":109,"../port/external/input":161,"../port/external/output":162,"../port/external/start":163,"object-forof":253,"util":91}],125:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Process = function () {
-  function Process() {
-    _classCallCheck(this, Process);
-  }
-
-  _createClass(Process, [{
-    key: 'setPid',
-    value: function setPid(pid) {
-      this.pid = pid;
-    }
-  }]);
-
-  return Process;
-}();
-
-module.exports = Process;
-},{}],126:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var validate = require('../validate');
-
-var ToJSON = function () {
-  function ToJSON() {
-    _classCallCheck(this, ToJSON);
-  }
-
-  _createClass(ToJSON, [{
-    key: 'toJSON',
-
-    /**
-     *
-     * Export this modified instance to a nodedefinition.
-     *
-     * @public
-     */
-    value: function toJSON() {
-      var def = {
-        id: this.id,
-        ns: this.ns,
-        name: this.name,
-        title: this.title,
-        type: this.type,
-        description: this.description,
-        // should not be the full nodes
-        nodes: [],
-        links: [],
-        ports: this.ports,
-        providers: this.providers
-      };
-
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
-
-      try {
-        for (var _iterator = this.nodes.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var node = _step.value;
-
-          def.nodes.push(node.toJSON());
-        }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
-      }
-
-      var _iteratorNormalCompletion2 = true;
-      var _didIteratorError2 = false;
-      var _iteratorError2 = undefined;
-
-      try {
-        for (var _iterator2 = this.links.values()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var link = _step2.value;
-
-          def.links.push(link.toJSON());
-        }
-      } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion2 && _iterator2.return) {
-            _iterator2.return();
-          }
-        } finally {
-          if (_didIteratorError2) {
-            throw _iteratorError2;
-          }
-        }
-      }
-
-      validate.flow(def);
-
-      return def;
-    }
-  }]);
-
-  return ToJSON;
-}();
-
-module.exports = ToJSON;
-},{"../validate":172}],127:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var debug = require('debug')('chix:io');
-var uuid = require('uuid').v4;
-var Events = require('../events/io');
-var ConnectorEvents = require('../events/connector');
-
-var Connect = function () {
-  function Connect() {
-    _classCallCheck(this, Connect);
-  }
-
-  _createClass(Connect, [{
-    key: 'connect',
-
-    /**
-     *
-     * Connects ports together using the link information provided.
-     *
-     * @param {xLink} link
-     * @fires IO#connect
-     * @public
-     */
-    value: function connect(link) {
-      if (!link.source) {
-        throw Error('Link requires a source');
-      }
-
-      if (!link.source.pid) {
-        link.source.pid = link.source.id;
-      }
-
-      if (!link.ioid) {
-        link.ioid = uuid();
-      }
-
-      if (!link.target) {
-        throw Error('Link requires a target');
-      }
-
-      if (!link.target.pid) {
-        link.target.pid = link.target.id;
-      }
-
-      this.connections.set(link.ioid, link);
-
-      if (link.target.has('sync')) {
-        this.addSyncedTarget(link);
-      }
-
-      if (link.source.get('pointer')) {
-        this.addPointerPort(link);
-      }
-
-      debug('%s: link connected', link.ioid);
-
-      link.source.on(ConnectorEvents.DATA, this.onDataHandler);
-
-      this.emit(Events.CONNECT, link);
-    }
-  }]);
-
-  return Connect;
-}();
-
-module.exports = Connect;
-},{"../events/connector":108,"../events/io":110,"debug":178,"uuid":429}],128:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var debug = require('debug')('chix:io');
-var Events = require('../events/io');
-var ConnectorEvents = require('../events/connector');
-
-var Disconnect = function () {
-  function Disconnect() {
-    _classCallCheck(this, Disconnect);
-  }
-
-  _createClass(Disconnect, [{
-    key: 'disconnect',
-
-    /**
-     *
-     * Disconnects a link
-     *
-     * @param {xLink} link
-     * @fires IO#disconnect
-     */
-    value: function disconnect(link) {
-      // unregister the connection
-      if (this.connections.has(link.ioid)) {
-        this.connections.delete(link.ioid);
-      } else {
-        throw Error('Cannot disconnect an unknown connection');
-      }
-
-      if (this.syncedTargetMap.has(link.target.pid)) {
-        this.removeSyncedTarget(link);
-      }
-
-      if (this.pointerPorts.has(link.source.pid)) {
-        this.removePointerPort(link);
-      }
-
-      debug('%s: disconnected', link.ioid);
-
-      delete link.ioid;
-
-      link.source.removeListener(ConnectorEvents.DATA, this.onDataHandler);
-
-      // used by actor to close ports
-      this.emit(Events.DISCONNECT, link);
-    }
-  }]);
-
-  return Disconnect;
-}();
-
-module.exports = Disconnect;
-},{"../events/connector":108,"../events/io":110,"debug":178}],129:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var EventEmitter = require('events').EventEmitter;
-var debug = require('debug')('chix:io');
-
-var mixin = require('../mixin');
-var $Connect = require('./connect');
-var $Disconnect = require('./disconnect');
-var $Pointer = require('./pointer');
-var $Send = require('./send');
-var $Sync = require('./sync');
-
-var Events = require('../events/io');
-
-/**
- *
- * Io Handler
- *
- * It should know:
- *
- *  - the connections.
- *  - relevant source & target connection settings.
- *
- * Connection settings can overlap with port settings.
- * Connection settings take precedence over port settings.
- *
- * @constructor
- * @public
- *
- **/
-
-var IoHandler = function (_EventEmitter) {
-  _inherits(IoHandler, _EventEmitter);
-
-  function IoHandler() {
-    _classCallCheck(this, IoHandler);
-
-    // connections.byTarget, connections.bySource etc.
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(IoHandler).call(this));
-
-    _this.connections = new Map();
-    _this.syncedTargetMap = new Map();
-    _this.pointerPorts = new Map();
-    _this._shutdown = false;
-    _this.onDataHandler = _this.onDataHandler.bind(_this);
-    return _this;
-  }
-
-  /**
-   * @param {Packet} p - Packet
-   * @param {Connector} source - Source Connector
-   * @fires IO#send
-   */
-
-
-  _createClass(IoHandler, [{
-    key: 'onDataHandler',
-    value: function onDataHandler(p, source) {
-      var wire = source.wire;
-      if (source.get('collect')) {
-        debug('%s: collecting packets', wire.ioid);
-        this.CHI.collect(wire, p);
-        return; // will be handled by event
-      }
-
-      this.emit(Events.SEND, wire);
-      this.send(wire, p);
-    }
-  }, {
-    key: 'get',
-    value: function get(link) {
-      if (this.connections.has(link.ioid)) {
-        return this.connections.get(link.ioid);
-      }
-    }
-  }, {
-    key: 'reset',
-    value: function reset(cb) {
-      this._shutdown = true;
-
-      if (cb) cb();
-    }
-
-    /**
-     *
-     * @param {Packet} packet - The dropped packet
-     * @param {String} origin - Origin
-     * @fires IO#drop
-     */
-
-  }, {
-    key: 'drop',
-    value: function drop(packet, origin) {
-      // TODO: drop data/packet gracefully
-      debug('IoHandler: Dropping packet %s %s', packet, origin);
-      this.emit(Events.DROP, packet);
-    }
-  }]);
-
-  return IoHandler;
-}(EventEmitter);
-
-mixin(IoHandler, $Connect, $Disconnect, $Pointer, $Send, $Sync);
-
-module.exports = IoHandler;
-},{"../events/io":110,"../mixin":135,"./connect":127,"./disconnect":128,"./pointer":131,"./send":132,"./sync":133,"debug":178,"events":86}],130:[function(require,module,exports){
-'use strict';
-
-/**
- *
- * Handles the index
- *
- * TODO: packet is still needed, because index is set
- *
- * @param {Link} link
- * @param {Data} data
- * @param {Packet} p
- * @public
- */
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-function handleIndex(link, data, p) {
-  // TODO: data should be better defined and a typed object
-  var index = link.source.get('index');
-  if (/^\d+/.test(index)) {
-    // numeric
-    if (Array.isArray(data)) {
-      if (index < data.length) {
-        // new remember index.
-        p.point(link, index);
-        // p.index = index
-        // return data[index]
-      } else {
-        throw Error('index[] out-of-bounds on array output port ' + link.source.port);
-      }
-    } else {
-      throw Error('Got index[] on array output port ' + link.source.port + ', but data is not of the array type');
-    }
-  } else {
-    if ((typeof data === 'undefined' ? 'undefined' : _typeof(data)) === 'object') {
-      if (data.hasOwnProperty(index)) {
-        // TODO: test with dot-object
-        // new remember index.
-        p.point(link, index);
-        // p.index = index
-        // return data[index]
-      } else {
-        // maybe do not fail hard and just send to the error port.
-        console.log(p);
-        throw Error('Property ' + index + ' not found on object output port ' + link.source.port);
-      }
-    } else {
-      throw Error('Got index[] on non-object output port ' + link.source.port);
-    }
-  }
-}
-
-module.exports = handleIndex;
-},{}],131:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var debug = require('debug')('chix:io');
-
-var Pointer = function () {
-  function Pointer() {
-    _classCallCheck(this, Pointer);
-  }
-
-  _createClass(Pointer, [{
-    key: 'addPointerPort',
-    value: function addPointerPort(link) {
-      if (!this.pointerPorts.has(link.source.pid)) {
-        this.pointerPorts.set(link.source.pid, []);
-      }
-      this.pointerPorts.get(link.source.pid).push(link.source.port);
-      debug('%s: added pointer port `%s`', link.ioid, link.source.port);
-    }
-  }, {
-    key: 'removePointerPort',
-    value: function removePointerPort(link) {
-      var src = this.pointerPorts.get(link.source.pid);
-      src.splice(src.indexOf(link.source.port), 1);
-      if (src.length === 0) {
-        this.pointerPorts.delete(link.source.pid);
-      }
-    }
-  }, {
-    key: 'getPointerPorts',
-    value: function getPointerPorts(originId) {
-      if (this.pointerPorts.has(originId)) {
-        return this.pointerPorts.get(originId);
-      } else {
-        throw new Error(originId + ' s has no pointer ports');
-      }
-    }
-  }]);
-
-  return Pointer;
-}();
-
-module.exports = Pointer;
-},{"debug":178}],132:[function(require,module,exports){
-(function (process){
-'use strict';
-
-/* eslint-disable no-cond-assign */
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var debug = require('debug')('chix:io');
-var Packet = require('../packet');
-var handleIndex = require('./indexHandler');
-var Events = require('../events/io');
-
-var Send = function () {
-  function Send() {
-    _classCallCheck(this, Send);
-  }
-
-  _createClass(Send, [{
-    key: 'hold',
-    value: function hold() {
-      this._hold = true;
-      this._heldItems = [];
-    }
-  }, {
-    key: 'step',
-    value: function step() {
-      if (this._heldItems.length) {
-        var item = this._heldItems.shift();
-        this.send(item[0], item[1], true);
-      }
-    }
-  }, {
-    key: 'resume',
-    value: function resume() {
-      this._hold = false;
-      var item = void 0;
-      if (this._heldItems.length) {
-        while (item = this._heldItems.shift()) {
-          this.send(item[0], item[1], true);
-        }
-      }
-    }
-
-    /**
-     *
-     * The method to provide input to this io handler.
-     *
-     * @param {Link} link
-     * @param {Packet} p
-     *
-     */
-
-  }, {
-    key: 'send',
-    value: function send(link, p, step) {
-      if (this._hold && !step) {
-        this._heldItems.push([link, p]);
-        return;
-      }
-
-      if (!Packet.isPacket(p)) {
-        throw Error('send expects a packet');
-      }
-
-      debug('sending packet');
-
-      /*
-      if (link.source.has('pointer')) { // is just a boolean
-        debug('%s: handling pointer', link.ioid)
-        p.setOwner(link)
-        p = p.clone(link)
-        p.release(link)
-         // Create an identifier
-        const pp = this.getPointerPorts(link.source.pid)
-        pp.unshift(link.source.pid)
-        const identifier = pp.join('-')
-        // The source node+port are pointed to.
-        // The packet has it's chi updated with the
-        // source.pid as key and an assigned item id as value
-        this.CHI.pointer(
-          link.source.pid,
-          link.source.port,
-          p,
-          identifier
-        )
-      }
-      if (link.target.has('sync')) {
-        debug('%s: handling sync port', link.ioid)
-        const syncPorts = this.getSyncedTargetPorts(link.target)
-        this.CHI.sync(
-          link,
-          link.target.get('sync'), // originId
-          p,
-          syncPorts
-        )
-        // always return, react on CHI.on('synced')
-        return
-      }
-      */
-      this.__sendData(link, p);
-    }
-
-    /**
-     *
-     * The method to provide input to this io handler.
-     *
-     * Ok, what misses here is info on how to find the actor
-     * Who needs the information
-     *
-     *
-     * Actor:
-     *
-     *  ioHandler.listenTo(Object.keys(this.nodes),
-     *
-     * @param {Connector} target
-     * @param {object} input
-     * @param {object} chi
-     * @fires IO#data
-     * @fires IO#packet
-     * @fires IO#receive
-     * @private
-     */
-
-    /*
-     *
-     * Send Data
-     *
-     * @param {xLink} link - Link to write to
-     * @param {Any} data - The input data
-     * @private
-     */
-
-  }, {
-    key: '__sendData',
-    value: function __sendData(link, p) {
-      var _this = this;
-
-      if (this._shutdown) {
-        // TODO:: probably does not both have to be dropped
-        // during __sendData *and* during output
-        p.release(link);
-        this.drop(p, link);
-      } else {
-        var _ret = function () {
-          /* Do this with a component
-          if (link.target.has('cyclic') &&
-            Array.isArray(p.read(link)) // second time it's not an array anymore
-          ) {
-            debug('%s: cycling', link.ioid)
-            // grouping
-            // The counter part will be 'collect'
-            const g = this.CHI.group()
-            if (p.read(link).length === 0) {
-              return false
-            }
-            const data = JSON.parse(JSON.stringify(p.read(link)))
-            for (let i = 0; i < data.length; i++) {
-              // create new packet
-              const newp = Packet.create(
-                data[i],
-                typeof data[i] // not sure if this will always work.
-              ).setOwner(link)
-              // this is a copy taking place..
-              newp.set('chi', p.chi ? JSON.parse(JSON.stringify(p.chi)) : {})
-              g.item(newp.chi)
-              this.send(link, newp)
-            }
-            g.done()
-            return null
-          }
-          */
-
-          var cp = void 0; // current packet
-
-          if (link.source.has('index') && !p.hasOwnProperty('index')) {
-            // already done during clone
-            // cp.chi = JSON.parse(JSON.stringify(cp.chi))
-            // const cp = p.clone(link); // important!
-            cp = p.clone(p.owner); // important!
-            if (undefined === cp.read(p.owner)[link.source.get('index')]) {
-              debug('%s: INDEX UNDEFINED %s', link.ioid, link.source, cp.read(cp.owner));
-              return {
-                v: null
-              }; // nop
-            } else {
-              handleIndex(link, cp.read(cp.owner), cp);
-              // cp.write(link, handleIndex(link, cp.read(link), cp))
-            }
-          } else {
-            cp = p;
-          }
-
-          // better call it pointer
-          if (link.target.has('mask')) {
-            cp.point(cp.owner, link.target.get('mask'));
-          }
-
-          _this.emit(Events.DATA, {
-            link: link,
-            // data: cp.read(link) // only emit the data
-            data: cp.read(link) // only emit the data
-          });
-
-          _this.emit(Events.PACKET, {
-            link: link,
-            data: cp
-          });
-
-          debug('writing packet %s -> %s', link.source.port, link.target.port);
-
-          process.nextTick(function () {
-            cp.release(link);
-            link.target.write(cp);
-          });
-
-          _this.emit(Events.RECEIVE, link);
-        }();
-
-        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
-      }
-    }
-  }]);
-
-  return Send;
-}();
-
-module.exports = Send;
-}).call(this,require('_process'))
-},{"../events/io":110,"../packet":157,"./indexHandler":130,"_process":88,"debug":178}],133:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var debug = require('debug')('chix:io');
-
-var Sync = function () {
-  function Sync() {
-    _classCallCheck(this, Sync);
-  }
-
-  _createClass(Sync, [{
-    key: 'addSyncedTarget',
-
-    // build the syncedTargetMap, it contains a port array
-    // (the group that wants a sync with some originId
-    value: function addSyncedTarget(link) {
-      if (!this.syncedTargetMap.has(link.target.pid)) {
-        this.syncedTargetMap.set(link.target.pid, {});
-      }
-      if (!this.syncedTargetMap.get(link.target.pid)[link.target.get('sync')]) {
-        this.syncedTargetMap.get(link.target.pid)[link.target.get('sync')] = [];
-      }
-      this.syncedTargetMap.get(link.target.pid)[link.target.get('sync')].push(link.target.port);
-      debug('%s: syncing source port `%s` with target port %s', link.ioid, link.target.get('sync'), link.target.port);
-    }
-  }, {
-    key: 'removeSyncedTarget',
-    value: function removeSyncedTarget(link) {
-      var tgt = this.syncedTargetMap.get(link.target.pid);
-      tgt.splice(tgt.indexOf(link.target.port), 1);
-      if (tgt.length === 0) {
-        this.syncedTargetMap.delete(link.target.pid);
-      }
-    }
-  }, {
-    key: 'getSyncedTargetPorts',
-    value: function getSyncedTargetPorts(target) {
-      var originId = target.get('sync');
-      if (!this.syncedTargetMap.has(target.pid)) {
-        throw new Error('Unkown sync: ' + target.pid);
-      }
-      if (!this.syncedTargetMap.get(target.pid).hasOwnProperty(originId)) {
-        throw new Error('Unkown sync with: ' + originId);
-      }
-      // returns the ports array, those who want to sync with originId
-      return this.syncedTargetMap.get(target.pid)[originId];
-    }
-
-    /**
-     *
-     * Send synchronized input
-     *
-     * TODO: Input is synced here then we
-     *   throw it into the input sender.
-     *   They probably stay synced, but
-     *   it's not enforced anywhere after this.
-     *
-     * @param {string} targetId
-     * @param {object} data
-     */
-
-  }, {
-    key: 'sendSynced',
-    value: function sendSynced(targetId, data) {
-      for (var targetPort in data) {
-        if (data.hasOwnProperty(targetPort)) {
-          var synced = data[targetPort];
-          // keep in sync, do not use setImmediate
-          debug('%s: sendSynced', synced.link.ioid);
-          this.__sendData(synced.link, synced.p);
-        }
-      }
-    }
-  }]);
-
-  return Sync;
-}();
-
-module.exports = Sync;
-},{"debug":178}],134:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var uuid = require('uuid').v4;
-var Connector = require('./connector');
-var Setting = require('./setting');
-var validate = require('./validate');
-var Events = require('./events/link');
-
-/**
- *
- * xLink
- *
- *
- * Settings:
- *
- *   - ttl
- *   - expire
- *   - dispose: true
- *
- * Just need something to indicate it's an iip.
- *
- * @constructor
- * @public
- */
-
-var Link = function (_Setting) {
-  _inherits(Link, _Setting);
-
-  function Link(id, ioid) {
-    _classCallCheck(this, Link);
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Link).call(this));
-
-    _this.fills = 0;
-    _this.writes = 0;
-    _this.id = id === undefined ? uuid() : id;
-    _this.ioid = ioid || uuid();
-    _this.metadata = {};
-    return _this;
-  }
-
-  /**
-   *
-   * Creates a new connection/link
-   *
-   * Basically takes a plain link object
-   * and creates a proper xLink from it.
-   *
-   * The internal map holds xLinks, whereas
-   * the source map is just plain JSON.
-   *
-   * Structurewise they are almost the same.
-   *
-   * @param {Object} ln
-   * @return {xLink} link
-   * @public
-   */
-
-
-  _createClass(Link, [{
-    key: 'build',
-    value: function build(ln) {
-      if (!ln.source) {
-        throw Error('Create link expects a source');
-      }
-
-      if (!ln.target) {
-        throw Error('Create link expects a target');
-      }
-
-      validate.link(ln);
-
-      this.setSource(ln.source.id, ln.source.port, ln.source.setting, ln.source.action);
-
-      if (ln.metadata) {
-        this.setMetadata(ln.metadata);
-      } else {
-        this.setMetadata({});
-      }
-
-      this.setTarget(ln.target.id, ln.target.port, ln.target.setting, ln.target.action);
-    }
-
-    /**
-     *
-     * Set target
-     *
-     * @param {String} targetId
-     * @param {String} port
-     * @param {Object} settings
-     * @param {String} action
-     * @public
-     */
-
-  }, {
-    key: 'setTarget',
-    value: function setTarget(targetId, port, settings, action) {
-      this.target = new Connector(settings);
-      this.target.wire = this;
-      this.target.plug(targetId, port, action);
-    }
-
-    /**
-     *
-     * Set Source
-     *
-     * @param {Object} sourceId
-     * @param {String} port
-     * @param {Object} settings
-     * @param {String} action
-     * @public
-     */
-
-  }, {
-    key: 'setSource',
-    value: function setSource(sourceId, port, settings, action) {
-      this.source = new Connector(settings);
-      this.source.wire = this;
-      this.source.plug(sourceId, port, action);
-    }
-
-    /**
-     *
-     * Setting of pid's is delayed.
-     * I would like them to be available during plug.
-     * but whatever.
-     *
-     */
-
-  }, {
-    key: 'setSourcePid',
-    value: function setSourcePid(pid) {
-      this.source.setPid(pid);
-    }
-  }, {
-    key: 'setTargetPid',
-    value: function setTargetPid(pid) {
-      this.target.setPid(pid);
-    }
-  }, {
-    key: 'setMetadata',
-    value: function setMetadata(metadata) {
-      this.metadata = metadata;
-    }
-  }, {
-    key: 'setMeta',
-    value: function setMeta(key, val) {
-      this.metadata[key] = val;
-    }
-
-    /**
-     *
-     * Set Title
-     *
-     * @param {String} title
-     * @fires Link#metadata
-     * @public
-     */
-
-  }, {
-    key: 'setTitle',
-    value: function setTitle(title) {
-      this.setMeta('title', title);
-      this.emit(Events.CHANGE, this, 'metadata', this.metadata);
-    }
-
-    /**
-     *
-     * @fires Link#clear
-     * @public
-     */
-
-  }, {
-    key: 'clear',
-    value: function clear() {
-      this.fills = 0;
-      this.writes = 0;
-      this.emit(Events.CLEAR, this);
-    }
-
-    /**
-     * Update link by passing it a full object.
-     *
-     * Will only emit one change event.
-     *
-     * @fires Link#change
-     * @public
-     */
-
-  }, {
-    key: 'update',
-    value: function update(ln) {
-      this.build(ln);
-      this.emit(Events.CHANGE, this);
-    }
-  }, {
-    key: 'toJSON',
-    value: function toJSON() {
-      // TODO: use schema validation for toJSON
-      if (!this.hasOwnProperty('source')) {
-        console.log(this);
-        throw Error('Link should have a source property');
-      }
-      if (!this.hasOwnProperty('target')) {
-        throw Error('Link should have a target property');
-      }
-
-      var link = {
-        id: this.id,
-        source: this.source.toJSON(),
-        target: this.target.toJSON()
-      };
-
-      if (this.metadata) {
-        link.metadata = this.metadata;
-      }
-
-      if (this.fills) {
-        link.fills = this.fills;
-      }
-
-      if (this.writes) {
-        link.writes = this.writes;
-      }
-
-      if (this.data !== undefined) {
-        link.data = JSON.parse(JSON.stringify(this.data));
-      }
-
-      return link;
-    }
-  }], [{
-    key: 'create',
-    value: function create(ln) {
-      ln = ln || {};
-      if (!ln.source) {
-        ln.source = {};
-      }
-      if (!ln.target) {
-        ln.target = {};
-      }
-      var link = new Link(ln.id, ln.ioid);
-
-      if (ln.source || ln.target) {
-        link.build(ln);
-      }
-
-      return link;
-    }
-  }]);
-
-  return Link;
-}(Setting);
-
-module.exports = Link;
-},{"./connector":106,"./events/link":111,"./setting":171,"./validate":172,"uuid":429}],135:[function(require,module,exports){
-arguments[4][7][0].apply(exports,arguments)
-},{"dup":7}],136:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var NodeBox = require('./sandbox/node');
-var BaseNode = require('./BaseNode');
-var forOf = require('object-forof');
-var mixin = require('./mixin');
-var $callbackWrapper = require('./node/callbackWrapper');
-var $context = require('./node/context');
-var $delegate = require('./node/delegate');
-var $fill = require('./node/fill');
-var $output = require('./node/output');
-var $port = require('./node/port');
-var $runOnce = require('./node/runOnce');
-var $shutdown = require('./node/shutdown');
-var $start = require('./node/start');
-
-// Running within vm is also possible and api should stay
-// compatible with that, but disable for now.
-// vm = require('vm'),
-
-/**
- * Error Event.
- *
- * @event Node#error
- * @type {object}
- * @property {object} node - An export of this node
- * @property {string} msg - The error message
- */
-
-/**
- * Executed Event.
- *
- * @event Node#executed
- * @type {object}
- * @property {object} node - An export of this node
- */
-
-/**
- * Context Update event.
- *
- * @event Node#contextUpdate
- */
-
-/**
- * Output Event.
- *
- * Fired multiple times on output
- *
- * Once for every output port.
- *
- * @event Node#output
- * @type {object}
- * @property {object} node - An export of this node
- * @property {string} port - The output port
- * @property {string} out - A (reference) to the output
- */
-
-/**
- *
- * Node
- *
- * TODO:
- *   do not copy all those properties extend the node object itself.
- *   however, do not forget the difference between a nodeDefinition
- *   and a node.
- *
- *   node contains the process definition, which is the node
- *   definition merged with the instance configuration.
- *
- * @author Rob Halff <rob.halff@gmail.com>
- * @param {String} id
- * @param {Object} node
- * @param {String} identifier
- * @param {CHI} CHI
- * @constructor
- * @public
- */
-
-var xNode = function (_BaseNode) {
-  _inherits(xNode, _BaseNode);
-
-  function xNode(id, node, identifier, CHI) {
-    _classCallCheck(this, xNode);
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(xNode).call(this, id, node, identifier, CHI));
-
-    if (_this.async !== true) {
-      // super might have set it
-      _this.async = node.type === 'async';
-      _this.async = node.async ? true : _this.async;
-    }
-
-    _this.type = 'node';
-
-    _this.state = {};
-
-    _this._delay = 0;
-
-    // remember def for .compile()
-    _this.def = node;
-
-    /**
-     *
-     * Indicates whether this instance is active.
-     *
-     * This works together with the active state
-     * of the sandbox.
-     *
-     * When a blackbox sends async output done()
-     * should be used to inform us it is done.
-     *
-     * @property {Boolean} active
-     * @public
-     */
-    _this.active = false;
-
-    // this._setup()
-
-    /** delay interval */
-    _this.interval = 100;
-
-    /** @property {Object} input */
-    // this.input = {}
-
-    /** @property {Object} dependencies */
-    _this.dependencies = node.dependencies || {};
-
-    /** @property {Array} expose */
-    _this.expose = node.expose;
-
-    /** @property {String} fn */
-    _this.fn = node.fn;
-
-    /**
-     * @property {Numeric} nodeTimeout
-     * @default 3000
-     */
-    _this.nodeTimeout = node.nodeTimeout || 3000;
-
-    /**
-     *
-     * inputTimeout in milliseconds
-     *
-     * If inputTimeout === `false` there will be no timeout
-     *
-     * @property {Mixed} inputTimeout
-     * @default 3000
-     */
-    _this.inputTimeout = typeof node.inputTimeout === 'undefined' ? 3000 : node.inputTimeout;
-
-    /** @private */
-    _this.__halted = false; // was halted by a hold
-
-    /** @private */
-    _this._inputTimeout = null;
-
-    /** @property {Numeric} filled */
-    Object.defineProperty(_this, 'filled', {
-      enumerable: true,
-      configurable: false,
-      get: function get() {
-        return forOf(function (name, port) {
-          return port.isFilled() || undefined;
-        }, this.ports.input).length;
-      }
-    });
-
-    /** @property {Object} context */
-    Object.defineProperty(_this, 'context', {
-      enumerable: true,
-      configurable: false,
-      get: function get() {
-        var context = {};
-        forOf(function (name, port) {
-          context[name] = port.context;
-        }, this.ports.input);
-        return context;
-      }
-    });
-
-    _this.status = 'init';
-
-    // simplify this. compile if not compiled.
-    _this.nodebox = new NodeBox();
-    _this.nodebox.set('done', _this.complete.bind(_this));
-    _this.nodebox.set('cb', _this._asyncOutput.bind(_this));
-    _this.nodebox.set('state', _this.state);
-    _this.nodebox.require(_this.dependencies.npm);
-    _this.nodebox.expose(_this.expose);
-    _this.nodebox.set('output', _this.async ? _this._asyncOutput.bind(_this) : {});
-
-    if (_this._isPreloaded(node.ports)) {
-      if (_this.fn) {
-        // this.nodebox.fill(this.fn)
-        // not tested..
-        _this.nodebox.fill(_this.fn);
-      }
-
-      if (_this.async) {
-        // how about nodebox.state?
-        // state is now in the definition itself..
-        // this should really also be a deep copy.
-        _this.nodebox.state = node.state;
-        // this._loadAsync()
-        // this.createPorts(node.ports)
-      }
-    } else {
-      // console.log(compile(node, true))
-      _this.nodebox.compile(_this.fn);
-
-      if (_this.async) {
-        // This collects the port definitions they
-        // attach to `on`
-        _this.nodebox.run();
-
-        // this._loadAsync()
-        // this.createPorts(node.ports)
-      }
-    }
-
-    _this.state = _this.nodebox.state;
-
-    _this.createPorts(node.ports);
-
-    _this.setStatus('created');
-
-    _this.start();
-    return _this;
-  }
-
-  /**
-   *
-   * Starts the node
-   *
-   * TODO: dependencies are always the same, only input is different.
-   * dependencies must be created during createScript.
-   * also they must be wrapped within a function.
-   * otherwise you cannot overwrite window and document etc.
-   * ...Maybe statewise it's a good thing, dependencies are re-required.
-   *
-   * FIXME: this method does too much on it's own.
-   *
-   * Note: start is totally unprotected, it assumes the input is validated
-   * and all required ports are filled.
-   * Start should never really be called directly, the node starts when
-   * input is ready.
-   *
-   * @param {Function} fn
-   * @param {String} name
-   * @emits Node#error
-   * @emits Node#require
-   * @emits Node#expose
-   * @private
-   */
-
-
-  _createClass(xNode, [{
-    key: 'clearInput',
-    value: function clearInput(port) {
-      delete this.input[port];
-    }
-
-    /**
-     *
-     * Test whether this is a preloaded node.
-     *
-     * @private
-     */
-
-  }, {
-    key: '_isPreloaded',
-    value: function _isPreloaded(ports) {
-      if (typeof this.fn === 'function') {
-        return true;
-      }
-
-      for (var port in ports.input) {
-        if (ports.input.hasOwnProperty(port)) {
-          if (ports.input[port].fn) {
-            return true;
-          }
-        }
-      }
-
-      return false;
-    }
-  }]);
-
-  return xNode;
-}(BaseNode);
-
-mixin(xNode, $callbackWrapper, $context, $delegate, $fill, $output, $port, $shutdown, $runOnce, $start);
-
-xNode.SYNC_NOT_FILLED = false;
-xNode.ALL_CONNECTED_NOT_FILLED = false;
-
-module.exports = xNode;
-},{"./BaseNode":92,"./mixin":135,"./node/callbackWrapper":148,"./node/context":149,"./node/delegate":150,"./node/fill":151,"./node/output":152,"./node/port":153,"./node/runOnce":154,"./node/shutdown":155,"./node/start":156,"./sandbox/node":169,"object-forof":253}],137:[function(require,module,exports){
-arguments[4][8][0].apply(exports,arguments)
-},{"../../events/node":112,"dup":8,"object-forof":253}],138:[function(require,module,exports){
-arguments[4][9][0].apply(exports,arguments)
-},{"../../events/node":112,"debug":178,"dup":9,"object-forof":253}],139:[function(require,module,exports){
-arguments[4][10][0].apply(exports,arguments)
-},{"../../events/node":112,"dup":10,"util":91}],140:[function(require,module,exports){
-arguments[4][11][0].apply(exports,arguments)
-},{"../../packet":157,"dup":11}],141:[function(require,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],142:[function(require,module,exports){
-arguments[4][13][0].apply(exports,arguments)
-},{"dup":13,"object-forof":253}],143:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"dup":14,"object-forof":253}],144:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Port = require('../../port');
-var debug = require('debug')('chix:inode');
-var forOf = require('object-forof');
-var Packet = require('../../packet');
-var Events = require('../../events/node');
-
-var Ports = function () {
-  function Ports() {
-    _classCallCheck(this, Ports);
-  }
-
-  _createClass(Ports, [{
-    key: 'handleLinkSettings',
-
-    /**
-     *
-     * Fills the port.
-     *
-     * Does the same as fillPort, however it also checks:
-     *
-     *   - port availability
-     *   - port settings
-     *
-     * FIXME: fill & fillPort can just be merged probably.
-     *
-     * @param {Object} target
-     * @public
-     */
-    value: function handleLinkSettings(target) {
-      // FIX: hold is not handled anywhere as setting anymore
-      if (target.has('hold')) {
-        this.hold();
-      } else if (target.has('persist')) {
-        // FIX ME: has become a weird construction now
-        var index = target.get('index');
-        var _port = this.ports.input[target.port];
-
-        // persist can be a boolean, or it becomes an array of indexes to persist.
-        if (index) {
-          if (!Array.isArray(_port.persist)) {
-            _port.persist = [];
-          }
-          _port.persist.push(index);
-        } else {
-          _port.persist = true;
-        }
-      }
-    }
-  }, {
-    key: 'sendPortOutput',
-    value: function sendPortOutput(port, output) {
-      if (port === 'error' && output.read() === null) {
-        // do nothing
-        return;
-      }
-
-      if (/error/.test(port)) {
-        if (!this.portExists('output', port)) {
-          // throw Error(output.read(output.owner))
-          this.emit('error', {
-            node: this,
-            msg: output.read(output.owner)
-          });
-          return;
-        }
-        var errorPort = this.getPort('output', port);
-        if (!errorPort.hasConnections()) {
-          this.emit('error', {
-            node: this,
-            msg: output.read(output.owner)
-          });
-
-          return;
-        }
-      }
-
-      if (!Packet.isPacket(output)) {
-        throw Error(this.identifier + ': Output for port \'' + port + '\' must be a Packet');
-      }
-
-      if (this.ports.output.hasOwnProperty(port)) {
-        debug('%s:sendPortOutput port `%s`', this.identifier, port);
-
-        this.event(Events.OUTPUT, {
-          node: this,
-          port: port,
-          out: output
-        });
-
-        var _port = this.ports.output[port];
-
-        _port.write(output);
-      } else {
-        throw Error(this.identifier + ': no such output port ' + port);
-      }
-    }
-    /**
-     *
-     * Wires a source port to one of our ports
-     *
-     * target is the target object of the connection.
-     * which consist of a source and target object.
-     *
-     * So in this link the target is _our_ port.
-     *
-     * If a connection is made to the virtual `:start` port
-     * it will be created automatically if it does not exist already.
-     *
-     * The port will be set to the open state and the connection
-     * will be registered.
-     *
-     * A port can have multiple connections.
-     *
-     * TODO: the idea was to also keep track of
-     *       what sources are connected.
-     *
-     * @private
-     */
-
-  }, {
-    key: '_initStartPort',
-    value: function _initStartPort() {
-      // add it to known ports
-      if (!this.portExists('input', ':start')) {
-        debug('%s:%s initialized', this.identifier, ':start');
-        this.addPort('input', ':start', {
-          type: 'any',
-          name: ':start',
-          required: false,
-          rejects: 0,
-          fills: 0,
-          runCount: 0
-        });
-      }
-    }
-  }, {
-    key: 'addPort',
-    value: function addPort(type, port, def) {
-      var _this = this;
-
-      if (this.portExists(type, port)) {
-        throw Error(this.identifier + ': Port ' + port + ' already exists');
-      }
-
-      // TODO: this generic, however options does not exists anymore, it's settings
-      /*
-      _setup () {
-        for (const port in this.ports.input) {
-          if (this.ports.input.hasOwnProperty(port)) {
-            if (this.ports.input[port].options) {
-              for (const opt in this.ports.input[port].options) {
-                if (this.ports.input[port].options.hasOwnProperty(opt)) {
-                  this.setPortOption(
-                    'input',
-                    port,
-                    opt,
-                    this.ports.input[port].options[opt])
-                }
-              }
-            }
-          }
-        }
-      }
-      */
-      var _def = Object.assign({}, def);
-
-      // If there is a port function defined for this port it means it's async
-      // ASYNC PORT SETUP
-      if (this.nodebox.on.input.hasOwnProperty(port)) {
-        _def.fn = this._createPortBox(this.nodebox.on.input[port].toString(), ('__' + port + '__').toUpperCase());
-        this.async = def.async = true;
-      } else if (_def.fn) {
-        // pre-compiled
-        _def.fn = this._createPortBox(_def.fn, ('__' + port + '__').toUpperCase());
-        this.async = _def.async = true;
-      }
-
-      var _port = Port.create(type, port, _def);
-      if (type === 'input' && _port.setState) {
-        _port.setState(this.state);
-      }
-
-      if (def.options) {
-        forOf(function (opt, val) {
-          _this.setPortOption('input', port, opt, val);
-        }, def.options);
-      }
-
-      _port.setParent(this);
-
-      _port.on('fill', this.onPortFill.bind(this));
-
-      this.ports[type][port] = _port;
-
-      return true;
-    }
-  }, {
-    key: 'removePort',
-    value: function removePort(type, port) {
-      if (this.portExists(type, port)) {
-        var _port = this.getPort(type, port);
-        // Add shutdown task?
-        // io handler would also need to disconnect etc.
-        // this.clearInput(port)
-        _port.destroy();
-        // this.clearContextProperty(port)
-        delete this.ports[type][port];
-        return true;
-      } else {
-        throw Error(this.identifier + ': Port \'' + port + '\' does not exist');
-      }
-    }
-
-    // TODO: name within the port object does not seem to be updated.
-
-  }, {
-    key: 'renamePort',
-    value: function renamePort(type, from, to) {
-      if (this.portExists(type, from)) {
-        this.ports[type][to] = this.ports[type][from];
-        delete this.ports[type][from];
-        return true;
-      } else {
-        throw Error(this.identifier + ': Port \'' + from + '\' does not exist');
-      }
-    }
-  }, {
-    key: 'getPort',
-    value: function getPort(type, name) {
-      if (type === 'input' && name === ':start') {
-        this._initStartPort();
-      }
-      if (this.ports.hasOwnProperty(type) && this.ports[type].hasOwnProperty(name)) {
-        return this.ports[type][name];
-      } else {
-        throw new Error(this.identifier + ': Port \'' + name + '\' does not exist');
-      }
-    }
-  }, {
-    key: 'getInputPort',
-    value: function getInputPort(name) {
-      return this.getPort('input', name);
-    }
-  }, {
-    key: 'getOutputPort',
-    value: function getOutputPort(name) {
-      return this.getPort('output', name);
-    }
-  }, {
-    key: 'getPortOption',
-    value: function getPortOption(type, name, opt) {
-      return this.getPort(type, name).getOption(opt);
-    }
-
-    /*
-    portExists (type, port) {
-      return (this.ports[type] && this.ports[type].hasOwnProperty(port)) ||
-      (type === 'output' && Ports.events.indexOf(port) >= 0)
-    }
-    */
-
-  }, {
-    key: 'portExists',
-    value: function portExists(type, port) {
-      return this.ports[type] && this.ports[type].hasOwnProperty(port);
-    }
-
-    // Array format is used to get nested property type
-
-  }, {
-    key: 'getPortType',
-    value: function getPortType(kind, port) {
-      var i = void 0;
-      var obj = void 0;
-      var type = void 0;
-      if (Array.isArray(port)) {
-        obj = this.ports[kind];
-        for (i = 0; i < port.length; i++) {
-          if (i === 0) {
-            obj = obj[port[i]];
-          } else {
-            obj = obj.properties[port[i]];
-          }
-        }
-        type = obj.type;
-      } else {
-        if (this.ports[kind].hasOwnProperty(port)) {
-          type = this.ports[kind][port].type;
-        } else {
-          throw new Error(this.identifier + ': Port \'' + port + '\' does not exist');
-        }
-      }
-      if (type) {
-        return type;
-      } else {
-        throw Error(this.identifier + ': Unable to determine type for port ' + port);
-      }
-    }
-
-    /**
-     *
-     * Sets an input port option.
-     *
-     * The node schema for instance can specifiy whether a port is persistent.
-     *
-     * At the moment a connection can override these values.
-     * It's a way of saying I give you this once so take care of it.
-     *
-     * @param {string} type
-     * @param {string} name
-     * @param {string} opt
-     * @param {any} value
-     * @returns {undefined}
-     */
-
-  }, {
-    key: 'setPortOption',
-    value: function setPortOption(type, name, opt, value) {
-      this.getPort(type, name).setOption(opt, value);
-    }
-  }, {
-    key: 'setPortOptions',
-    value: function setPortOptions(type, options) {
-      var _this2 = this;
-
-      forOf(function (port, opt, val) {
-        return _this2.setPortOption(type, port, opt, options[opt]);
-      }, options);
-    }
-
-    /**
-     *
-     * Receive a ports definition and creates the Port instances
-     *
-     * @param {Object} ports
-     * @param {Object} ports.input
-     * @param {Object} ports.output
-     */
-
-  }, {
-    key: 'createPorts',
-    value: function createPorts(ports) {
-      var _this3 = this;
-
-      if (!ports.output) {
-        ports.output = {};
-      }
-
-      if (!ports.input) {
-        ports.input = {};
-      }
-
-      this.ports = { input: {}, output: {} };
-
-      forOf(function (name, def) {
-        return _this3.addPort('input', name, def);
-      }, ports.input);
-      forOf(function (name, def) {
-        return _this3.addPort('output', name, def);
-      }, ports.output);
-      forOf(function (name, event) {
-        if (event.expose) {
-          var port = ':' + event.name;
-          _this3.addPort('output', port, { name: port, type: 'any' });
-        }
-      }, Events);
-    }
-  }, {
-    key: '_portsAvailable',
-    value: function _portsAvailable() {
-      return forOf(function (name, port) {
-        if ((!port.hasOwnProperty('required') || port.required === true) && !port.hasOwnProperty('default')) {
-          return port + '*';
-        }
-        return port;
-      }, this.ports.input).join(', ');
-    }
-  }]);
-
-  return Ports;
-}();
-
-module.exports = Ports;
-},{"../../events/node":112,"../../packet":157,"../../port":159,"debug":178,"object-forof":253}],145:[function(require,module,exports){
-arguments[4][16][0].apply(exports,arguments)
-},{"dup":16}],146:[function(require,module,exports){
-arguments[4][17][0].apply(exports,arguments)
-},{"dup":17}],147:[function(require,module,exports){
-arguments[4][18][0].apply(exports,arguments)
-},{"dup":18}],148:[function(require,module,exports){
-'use strict';
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Packet = require('../packet');
-var Events = require('../events/node');
-var util = require('util');
-
-var CallbackWrapper = function () {
-  function CallbackWrapper() {
-    _classCallCheck(this, CallbackWrapper);
-  }
-
-  _createClass(CallbackWrapper, [{
-    key: '_callbackWrapper',
-
-    /**
-     *
-     * Generic Callback wrapper
-     *
-     * Will collect the arguments and pass them on to the next node
-     *
-     * So technically the next node is the callback.
-     *
-     * Parameters are defined on the output as ports.
-     *
-     * Each callback argument must be defined as output port
-     * in the callee's schema
-     *
-     * e.g.
-     *
-     *  node style callback:
-     *
-     *  ports.output: { err: ..., result: ... }
-     *
-     *  connect style callback:
-     *
-     *  ports.output: { req: ..., res: ..., next: ... }
-     *
-     * The order of appearance of arguments must match those of the ports within
-     * the json schema.
-     *
-     * TODO: Within the schema you must define the correct type otherwise output
-     * will be refused
-     *
-     *
-     * @private
-     */
-    // PUT THIS INTO A DIFFERENT NODE TYPE, SEPERATE THE DIFFERENT FLAVOURS
-    value: function _callbackWrapper() {
-      var obj = {};
-      var ports = this.outPorts;
-
-      for (var i = 0; i < arguments.length; i++) {
-        if (!ports[i]) {
-          this.event(Events.ERROR, {
-            msg: Error(util.format('Unexpected extra port of type %s', _typeof(arguments[i]) === 'object' ? arguments[i].constructor.name : _typeof(arguments[i])))
-          });
-        } else {
-          obj[ports[i]] = Packet.create(arguments[i]);
-        }
-      }
-      this._output(obj);
-    }
-  }]);
-
-  return CallbackWrapper;
-}();
-
-module.exports = CallbackWrapper;
-},{"../events/node":112,"../packet":157,"util":91}],149:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var debug = require('debug')('chix:node');
-var Packet = require('../packet');
-var Events = require('../events/node');
-
-var Context = function () {
-  function Context() {
-    _classCallCheck(this, Context);
-  }
-
-  _createClass(Context, [{
-    key: '$setContextProperty',
-    value: function $setContextProperty(port, data, trigger) {
-      debug('%s:%s set context', this.identifier, port);
-      if (data === undefined) {
-        throw Error('Refused to $setContextProperty to undefined');
-      }
-      var p = void 0;
-      if (Packet.isPacket(data)) {
-        p = data;
-      } else {
-        p = Packet.create(data, this.getPortType('input', port)).setOwner(this);
-      }
-      this.getInputPort(port).setContext(p, trigger);
-    }
-  }, {
-    key: 'clearContextProperty',
-    value: function clearContextProperty(port) {
-      debug('%s:%s clear context', this.identifier, port);
-
-      this.getInputPort(port).clearContext();
-
-      this.event(Events.CONTEXTCLEAR, {
-        node: this,
-        port: port
-      });
-    }
-  }]);
-
-  return Context;
-}();
-
-module.exports = Context;
-},{"../events/node":112,"../packet":157,"debug":178}],150:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Delegate = function () {
-  function Delegate() {
-    _classCallCheck(this, Delegate);
-  }
-
-  _createClass(Delegate, [{
-    key: '_delegate',
-
-    /**
-     *
-     * Execute the delegated callback for this node.
-     *
-     * [fs, 'readFile', '/etc/passwd']
-     *
-     * will execute:
-     *
-     * fs['readFile']('/etc/passwd', this.callbackWrapper)
-     *
-     * @param {Object} output
-     * @emits Node#branching
-     * @private
-     */
-    // PUT THIS INTO A DIFFERENT NODE TYPE, SEPERATE THE DIFFERENT FLAVOURS
-    value: function _delegate(output) {
-      var fn = output.splice(0, 1).pop();
-      var method = output.splice(0, 1).pop();
-      output.push(this._callbackWrapper.bind(this));
-      fn[method].apply(fn, output);
-    }
-  }]);
-
-  return Delegate;
-}();
-
-module.exports = Delegate;
-},{}],151:[function(require,module,exports){
-'use strict';
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Port = require('../port');
-var forOf = require('object-forof');
-var debug = require('debug')('chix:node');
-var PacketContainer = require('../packetContainer');
-var Events = require('../events/node');
-
-var Fill = function () {
-  function Fill() {
-    _classCallCheck(this, Fill);
-  }
-
-  _createClass(Fill, [{
-    key: 'onPortFill',
-    value: function onPortFill() {
-      var _this = this;
-
-      debug('%s onPortFill', this.identifier);
-
-      if (this.status === 'hold') {
-        this.__halted = true;
-        this.event(Events.PORTFILL, this);
-
-        return;
-      }
-
-      if (this.status !== 'running') {
-        throw Error('onPortFill: node must be in `running` state, current state: ' + this.status);
-      }
-
-      var inputPorts = this.ports.input;
-
-      this.notFilled = [];
-      var res = forOf(function (name, port) {
-        if (port.isSync()) {
-          var ret = port.isFilled();
-          if (ret) {
-            debug('%s.%s: ready using `%s`', _this.identifier, name, Port.Message[ret]);
-            return true;
-          }
-          debug('%s.%s: not ready', _this.identifier, name);
-          _this.notFilled.push(name);
-          return undefined;
-        }
-        // async is always ready
-        debug('%s.%s: ready using `%s`', _this.identifier, name, 'async always ready');
-        return true;
-      }, inputPorts).length;
-
-      if (res === this.inPorts.length) {
-        debug('%s:onPortFill running', this.identifier);
-
-        this.setStatus('running');
-
-        // need an emit here to indicate running
-        // can also run shutdown then first.
-
-        if (this.async) {
-          var atLeastOneAsyncFilled = forOf(function (portName, port) {
-            return port.isAsync() && port.isFilled() || undefined;
-          }, inputPorts).length;
-
-          if (atLeastOneAsyncFilled) {
-            (function () {
-              _this.event(Events.EXECUTE);
-
-              var input = {};
-
-              forOf(function (name, port) {
-                if (port.isSync()) {
-                  input[name] = port.read();
-                } else if (port.isFilled()) {
-                  input[name] = port.read();
-                }
-              }, inputPorts);
-
-              var params = void 0;
-              try {
-                params = PacketContainer.create(input);
-              } catch (e) {
-                console.log('%s: INPUT TRIED TO MERGE', _this.identifier, JSON.stringify(input, null, 2));
-                throw Error('stop');
-                /*
-                this.emit('error', {
-                  node: this,
-                  // todo: should be named 'error' and be an error everywhere
-                  msg: e
-                })
-                this.event(Events.PORTFILL, this)
-                return false
-                */
-              }
-
-              forOf(function (name, port) {
-                // input[name] because already read() above (isFilled() === false)
-                if (!port.isSync() && input[name]) {
-                  debug('%s.%s: execute %s', _this.identifier, name, port.fn.name);
-                  port.run(params, _this.state); // this state?
-                  _this.state = _this.nodebox.state = port.fn.state;
-                }
-              }, inputPorts);
-            })();
-          } else {
-            this.event(Events.PORTFILL, this);
-            return false;
-          }
-        } else {
-          var _ret2 = function () {
-            _this.event(Events.EXECUTE);
-            var input = {};
-            forOf(function (portName, port) {
-              input[portName] = port.read();
-            }, inputPorts);
-
-            var params = void 0;
-            try {
-              params = PacketContainer.create(input);
-            } catch (e) {
-              _this.emit('error', {
-                node: _this,
-                // todo: should be named 'error' and be an error everywhere
-                msg: e
-              });
-              _this.event(Events.PORTFILL, _this);
-              return {
-                v: false
-              };
-            }
-            _this.__start(params);
-          }();
-
-          if ((typeof _ret2 === 'undefined' ? 'undefined' : _typeof(_ret2)) === "object") return _ret2.v;
-        }
-
-        this.runCount++;
-
-        this.event(Events.EXECUTED, {
-          node: this
-          // port: port
-        });
-
-        // Cleanup all these events
-        this.complete();
-
-        this.event(Events.PORTFILL, this);
-
-        return true;
-      } else {
-        debug('%s:onPortFill ports: %s not ready', this.identifier, this.notFilled);
-        this.event(Events.PORTFILL, this);
-      }
-    }
-  }]);
-
-  return Fill;
-}();
-
-module.exports = Fill;
-},{"../events/node":112,"../packetContainer":158,"../port":159,"debug":178,"object-forof":253}],152:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var forOf = require('object-forof');
-
-var Output = function () {
-  function Output() {
-    _classCallCheck(this, Output);
-  }
-
-  _createClass(Output, [{
-    key: '_asyncOutput',
-
-    /**
-     *
-     * This node handles the output of the `blackbox`
-     *
-     * It is specific to the API of the internal Chix node function.
-     *
-     * out = { port1: data, port2: data }
-     * out = [fs.readFile, arg1, arg2 ]
-     *
-     * Upon output the input will be freed.
-     *
-     * @param {Object} output
-     * @private
-     */
-    value: function _asyncOutput(output) {
-      var _this = this;
-
-      // delegate and object output has
-      // synchronous output on _all_ ports
-      // however we do not know if we we're called from
-      // the function type of output..
-      forOf(function (port, p) {
-        return _this.sendPortOutput(port, p);
-      }, output);
-    }
-
-    /**
-     *
-     * Output
-     *
-     * Directs the output to the correct handler.
-     *
-     * If output is a function it is handled by asyncOutput.
-     *
-     * If it's an array, it means it's the shorthand variant
-     *
-     * e.g. output = [fs, 'readFile']
-     *
-     * This will be handled by the delegate() method.
-     *
-     * Otherwise it is a normal output object containing the output for the ports.
-     *
-     * e.g. { out1: ...,  out2: ...,  error: ... } etc.
-     *
-     * TODO: not sure if this should always call complete.
-     *
-     * @param {Object} output
-     * @private
-     */
-
-  }, {
-    key: '_output',
-    value: function _output(output) {
-      var _this2 = this;
-
-      if (typeof output === 'function') {
-        output.call(this, this._asyncOutput.bind(this));
-        return;
-      }
-
-      if (Array.isArray(output)) {
-        this._delegate(output);
-        return;
-      }
-
-      forOf(function (port, p) {
-        return _this2.sendPortOutput(port, p);
-      }, output);
-    }
-  }]);
-
-  return Output;
-}();
-
-module.exports = Output;
-},{"object-forof":253}],153:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var debug = require('debug')('chix:node');
-var PortBox = require('../sandbox/port');
-
-var Port = function () {
-  function Port() {
-    _classCallCheck(this, Port);
-  }
-
-  _createClass(Port, [{
-    key: '_createPortBox',
-
-    /**
-     *
-     * Executes the async variant
-     *
-     * state is the only variable which will persist.
-     *
-     * @param {string} fn - Portbox Function Body
-     * @returns {PortBox}
-     * @private
-     */
-    value: function _createPortBox(fn, name) {
-      debug('%s: creating portbox `%s`', this.identifier, name);
-
-      var portbox = new PortBox(name);
-      portbox.set('state', this.nodebox.state);
-      portbox.set('output', this._asyncOutput.bind(this));
-
-      // also absorbes already required.
-      portbox.require(this.dependencies.npm, true);
-      portbox.expose(this.expose, this.CHI);
-
-      if (typeof fn !== 'function') {
-        fn = fn.slice(fn.indexOf('{') + 1, fn.lastIndexOf('}'));
-        portbox.compile(fn);
-      } else {
-        portbox.fill(fn);
-      }
-
-      return portbox;
-    }
-  }, {
-    key: '$portIsFilled',
-    value: function $portIsFilled(port) {
-      return this.ports.input[port].isFilled();
-    }
-  }, {
-    key: 'handlePortSettings',
-    value: function handlePortSettings(port) {
-      if (this.ports.input.hasOwnProperty(port)) {}
-    }
-  }]);
-
-  return Port;
-}();
-
-module.exports = Port;
-},{"../sandbox/port":170,"debug":178}],154:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var debug = require('debug')('chix:node');
-var Events = require('../events/node');
-
-var RunOnce = function () {
-  function RunOnce() {
-    _classCallCheck(this, RunOnce);
-  }
-
-  _createClass(RunOnce, [{
-    key: '_runOnce',
-
-    /**
-     *
-     * Runs the node
-     *
-     * @emits Node#nodeTimeout
-     * @emits Node#start
-     * @emits Node#executed
-     * @private
-     */
-    value: function _runOnce() {
-      var t = setTimeout(function () {
-        debug('%s: node timeout', this.identifier);
-
-        /**
-         * Timeout Event.
-         *
-         * @event Node#nodeTimeout
-         * @type {object}
-         * @property {object} node - An export of this node
-         */
-        this.event(Events.TIMEOUT, {
-          node: this.export()
-        });
-      }.bind(this), this.nodeTimeout);
-
-      /**
-       * Start Event.
-       *
-       * @event Node#start
-       * @type {object}
-       * @property {object} node - An export of this node
-       */
-      this.event(Events.START, {
-        node: this.export()
-      });
-
-      // this.nodebox.runInNewContext(this.sandbox)
-
-      // this.setStatus('running')
-
-      this.nodebox.run();
-      this.state = this.nodebox.state;
-
-      debug('%s:%s executed', this.identifier, this.nodebox.fn.name);
-
-      clearTimeout(t);
-
-      this.active = false;
-
-      this._output(this.nodebox.output);
-    }
-  }]);
-
-  return RunOnce;
-}();
-
-module.exports = RunOnce;
-},{"../events/node":112,"debug":178}],155:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Events = require('../events/node');
-
-var Shutdown = function () {
-  function Shutdown() {
-    _classCallCheck(this, Shutdown);
-  }
-
-  _createClass(Shutdown, [{
-    key: 'shutdown',
-
-    /**
-     *
-     * Runs the shutdown method of the blackbox
-     *
-     * An asynchronous node can define a shutdown function:
-     *
-     *   on.shutdown = function() {
-     *
-     *     // do shutdown stuff
-     *
-     *   }
-     *
-     * When a network shuts down, this function will be called.
-     * To make sure all nodes shutdown gracefully.
-     *
-     * e.g. A node starting a http server can use this
-     *      method to shutdown the server.
-     *
-     * @param {function} cb
-     * @returns {undefined}
-     * @public
-     */
-    value: function shutdown(cb) {
-      if (this.nodebox.on && this.nodebox.on.shutdown) {
-        // TODO: nodes now do nothing with the callback, they should..
-        // otherwise we will hang
-        this.nodebox.on.shutdown(cb);
-
-        // TODO: send the nodebox, or just the node export?
-        this.event(Events.SHUTDOWN, this.nodebox);
-      } else {
-        if (cb) {
-          cb();
-        }
-      }
-    }
-  }, {
-    key: 'hasShutdown',
-    value: function hasShutdown() {
-      // shutdown is not picked up.
-      // console.log(this.nodebox.fn.toString())
-      return this.nodebox.on && this.nodebox.on.shutdown;
-    }
-  }]);
-
-  return Shutdown;
-}();
-
-module.exports = Shutdown;
-},{"../events/node":112}],156:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var debug = require('debug')('chix:actor');
-var Events = require('../events/node');
-
-// THIS STUFF IS INCORRECT.
-// is more of a load method then a run each and everytime thing
-// actually why not just use the compile() to make it compiled.
-// Weird... :-)
-
-var Start = function () {
-  function Start() {
-    _classCallCheck(this, Start);
-  }
-
-  _createClass(Start, [{
-    key: 'start',
-    value: function start() {
-      var sb = void 0;
-      if (['created', 'running', 'stopped'].indexOf(this.status) >= 0) {
-        this.setStatus('started');
-        debug('%s: running on start', this.identifier);
-        if (this.nodebox.on.start) {
-          // Run onStart functionality first
-          if (typeof this.nodebox.on.start === 'function') {
-            sb = this._createPortBox(this.nodebox.on.start);
-          } else {
-            sb = this._createPortBox(this.nodebox.on.start.toString());
-          }
-          sb.run(this);
-          this.nodebox.state = this.state = sb.state;
-        }
-
-        this.event(Events.STARTED, {
-          node: this.export()
-        });
-
-        this.setStatus('running');
-      } else {
-        // ok enough for now
-        if (this.status !== 'running') {
-          throw Error('Only can start node which is in the `created`, current status: ' + this.status);
-        }
-      }
-    }
-  }, {
-    key: '__start',
-    value: function __start(params) {
-      if (this.active) {
-        debug('%s: node still active delaying', this.identifier);
-        this._delay = this._delay + this.interval;
-        setTimeout(function () {
-          this.__start(params);
-        }.bind(this), 500 + this._delay);
-        return false;
-      }
-
-      // set active state.
-      this.active = true;
-
-      // document, is for servers etc, next run must shut the old one down
-      if (!this.async) {
-        if (this.nodebox.on) {
-          if (this.nodebox.on.shutdown) {
-            debug('%s: running shutdown', this.identifier);
-            this.shutdown();
-          }
-        }
-      }
-
-      this.nodebox.set('$', params);
-
-      // done before compile.
-      // this.nodebox.output = this.async ? this._asyncOutput.bind(this) : {}
-
-      this._runOnce();
-    }
-  }]);
-
-  return Start;
-}();
-
-module.exports = Start;
-},{"../events/node":112,"debug":178}],157:[function(require,module,exports){
-arguments[4][19][0].apply(exports,arguments)
-},{"debug":178,"dup":19,"json-ptr":188,"object-forof":253}],158:[function(require,module,exports){
-'use strict';
-
-// packet container to be used within components.
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var forOf = require('object-forof');
-var Packet = require('./packet');
-
-/**
- * API:
- *
- * const x = new PacketContainer(input)
- * x.in1
- * x.in1 = 'my-value'
- */
-var reserved = ['isPacket', 'get', 'read', 'write', 'create', 'clone'];
-
-var PacketContainer = function () {
-  function PacketContainer(params) {
-    var _this = this;
-
-    _classCallCheck(this, PacketContainer);
-
-    this.params = params || {};
-    this._meta = {};
-    forOf(function (name, p) {
-      if (!Packet.isPacket(p)) {
-        throw Error('Packet expected got ' + (typeof p === 'undefined' ? 'undefined' : _typeof(p)) + ' for param ' + name);
-      }
-      // merge meta
-      if (reserved.indexOf(name) === -1) {
-        Object.defineProperty(_this, name, {
-          enumerable: true,
-          get: function get() {
-            return p.read();
-          },
-          set: function set(val) {
-            p.write(p.owner, val);
-          }
-        });
-        // meta
-        Packet.metaMerge(_this._meta, p._meta);
-      } else {
-        throw Error('Parameter name \'' + name + '\' not allowed');
-      }
-    }, this.params);
-
-    // merge meta for all packets
-    forOf(function (name, p) {
-      Object.assign(p._meta, _this._meta);
-    }, this.params);
-  }
-
-  /**
-   * Determines whether the value is a Packet
-   *
-   * @param {Any} p - Value to test
-   * @returns {*}
-   */
-
-
-  _createClass(PacketContainer, [{
-    key: 'isPacket',
-    value: function isPacket(p) {
-      return Packet.isPacket(p);
-    }
-
-    /**
-     *
-     * @param {String} name - Param name
-     * @returns {*}
-     */
-
-  }, {
-    key: 'get',
-    value: function get(name) {
-      return this.params[name];
-    }
-  }, {
-    key: 'clone',
-    value: function clone(name, val) {
-      var p = this.params[name];
-      var cp = p.clone(p.owner);
-
-      if (p === cp) {
-        throw Error('They the same');
-      }
-      if (val) {
-        cp.write(p.owner, val);
-      }
-      return cp;
-    }
-  }, {
-    key: 'read',
-    value: function read(name) {
-      return this.params[name].read();
-    }
-  }, {
-    key: 'write',
-    value: function write(name, val) {
-      return this.params[name].write(this.params[name].owner, val);
-    }
-  }, {
-    key: 'create',
-    value: function create(val, type) {
-      var p = Packet.create(val, type);
-      Object.assign(p._meta, this._meta);
-      return p;
-    }
-  }], [{
-    key: 'create',
-    value: function create(params) {
-      return new PacketContainer(params);
-    }
-  }]);
-
-  return PacketContainer;
-}();
-
-module.exports = PacketContainer;
-},{"./packet":157,"object-forof":253}],159:[function(require,module,exports){
-arguments[4][20][0].apply(exports,arguments)
-},{"./common/parent":104,"./mixin":135,"./port/factory":164,"./validate":172,"dup":20,"events":86,"object-forof":253}],160:[function(require,module,exports){
-arguments[4][21][0].apply(exports,arguments)
-},{"./input":165,"dup":21}],161:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var InputPort = require('../input');
-
-var ExternalInputPort = function (_InputPort) {
-  _inherits(ExternalInputPort, _InputPort);
-
-  function ExternalInputPort(def, internalPort) {
-    _classCallCheck(this, ExternalInputPort);
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ExternalInputPort).call(this, def));
-
-    _this.nodeId = def.nodeId;
-    _this.name = def.name;
-    _this._port = internalPort;
-
-    if (def) {
-      if (def.hasOwnProperty('default')) {
-        _this.setDefault(def.default);
-      }
-
-      if (def.context) {
-        _this.setContext(def.context);
-      }
-    }
-    return _this;
-  }
-
-  _createClass(ExternalInputPort, [{
-    key: 'isSync',
-    value: function isSync() {
-      return true;
-    }
-  }, {
-    key: 'receive',
-    value: function receive(p, index) {
-      this._port.receive(p, index);
-      return this;
-      // throw Error('Receive is bypassed')
-    }
-  }, {
-    key: 'fill',
-    value: function fill() {
-      throw Error('Fill is bypassed');
-    }
-  }, {
-    key: 'isFilled',
-    value: function isFilled() {
-      return this._port.isFilled();
-    }
-  }, {
-    key: 'isRequired',
-    value: function isRequired() {}
-  }, {
-    key: 'read',
-    value: function read() {
-      this._port.read();
-      return undefined;
-    }
-  }, {
-    key: 'connect',
-    value: function connect(link) {
-      this._port.connect();
-      return this;
-    }
-  }, {
-    key: 'plug',
-    value: function plug(target) {
-      this._port.plug(target);
-      return this;
-    }
-  }, {
-    key: 'disconnect',
-    value: function disconnect(link) {
-      this._port.disconnect(link);
-    }
-  }, {
-    key: 'unplug',
-    value: function unplug(target) {
-      this._port.unplug(target);
-    }
-  }, {
-    key: 'clearInput',
-    value: function clearInput() {
-      if (this._port) {
-        this._port.clearInput();
-      }
-      return this;
-    }
-  }, {
-    key: 'setDefault',
-    value: function setDefault(val) {
-      if (this._port) {
-        this._port.setDefault(val);
-      }
-      return this;
-    }
-  }, {
-    key: 'hasDefault',
-    value: function hasDefault() {
-      this._port.hasDefault();
-    }
-  }, {
-    key: 'clearDefault',
-    value: function clearDefault() {
-      this._port.clearDefault();
-      return this;
-    }
-  }, {
-    key: 'setContext',
-    value: function setContext(val) {
-      if (this._port) {
-        this._port.setContext(val);
-      }
-      return this;
-    }
-  }, {
-    key: 'hasContext',
-    value: function hasContext(val) {
-      return this._port.hasContext(val);
-    }
-  }, {
-    key: 'clearContext',
-    value: function clearContext() {
-      this._port.clearContext();
-      return this;
-    }
-  }, {
-    key: 'setPersist',
-    value: function setPersist(val) {
-      this._port.setPersist(val);
-      return this;
-    }
-  }, {
-    key: 'hasPersist',
-    value: function hasPersist() {
-      return this._port.hasPersist();
-    }
-  }, {
-    key: 'clearPersist',
-    value: function clearPersist() {
-      this._port.clearPersist();
-      return this;
-    }
-  }, {
-    key: 'destroy',
-    value: function destroy() {
-      this._port.destroy();
-    }
-  }]);
-
-  return ExternalInputPort;
-}(InputPort);
-
-module.exports = ExternalInputPort;
-},{"../input":165}],162:[function(require,module,exports){
-'use strict';
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var OutputPort = require('../output');
-var Events = require('../../events/port');
-
-var ExternalOutputPort = function (_OutputPort) {
-  _inherits(ExternalOutputPort, _OutputPort);
-
-  function ExternalOutputPort(def, internalPort) {
-    _classCallCheck(this, ExternalOutputPort);
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ExternalOutputPort).call(this, def));
-
-    _this.nodeId = def.nodeId;
-    _this.name = def.name;
-    _this.type = internalPort.type;
-    _this._port = internalPort;
-    internalPort.on(Events.DATA, function (p) {
-      return _this.write(p);
-    });
-    return _this;
-  }
-
-  return ExternalOutputPort;
-}(OutputPort);
-
-module.exports = ExternalOutputPort;
-},{"../../events/port":114,"../output":166}],163:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var InputPort = require('../input');
-
-var ExternalStartPort = function (_InputPort) {
-  _inherits(ExternalStartPort, _InputPort);
-
-  function ExternalStartPort(def, actor) {
-    _classCallCheck(this, ExternalStartPort);
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ExternalStartPort).call(this, def));
-
-    _this.nodeId = def.nodeId;
-    _this.name = def.name;
-    _this.actor = actor;
-    return _this;
-  }
-
-  _createClass(ExternalStartPort, [{
-    key: 'isSync',
-    value: function isSync() {
-      return true;
-    }
-  }, {
-    key: 'receive',
-    value: function receive(p, index) {
-      this.actor.push();
-      return this;
-    }
-  }, {
-    key: 'fill',
-    value: function fill() {
-      throw Error('Fill is bypassed');
-    }
-  }, {
-    key: 'isFilled',
-    value: function isFilled() {
-      return _get(Object.getPrototypeOf(ExternalStartPort.prototype), 'isFilled', this).call(this);
-    }
-  }, {
-    key: 'isRequired',
-    value: function isRequired() {
-      return false;
-    }
-  }, {
-    key: 'read',
-    value: function read() {
-      _get(Object.getPrototypeOf(ExternalStartPort.prototype), 'read', this).call(this);
-      return undefined;
-    }
-  }, {
-    key: 'connect',
-    value: function connect(link) {
-      _get(Object.getPrototypeOf(ExternalStartPort.prototype), 'connect', this).call(this);
-      return this;
-    }
-  }, {
-    key: 'plug',
-    value: function plug(target) {
-      _get(Object.getPrototypeOf(ExternalStartPort.prototype), 'plug', this).call(this, target);
-      return this;
-    }
-  }, {
-    key: 'disconnect',
-    value: function disconnect(link) {
-      _get(Object.getPrototypeOf(ExternalStartPort.prototype), 'disconnect', this).call(this, link);
-    }
-  }, {
-    key: 'unplug',
-    value: function unplug(target) {
-      _get(Object.getPrototypeOf(ExternalStartPort.prototype), 'unplug', this).call(this, target);
-    }
-  }, {
-    key: 'clearInput',
-    value: function clearInput() {
-      _get(Object.getPrototypeOf(ExternalStartPort.prototype), 'clearInput', this).call(this);
-      return this;
-    }
-  }, {
-    key: 'setDefault',
-    value: function setDefault() {
-      throw Error('Default not supported');
-    }
-  }, {
-    key: 'hasDefault',
-    value: function hasDefault() {
-      throw Error('Default not supported');
-    }
-  }, {
-    key: 'clearDefault',
-    value: function clearDefault() {
-      throw Error('Default not supported');
-    }
-  }, {
-    key: 'setContext',
-    value: function setContext(val) {
-      throw Error('Context not supported');
-    }
-  }, {
-    key: 'hasContext',
-    value: function hasContext(val) {
-      throw Error('Context not supported');
-    }
-  }, {
-    key: 'clearContext',
-    value: function clearContext() {
-      throw Error('Context not supported');
-    }
-  }, {
-    key: 'setPersist',
-    value: function setPersist(val) {
-      throw Error('Persist not supported');
-    }
-  }, {
-    key: 'hasPersist',
-    value: function hasPersist() {
-      throw Error('Persist not supported');
-    }
-  }, {
-    key: 'clearPersist',
-    value: function clearPersist() {
-      throw Error('Persist not supported');
-    }
-  }, {
-    key: 'destroy',
-    value: function destroy() {
-      _get(Object.getPrototypeOf(ExternalStartPort.prototype), 'destroy', this).call(this);
-    }
-  }]);
-
-  return ExternalStartPort;
-}(InputPort);
-
-module.exports = ExternalStartPort;
-},{"../input":165}],164:[function(require,module,exports){
-arguments[4][22][0].apply(exports,arguments)
-},{"./asyncInput":160,"./input":165,"./output":166,"dup":22}],165:[function(require,module,exports){
-arguments[4][23][0].apply(exports,arguments)
-},{"../events/connector":108,"../events/port":114,"../packet":157,"../port":159,"debug":178,"dup":23}],166:[function(require,module,exports){
-arguments[4][24][0].apply(exports,arguments)
-},{"../events/port":114,"../packet":157,"../port":159,"_process":88,"debug":178,"dup":24}],167:[function(require,module,exports){
-(function (process){
-'use strict';
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var uuid = require('uuid').v4;
-var EventEmitter = require('events').EventEmitter;
-var Events = require('../events/pm');
-var NodeEvents = require('../events/node');
-var debug = require('debug')('chix:pm');
-
-var onExit = [];
-if (process.on) {
-  // old browserify
-  process.on('exit', function onExitHandlerProcessManager() {
-    onExit.forEach(function (instance) {
-      var processes = Array.from(instance.processes.values()).reverse();
-
-      processes.forEach(function (_process) {
-        if (_process.type === 'node') {
-          if (_process.notFilled.length) {
-            debug('%s: did not run. notFilled: %s', _process.identifier, _process.notFilled);
-          }
-        }
-      });
-    });
-  });
-}
-
-/**
- *
- * Default Process Manager
- *
- * @constructor
- * @public
- *
- */
-
-var ProcessManager = function (_EventEmitter) {
-  _inherits(ProcessManager, _EventEmitter);
-
-  function ProcessManager() {
-    _classCallCheck(this, ProcessManager);
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(ProcessManager).call(this));
-
-    _this.processes = new Map();
-    onExit.push(_this);
-    _this.onProcessStartHandler = _this.onProcessStartHandler.bind(_this);
-    _this.onProcessStopHandler = _this.onProcessStopHandler.bind(_this);
-    _this.onProcessStatusHandler = _this.onProcessStatusHandler.bind(_this);
-    _this.processErrorHandler = _this.processErrorHandler.bind(_this);
-    return _this;
-  }
-
-  _createClass(ProcessManager, [{
-    key: 'getMainGraph',
-    value: function getMainGraph() {
-      return this.getMainGraphs().pop();
-    }
-  }, {
-    key: 'getMainGraphs',
-    value: function getMainGraphs() {
-      var main = [];
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
-
-      try {
-        for (var _iterator = this.processes.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var _process2 = _step.value;
-
-          if (_process2.type === 'flow' && !_process2.hasParent()) {
-            main.push(_process2);
-          }
-        }
-      } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion && _iterator.return) {
-            _iterator.return();
-          }
-        } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
-          }
-        }
-      }
-
-      return main;
-    }
-  }, {
-    key: 'onProcessStartHandler',
-    value: function onProcessStartHandler(event) {
-      this.emit(Events.START_PROCESS, event.node);
-    }
-  }, {
-    key: 'onProcessStopHandler',
-    value: function onProcessStopHandler(event) {
-      this.emit(Events.STOP_PROCESS, event.node);
-    }
-  }, {
-    key: 'onProcessStatusHandler',
-    value: function onProcessStatusHandler(event) {
-      this.emit(Events.PROCESS_STATUS, event);
-    }
-  }, {
-    key: 'register',
-    value: function register(node) {
-      if (node.pid) {
-        throw new Error('Refusing to add node with existing process id');
-      }
-
-      var pid = uuid();
-      node.setPid(pid);
-      this.processes.set(pid, node);
-
-      node.on(NodeEvents.START.name, this.onProcessStartHandler);
-      node.on(NodeEvents.STOP.name, this.onProcessStopHandler);
-      node.on(NodeEvents.STATUSUPDATE.name, this.onProcessStatusHandler);
-      node.on(NodeEvents.ERROR.name, this.processErrorHandler);
-
-      this.emit(Events.ADD_PROCESS, node);
-    }
-
-    /**
-     *
-     * Process Error Handler.
-     *
-     * The only errors we receive come from the nodes themselves.
-     * It's also garanteed if we receive an error the process itself
-     * Is already within an error state.
-     *
-     */
-
-  }, {
-    key: 'processErrorHandler',
-    value: function processErrorHandler(event) {
-      /* TODO: re-enable
-      if (event.node.status !== 'error') {
-        console.log('STATUS', event.node.status)
-        throw Error('Process is not within error state', event.node.status)
-      }
-      */
-
-      // Emit it, humans must solve this.
-      console.log('PM Error', event);
-      this.emit(Events.ERROR, event);
-    }
-  }, {
-    key: 'changePid',
-    value: function changePid(from, to) {
-      if (this.processes.has(from)) {
-        this.processes.set(to, this.processes.get(from));
-        this.processes.delete(from);
-      } else {
-        throw Error('Process id not found');
-      }
-
-      this.emit(Events.CHANGE_PID, {
-        from: from,
-        to: to
-      });
-    }
-  }, {
-    key: 'getProcess',
-    value: function getProcess(pid) {
-      if (this.processes.has(pid)) {
-        return this.processes.get(pid);
-      }
-      throw Error('Process id not found');
-    }
-
-    // TODO: improve start, stop, hold, release logic..
-
-  }, {
-    key: 'start',
-    value: function start(node) {
-      // allow by pid and by node object
-      var pid = (typeof node === 'undefined' ? 'undefined' : _typeof(node)) === 'object' ? node.pid : node;
-      var process = this.getProcess(pid);
-      if (process.type === 'flow') {
-        process.start();
-      } else {
-        process.release();
-      }
-    }
-  }, {
-    key: 'stop',
-    value: function stop(node, cb) {
-      // allow by pid and by node object
-      var pid = (typeof node === 'undefined' ? 'undefined' : _typeof(node)) === 'object' ? node.pid : node;
-
-      var process = this.getProcess(pid);
-      if (process.type === 'flow') {
-        process.stop(cb);
-      } else {
-        process.hold(cb);
-      }
-    }
-
-    // TODO: just deleting is not enough.
-    // links also contains the pids
-    // on remove process those links should also be removed.
-
-  }, {
-    key: 'unregister',
-    value: function unregister(node, cb) {
-      if (!node.pid) {
-        throw new Error('Process id not found');
-      }
-
-      var _onUnregister = function onUnregister(node, cb) {
-        node.removeListener(NodeEvents.START.name, this.onProcessStartHandler);
-        node.removeListener(NodeEvents.STOP.name, this.onProcessStopHandler);
-        node.removeListener(NodeEvents.STATUSUPDATE.name, this.onProcessStatusHandler);
-        node.removeListener(NodeEvents.ERROR.name, this.processErrorHandler);
-
-        this.processes.delete(node.pid);
-
-        // remove pid
-        delete node.pid;
-
-        if (cb) {
-          cb(node);
-        }
-
-        this.emit(Events.REMOVE_PROCESS, node);
-      }.bind(this, node, cb);
-
-      var process = this.getProcess(node.pid);
-
-      if (process.type === 'flow') {
-        // wait for `subgraph` to be finished
-        this.stop(node, _onUnregister);
-      } else {
-        node.shutdown(_onUnregister);
-      }
-    }
-
-    /**
-     *
-     * Get Process
-     * Either by id or it's pid.
-     *
-     */
-
-  }, {
-    key: 'get',
-    value: function get(pid) {
-      return this.processes.get(pid);
-    }
-  }, {
-    key: 'getById',
-    value: function getById(id, actor) {
-      return this.findBy('id', id, actor);
-    }
-  }, {
-    key: 'findBy',
-    value: function findBy(prop, value, actor) {
-      var found = void 0;
-      var _iteratorNormalCompletion2 = true;
-      var _didIteratorError2 = false;
-      var _iteratorError2 = undefined;
-
-      try {
-        for (var _iterator2 = this.processes.values()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var _process3 = _step2.value;
-
-          if (_process3[prop] === value && (!actor || actor.hasNode(_process3.id))) {
-            if (found) {
-              console.log(this.processes);
-              throw Error('conflict: multiple ' + prop + 's matching ' + value);
-            }
-            found = _process3;
-          }
-        }
-      } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion2 && _iterator2.return) {
-            _iterator2.return();
-          }
-        } finally {
-          if (_didIteratorError2) {
-            throw _iteratorError2;
-          }
-        }
-      }
-
-      return found;
-    }
-  }, {
-    key: 'filterByStatus',
-    value: function filterByStatus(status) {
-      return this.filterBy('status', status);
-    }
-  }, {
-    key: 'filterBy',
-    value: function filterBy(prop, value) {
-      var filtered = [];
-
-      var _iteratorNormalCompletion3 = true;
-      var _didIteratorError3 = false;
-      var _iteratorError3 = undefined;
-
-      try {
-        for (var _iterator3 = this.processes.values()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-          var _process4 = _step3.value;
-
-          if (_process4[prop] === value) {
-            filtered.push(_process4);
-          }
-        }
-      } catch (err) {
-        _didIteratorError3 = true;
-        _iteratorError3 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion3 && _iterator3.return) {
-            _iterator3.return();
-          }
-        } finally {
-          if (_didIteratorError3) {
-            throw _iteratorError3;
-          }
-        }
-      }
-
-      return filtered;
-    }
-  }]);
-
-  return ProcessManager;
-}(EventEmitter);
-
-module.exports = ProcessManager;
-}).call(this,require('_process'))
-},{"../events/node":112,"../events/pm":113,"_process":88,"debug":178,"events":86,"uuid":429}],168:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var DefaultContextProvider = require('./context/defaultProvider');
-
-/**
- *
- * We will run inside an instance.
- *
- * At the moment the run context is purely the callback.
- * TODO: which fails hard
- *
- */
-
-var Run = function () {
-  function Run(actor, callback) {
-    _classCallCheck(this, Run);
-
-    this.actor = actor;
-
-    // Used with callback handling
-    // Keeps track of the number of exposed output ports
-    this.outputPorts = [];
-
-    // data we will give to the callback
-    this.output = {};
-    this.outputCount = 0;
-
-    this.callback = callback;
-
-    if (!actor.contextProvider) {
-      actor.contextProvider = new DefaultContextProvider();
-    }
-
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
-
-    try {
-      for (var _iterator = actor.nodes.values()[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-        var node = _step.value;
-
-        // Als deze node in onze view zit
-        if (actor.view.indexOf(node.id) >= 0) {
-          if (this.callback && node.ports && node.ports.output) {
-            for (var key in node.ports.output) {
-              // this is related to actions.
-              // expose bestaat niet meer, de integrerende flow
-              // krijgt gewoon de poorten nu.
-              if (node.ports.output.hasOwnProperty(key)) {
-                if (node.ports.output[key].expose) {
-                  this.outputPorts.push(key);
-                }
-              }
-            }
-
-            node.on('output', this.handleOutput.bind(this));
-          }
-        }
-      }
-    } catch (err) {
-      _didIteratorError = true;
-      _iteratorError = err;
-    } finally {
-      try {
-        if (!_iteratorNormalCompletion && _iterator.return) {
-          _iterator.return();
-        }
-      } finally {
-        if (_didIteratorError) {
-          throw _iteratorError;
-        }
-      }
-    }
-
-    if (this.callback && !this.outputPorts.length) {
-      throw new Error('No exposed output ports available for callback');
-    }
-
-    if (actor.trigger) {
-      actor.sendIIP(actor.trigger, '');
-    }
-  }
-
-  _createClass(Run, [{
-    key: 'handleOutput',
-    value: function handleOutput(data) {
-      if (this.outputPorts.indexOf(data.port) >= 0) {
-        if (!this.output.hasOwnProperty(data.node.id)) {
-          this.output[data.node.id] = {};
-        }
-
-        this.output[data.node.id][data.port] = data.out;
-
-        this.outputCount++;
-
-        if (this.outputPorts.length === this.outputCount) {
-          this.outputCount = 0; // reset
-
-          this.callback.apply(this.actor, [this.output]);
-
-          this.output = {};
-        }
-      }
-    }
-  }]);
-
-  return Run;
-}();
-
-module.exports = Run;
-},{"./context/defaultProvider":107}],169:[function(require,module,exports){
-(function (process,global){
-'use strict';
-
-/* global window */
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var IOBox = require('iobox');
-var path = require('path');
-
-// taken from underscore.string.js
-function _underscored(str) {
-  // also underscore dot
-  return str.replace(/([a-z\d])([A-Z]+)/g, '$1_$2').replace(/[\.\-\s]+/g, '_').toLowerCase();
-}
-
-/**
- *
- * NodeBox
- *
- * @constructor
- * @public
- *
- */
-
-var NodeBox = function (_IOBox) {
-  _inherits(NodeBox, _IOBox);
-
-  function NodeBox(name) {
-    _classCallCheck(this, NodeBox);
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(NodeBox).call(this, name));
-
-    _this.name = name || 'NodeBox';
-    _this.define();
-    return _this;
-  }
-
-  _createClass(NodeBox, [{
-    key: 'define',
-    value: function define() {
-      // Define the structure
-      this.addArg('input', {});
-      this.addArg('$', {});
-      this.addArg('output', {});
-      this.addArg('state', {});
-      this.addArg('done', null);
-      this.addArg('cb', null);
-      // this.addArg('console', console)
-
-      this.addArg('on', {
-        input: {}
-      }); // dynamic construction
-
-      // what to return from the function
-      this.addReturn('output');
-      this.addReturn('state');
-      this.addReturn('on');
-    }
-
-    /**
-     *
-     * Add requires to the sandbox.
-     *
-     * xNode should use check = true and then have
-     * a try catch block.
-     *
-     * @param {Object} requires
-     * @param {Boolean} check
-     */
-
-  }, {
-    key: 'require',
-    value: function (_require) {
-      function require(_x, _x2) {
-        return _require.apply(this, arguments);
-      }
-
-      require.toString = function () {
-        return _require.toString();
-      };
-
-      return require;
-    }(function (requires, check) {
-      // the generic sandbox should do the same logic
-      // for adding the requires but should not check if
-      // they are available.
-      var ukey = void 0;
-
-      // 'myrequire': '<version'
-      for (var key in requires) {
-        if (requires.hasOwnProperty(key)) {
-          // only take last part e.g. chix-flow/SomeThing-> some_thing
-          ukey = _underscored(key.split('/').pop());
-
-          this.emit('require', { require: key });
-
-          if (check !== false) {
-            if (typeof requires[key] !== 'string') {
-              // assume it's already required.
-              // the npm installed versions use this.
-              // e.g. nodule-template
-              this.addArg(ukey, requires[key]);
-            } else {
-              try {
-                var p = path.resolve(process.cwd(), 'node_modules', key);
-                this.addArg(ukey, require(p));
-              } catch (e) {
-                this.addArg(ukey, require(key));
-              }
-            }
-          } else {
-            // just register it, used for generate
-            this.addArg(ukey, undefined);
-          }
-        }
-      }
-    })
-  }, {
-    key: 'expose',
-    value: function expose(_expose) {
-      // created to allow window to be exposed to a node.
-      // only meant to be used for dom nodes.
-      var g = typeof window === 'undefined' ? global : window;
-
-      if (_expose) {
-        for (var i = 0; i < _expose.length; i++) {
-          this.emit('expose', {
-            expose: _expose[i]
-          });
-
-          if (_expose[i] === 'window') {
-            this.addArg('win', window);
-          } else if (_expose[i] === 'self') {
-            this.addArg('self', this);
-          } else {
-            // Do not re-expose anything already going in
-            if (!this.args.hasOwnProperty(_expose[i])) {
-              this.addArg(_expose[i], g[_expose[i]]);
-            }
-          }
-        }
-      }
-    }
-  }, {
-    key: 'compile',
-    value: function compile(fn) {
-      return _get(Object.getPrototypeOf(NodeBox.prototype), 'compile', this).call(this, fn, true // return as object
-      );
-    }
-
-    /**
-     *
-     * Runs the sandbox.
-     *
-     */
-
-  }, {
-    key: 'run',
-    value: function run(bind) {
-      var res = _get(Object.getPrototypeOf(NodeBox.prototype), 'run', this).apply(this, [bind]);
-      var ret = void 0;
-
-      // puts the result back into our args/state
-      // TODO: I do not think this is needed?
-      for (var k in res) {
-        if (k === 'return') {
-          ret = res.return;
-        } else if (res.hasOwnProperty(k)) {
-          this.set(k, res[k]);
-        }
-      }
-      return ret; // original return value
-    }
-  }]);
-
-  return NodeBox;
-}(IOBox);
-
-module.exports = NodeBox;
-}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":88,"iobox":182,"path":87}],170:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var NodeBox = require('./node');
-
-/**
- *
- * PortBox
- *
- * @constructor
- * @public
- *
- */
-
-var PortBox = function (_NodeBox) {
-  _inherits(PortBox, _NodeBox);
-
-  function PortBox(name) {
-    _classCallCheck(this, PortBox);
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(PortBox).call(this, name));
-
-    _this.name = name || 'PortBox';
-    return _this;
-  }
-
-  _createClass(PortBox, [{
-    key: 'define',
-    value: function define() {
-      // Define the structure
-      this.addArg('data', null);
-      this.addArg('source', null); // not sure..
-      this.addArg('state', {});
-      this.addArg('input', {});
-      this.addArg('$', {});
-      this.addArg('output', null); // output function should be set manually
-
-      // what to return from the function.
-      this.addReturn('state');
-    }
-  }]);
-
-  return PortBox;
-}(NodeBox);
-
-module.exports = PortBox;
-},{"./node":169}],171:[function(require,module,exports){
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var EventEmitter = require('events').EventEmitter;
-var Events = require('./events/setting');
-
-/**
- *
- * Setting
- *
- * Both used by Connector and xLink
- *
- * @constructor
- * @public
- *
- */
-
-var Setting = function (_EventEmitter) {
-  _inherits(Setting, _EventEmitter);
-
-  function Setting(settings) {
-    _classCallCheck(this, Setting);
-
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Setting).call(this));
-
-    for (var key in settings) {
-      if (settings.hasOwnProperty(key)) {
-        _this.set(key, settings[key]);
-      }
-    }
-    return _this;
-  }
-
-  /**
-   *
-   * Set
-   *
-   * Sets a setting
-   *
-   * @param {String} name
-   * @param {Any} val
-   */
-
-
-  _createClass(Setting, [{
-    key: 'set',
-    value: function set(name, val) {
-      if (undefined !== val) {
-        if (!this.setting) {
-          this.setting = {};
-        }
-        this.setting[name] = val;
-
-        this.emit(Events.CHANGE, this, 'setting', this.setting);
-      }
-    }
-
-    /**
-     *
-     * Get
-     *
-     * Returns the setting or undefined.
-     *
-     * @returns {Any}
-     */
-
-  }, {
-    key: 'get',
-    value: function get(name) {
-      return this.setting ? this.setting[name] : undefined;
-    }
-
-    /**
-     *
-     * Delete a setting
-     *
-     * @returns {Any}
-     */
-
-  }, {
-    key: 'del',
-    value: function del(name) {
-      if (this.setting && this.setting.hasOwnProperty(name)) {
-        delete this.setting[name];
-      }
-    }
-
-    /**
-     *
-     * Check whether a setting is set.
-     *
-     * @returns {Any}
-     */
-
-  }, {
-    key: 'has',
-    value: function has(name) {
-      return this.setting && this.setting.hasOwnProperty(name);
-    }
-  }]);
-
-  return Setting;
-}(EventEmitter);
-
-module.exports = Setting;
-},{"./events/setting":115,"events":86}],172:[function(require,module,exports){
-arguments[4][25][0].apply(exports,arguments)
-},{"../schemas/link.json":173,"../schemas/map.json":174,"../schemas/node.json":175,"dup":25,"instance-of":181,"json-gate":185,"lodash/isPlainObject":198}],173:[function(require,module,exports){
-arguments[4][43][0].apply(exports,arguments)
-},{"dup":43}],174:[function(require,module,exports){
-arguments[4][44][0].apply(exports,arguments)
-},{"dup":44}],175:[function(require,module,exports){
-arguments[4][45][0].apply(exports,arguments)
-},{"dup":45}],176:[function(require,module,exports){
-module.exports={
-  "type":"object",
-  "title":"Chiχ Stage",
-  "properties":{
-    "id": {
-      "type":"string",
-      "required": false
-    },
-    "env": {
-      "type":"string",
-      "required": false
-    },
-    "title": {
-      "type":"string",
-      "required": true
-    },
-    "description": {
-      "type":"string",
-      "required": true
-    },
-    "actors": {
-      "type":"array",
-      "title":"Actors",
-      "required": true,
-      "items": {
-        "type": "object",
-        "title": "Actor",
-        "properties":{
-          "id": {
-            "type":"string",
-            "required": true
-          },
-          "ns": {
-            "type":"string",
-            "required": true
-          },
-          "name": {
-            "type":"string",
-            "required": true
-          },
-          "version": {
-            "type":"string",
-            "required": false
-          },
-          "context": {
-            "type":"object",
-            "required": false
-          }
-        }
-      }
-    },
-    "links": {
-      "type":"array",
-      "title":"Links",
-      "required": true,
-      "items": {
-        "type": "object",
-        "title": "Link",
-        "properties":{
-          "id": {
-            "type":"string",
-            "required": false
-          },
-          "source": {
-            "type":"string",
-            "required": true
-          },
-          "target": {
-            "type":"string",
-            "required": true
-          },
-          "out": {
-            "type":"string",
-            "required": false
-          },
-          "in": {
-            "type":"string",
-            "required": false
-          },
-          "settings": {
-            "persist": {
-              "type":"boolean",
-              "required": false
-            },
-            "cyclic": {
-              "type":"boolean",
-              "required": false
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-},{}],177:[function(require,module,exports){
+},{"./support/isBuffer":145,"_process":143,"inherits":144}],147:[function(require,module,exports){
 'use strict'
 
-const EventEmitter = require('events').EventEmitter
-const util = require('util')
+module.exports = function NpmLogActorMonitor (Logger, actor) {
+  const io = actor.ioHandler
 
-/**
- *
- * Loader
- *
- * This is the base loader class
- * Ít can be used to implement a definition loader
- * for Chix
- *
- * @api public
- * @author Rob Halff <rob.halff@gmail.com>
- * @constructor
- */
-function Loader () {
-  this.dependencies = {}
-
-  /**
-   *
-   * Format:
-   *
-   * Keeps track of all known nodeDefinitions.
-   *
-   * {
-   *  'http://....': { // url in this case is the identifier
-   *
-   *    fs: {
-   *       readFile:  <definition>
-   *       writeFile: <definition>
-   *    }
-   *
-   *  }
-   *
-   * }
-   *
-   */
-  this.nodeDefinitions = {}
-}
-
-util.inherits(Loader, EventEmitter)
-
-/**
- *
- * This is the main method all child classes should implement.
- *
- * @param {Object} graphs
- * @param {Function} callback
- * @api public
- */
-Loader.prototype.load = function (graphs, callback /*, update dependencies*/) {
-  callback(null, {
-    providerLocation: '',
-    nodeDefinitions: this.nodeDefinitions
-  })
-}
-
-/**
- *
- * Add node definitions
- *
- * Used to `statically` add nodeDefinitions.
- *
- * @param {String} identifier
- * @param {Object} nodeDefs
- * @api public
- */
-Loader.prototype.addNodeDefinitions = function (identifier, nodeDefs) {
-  if (Array.isArray(nodeDefs)) {
-    for (let i = 0; i < nodeDefs.length; i++) {
-      this.addNodeDefinition(identifier, nodeDefs[i])
-    }
-  } else {
-    for (let ns in nodeDefs) {
-      if (nodeDefs.hasOwnProperty(ns)) {
-        for (let name in nodeDefs[ns]) {
-          if (nodeDefs[ns].hasOwnProperty(name)) {
-            this.addNodeDefinition(identifier, nodeDefs[ns][name])
-          }
-        }
-      }
-    }
-  }
-}
-
-/**
- *
- * Add a node definition
- *
- * @param {String} identifier
- * @param {Object} nodeDef
- * @api public
- */
-Loader.prototype.addNodeDefinition = function (identifier, nodeDef) {
-  if (!nodeDef.hasOwnProperty('ns')) {
-    throw new Error([
-      'Nodefinition for',
-      identifier,
-      'lacks an ns property'
-    ].join(' '))
-  }
-
-  if (!nodeDef.hasOwnProperty('name')) {
-    throw new Error([
-      'Nodefinition for',
-      identifier,
-      'lacks an name property'
-    ].join(' '))
-  }
-
-  // store the provider url along with the nodeDefinition
-  // Needed for fetching back from storage.
-  nodeDef.provider = identifier
-
-  if (nodeDef.type !== 'flow') {
-    // Do normal nodeDefinition stuff
-    this.dependencies = this._parseDependencies(this.dependencies, nodeDef)
-  } else {
-    // also setting default provider here?
-    // check this later, if addNodeDefinition(s) is used
-    // there will otherwise be no default provider.
-    // where is default provider, in chix-loader-remote.. err..
-    // I think addNodefinition(s) should set it maybe
-    // It's also a bit weird, because if you only add them manually
-    // there ain't really an url or path.
-    if (!nodeDef.providers || Object.keys(nodeDef.providers).length === 0) {
-      nodeDef.providers = {
-        '@': {
-          url: identifier
-        }
-      }
-    }
-  }
-
-  if (!this.nodeDefinitions.hasOwnProperty(identifier)) {
-    this.nodeDefinitions[identifier] = {}
-  }
-
-  if (!this.nodeDefinitions[identifier].hasOwnProperty(nodeDef.ns)) {
-    this.nodeDefinitions[identifier][nodeDef.ns] = {}
-  }
-
-  if (!this.nodeDefinitions[identifier][nodeDef.ns]
-    .hasOwnProperty([nodeDef.name])) {
-    this.nodeDefinitions[identifier][nodeDef.ns][nodeDef.name] = nodeDef
-  }
-}
-
-Loader.prototype._parseDependencies = function (dependencies, nodeDef) {
-  let r
-  let type
-
-  if (nodeDef.require) {
-    throw Error(
-      nodeDef.ns + '/' + nodeDef.name +
-      ': nodeDef.require is DEPRECATED, use nodeDef.dependencies'
+  actor.on('removeLink', function (event) {
+    Logger.debug(
+      event.node ? event.node.identifier : 'Some Actor',
+      'removed link'
     )
-  }
+  })
 
-  if (nodeDef.dependencies) {
-    for (type in nodeDef.dependencies) {
-      if (nodeDef.dependencies.hasOwnProperty(type)) {
-        for (r in nodeDef.dependencies[type]) {
-          if (nodeDef.dependencies[type].hasOwnProperty(r)) {
-            if (type === 'npm') {
-              if (nodeDef.dependencies.npm[r] !== 'builtin') {
-                // translate to require string, bower should do the same
-                //
-                // I think this should be delayed, to when the actual
-                // require takes place.
-                /*
-                requireString = r + '@' + nodeDef.dependencies.npm[r]
-                if (requires.indexOf(requireString) === -1) {
-                  requires.push(requireString)
-                }
-                */
-                if (!dependencies.hasOwnProperty('npm')) {
-                  dependencies.npm = {}
-                }
+  io.on('output', function (data) {
+    switch (data.port) {
+      case ':plug':
+        Logger.debug(
+          data.node.identifier,
+          'port %s plugged (%d)',
+          data.out.read().port,
+          data.out.read().connections)
+        break
 
-                // TODO: check for duplicates and pick the latest one.
-                dependencies.npm[r] = nodeDef.dependencies.npm[r]
-              }
-            } else if (type === 'bower') {
-              if (!dependencies.hasOwnProperty('bower')) {
-                dependencies.bower = {}
-              }
+      case ':unplug':
+        Logger.debug(
+          data.node.identifier,
+          'port %s unplugged (%d)',
+          data.out.read().port,
+          data.out.read().connections)
+        break
 
-              // TODO: check for duplicates and pick the latest one.
-              dependencies.bower[r] = nodeDef.dependencies.bower[r]
-            } else {
-              throw Error('Unkown package manager:' + type)
-            }
-          }
-        }
-      }
+      case ':portFill':
+        Logger.info(
+          data.node.identifier,
+          'port %s filled with data',
+          data.out.read().port)
+        break
+
+      case ':contextUpdate':
+        Logger.info(
+          data.node.identifier,
+          'port %s filled with context',
+          data.out.read().port)
+        break
+
+      case ':inputValidated':
+        Logger.debug(data.node.identifier, 'input validated')
+        break
+
+      case ':start':
+        Logger.info(data.node.identifier, 'START')
+        break
+
+      case ':freePort':
+        Logger.debug(data.node.identifier, 'free port %s', data.out.read().port)
+        break
+
+      /*
+             case ':queue':
+               Logger.debug(
+                 data.node,
+                 'queue: %s',
+                 data.port
+               )
+             break
+      */
+
+      case ':openPort':
+        Logger.info(
+          data.node.identifier,
+          'opened port %s (%d)',
+          data.out.read().port,
+          data.out.read().connections
+        )
+        break
+
+      case ':closePort':
+        Logger.info(
+          data.node.identifier,
+          'closed port %s',
+          data.out.read().port
+        )
+        break
+
+      case ':index':
+        Logger.info(
+          data.node.identifier,
+          '[%s] set on port `%s`',
+          data.out.read().index,
+          data.out.read().port
+        )
+        break
+
+      case ':nodeComplete':
+        // console.log('nodeComplete', data)
+        Logger.info(data.node.identifier, 'completed')
+        break
+
+      case ':portReject':
+        Logger.debug(
+          data.node.identifier,
+          'rejected input on port %s',
+          data.out.read().port
+        )
+        break
+
+      case ':inputRequired':
+        Logger.error(
+          data.node.identifier,
+          'input required on port %s',
+          data.out.read().port)
+        break
+
+      case ':error':
+        Logger.error(
+          data.node.identifier,
+          data.out.read().msg
+        )
+        break
+
+      case ':nodeTimeout':
+        Logger.error(
+          data.node.identifier,
+          'node timeout'
+        )
+        break
+
+      case ':executed':
+        Logger.info(
+          data.node.identifier,
+          'EXECUTED'
+        )
+        break
+
+      case ':inputTimeout':
+        Logger.info(
+          data.node.identifier,
+          'input timeout, got %s need %s',
+          Object.keys(data.node.input).join(', '),
+          data.node.openPorts.join(', '))
+        break
+
+      default:
+        Logger.info(data.node.identifier, 'output on port %s', data.port)
+        break
     }
-  }
-  return dependencies
+  })
+
+  return Logger
 }
 
-Loader.prototype.saveNodeDefinition = function () {
-  throw new Error([
-    this.constructor.name,
-    'must implement a save method'
-  ].join(' '))
+},{}],148:[function(require,module,exports){
+'use strict'
+
+module.exports = function NpmLogLoaderMonitor (Logger, loader) {
+  loader.on('loadUrl', function (data) {
+    Logger.info('loadUrl', data.url)
+  })
+
+  loader.on('loadFile', function (data) {
+    Logger.info('loadFile', data.path)
+  })
+
+  loader.on('loadCache', function (data) {
+    Logger.debug('cache', 'loaded cache file %s', data.file)
+  })
+
+  loader.on('purgeCache', function (data) {
+    Logger.debug('cache', 'purged cache file %s', data.file)
+  })
+
+  loader.on('writeCache', function (data) {
+    Logger.debug('cache', 'wrote cache file %s', data.file)
+  })
+
+  return Logger
 }
+
+},{}],149:[function(require,module,exports){
 
 /**
+ * This is the common logic for both the Node.js and web browser
+ * implementations of `debug()`.
  *
- * Ok now it becomes intresting.
- *
- * We will read the definition and are going to detect whether this
- * definition is about a flow, if it is about a flow.
- * We are also going to load those definitions, unless we already
- * have that definition ofcourse.
- *
- * This way we only have to provide the actor with ourselves.
- * The loader. The loader will then already know about all the
- * node definitions it needs. This keeps the actor simpler.
- * All it has to do is .getNodeDefinition() wherever in
- * the hierarchy it is.
- *
+ * Expose `debug()` as the module.
  */
 
+exports = module.exports = debug;
+exports.coerce = coerce;
+exports.disable = disable;
+exports.enable = enable;
+exports.enabled = enabled;
+exports.humanize = require('ms');
+
 /**
+ * The currently active debug mode names, and names to skip.
+ */
+
+exports.names = [];
+exports.skips = [];
+
+/**
+ * Map of special "%n" handling functions, for the debug "format" argument.
  *
- * Check whether we have the definition
+ * Valid key names are a single, lowercased letter, i.e. "n".
+ */
+
+exports.formatters = {};
+
+/**
+ * Previously assigned color.
+ */
+
+var prevColor = 0;
+
+/**
+ * Previous log timestamp.
+ */
+
+var prevTime;
+
+/**
+ * Select a color.
  *
- * @param {String} providerUrl
- * @param {String} ns
+ * @return {Number}
+ * @api private
+ */
+
+function selectColor() {
+  return exports.colors[prevColor++ % exports.colors.length];
+}
+
+/**
+ * Create a debugger with the given `namespace`.
+ *
+ * @param {String} namespace
+ * @return {Function}
+ * @api public
+ */
+
+function debug(namespace) {
+
+  // define the `disabled` version
+  function disabled() {
+  }
+  disabled.enabled = false;
+
+  // define the `enabled` version
+  function enabled() {
+
+    var self = enabled;
+
+    // set `diff` timestamp
+    var curr = +new Date();
+    var ms = curr - (prevTime || curr);
+    self.diff = ms;
+    self.prev = prevTime;
+    self.curr = curr;
+    prevTime = curr;
+
+    // add the `color` if not set
+    if (null == self.useColors) self.useColors = exports.useColors();
+    if (null == self.color && self.useColors) self.color = selectColor();
+
+    var args = Array.prototype.slice.call(arguments);
+
+    args[0] = exports.coerce(args[0]);
+
+    if ('string' !== typeof args[0]) {
+      // anything else let's inspect with %o
+      args = ['%o'].concat(args);
+    }
+
+    // apply any `formatters` transformations
+    var index = 0;
+    args[0] = args[0].replace(/%([a-z%])/g, function(match, format) {
+      // if we encounter an escaped % then don't increase the array index
+      if (match === '%%') return match;
+      index++;
+      var formatter = exports.formatters[format];
+      if ('function' === typeof formatter) {
+        var val = args[index];
+        match = formatter.call(self, val);
+
+        // now we need to remove `args[index]` since it's inlined in the `format`
+        args.splice(index, 1);
+        index--;
+      }
+      return match;
+    });
+
+    if ('function' === typeof exports.formatArgs) {
+      args = exports.formatArgs.apply(self, args);
+    }
+    var logFn = enabled.log || exports.log || console.log.bind(console);
+    logFn.apply(self, args);
+  }
+  enabled.enabled = true;
+
+  var fn = exports.enabled(namespace) ? enabled : disabled;
+
+  fn.namespace = namespace;
+
+  return fn;
+}
+
+/**
+ * Enables a debug mode by namespaces. This can include modes
+ * separated by a colon and wildcards.
+ *
+ * @param {String} namespaces
+ * @api public
+ */
+
+function enable(namespaces) {
+  exports.save(namespaces);
+
+  var split = (namespaces || '').split(/[\s,]+/);
+  var len = split.length;
+
+  for (var i = 0; i < len; i++) {
+    if (!split[i]) continue; // ignore empty strings
+    namespaces = split[i].replace(/\*/g, '.*?');
+    if (namespaces[0] === '-') {
+      exports.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
+    } else {
+      exports.names.push(new RegExp('^' + namespaces + '$'));
+    }
+  }
+}
+
+/**
+ * Disable debug output.
+ *
+ * @api public
+ */
+
+function disable() {
+  exports.enable('');
+}
+
+/**
+ * Returns true if the given mode name is enabled, false otherwise.
+ *
  * @param {String} name
+ * @return {Boolean}
  * @api public
  */
-Loader.prototype.hasNodeDefinition = function (providerUrl, ns, name) {
-  return this.nodeDefinitions.hasOwnProperty(providerUrl) &&
-    this.nodeDefinitions[providerUrl].hasOwnProperty(ns) &&
-    this.nodeDefinitions[providerUrl][ns].hasOwnProperty(name)
+
+function enabled(name) {
+  var i, len;
+  for (i = 0, len = exports.skips.length; i < len; i++) {
+    if (exports.skips[i].test(name)) {
+      return false;
+    }
+  }
+  for (i = 0, len = exports.names.length; i < len; i++) {
+    if (exports.names[i].test(name)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
+ * Coerce `val`.
  *
- * Easier method to just get an already loaded definition
- * TODO: Unrafel getNodeDefinition and make it simpler
- *
- * Anyway, this is the way, we do not want to keep a store of id's
- * in the loader also, so getById can go also.
+ * @param {Mixed} val
+ * @return {Mixed}
+ * @api private
  */
-Loader.prototype.getNodeDefinitionFrom = function (provider, ns, name) {
-  if (this.hasNodeDefinition(provider, ns, name)) {
-    return this.nodeDefinitions[provider][ns][name]
-  }
+
+function coerce(val) {
+  if (val instanceof Error) return val.stack || val.message;
+  return val;
 }
 
-// npm loader returns a different source
-Loader.prototype.getNodeSource = Loader.prototype.getNodeDefinitionFrom
-
-/**
- *
- * Loads the NodeDefinition for a node.
- *
- * In order to do so each node must know the provider url
- * it was loaded from.
- *
- * This is normally not stored directly into flows,
- * but the flow is saved with the namespaces in used.
- *
- * TODO: this really should just be (provider, name, ns, version)
- * Else use the load method.
- *
- * ah this is the exact same as loadDefnition only without callback.
- *
- */
-Loader.prototype.getNodeDefinition = function (node, map) {
-  const def = this.loadNodeDefinition(node, map)
-
-  // merge the schema of the internal node.
-  if (node.type === 'flow') {
-    this._mergeSchema(def) // in place
-  }
-
-  return def
-}
-
-// this is still the map so nodes are an array
-// saves us from having to maintain a nodes list.
-// making this mergeSchema more self-reliant
-Loader.prototype.findNodeWithinGraph = function (nodeId, graph) {
-  for (let i = 0; i < graph.nodes.length; i++) {
-    if (nodeId === graph.nodes[i].id) {
-      // ok that's the node, but still it needs to be resolved
-      // we need to get it's definition
-      return graph.nodes[i]
-    }
-  }
-
-  throw Error('Could not find internal node within graph')
-}
-
-Loader.prototype._mergeSchema = function (graph) {
-  for (let type in graph.ports) {
-    if (graph.ports.hasOwnProperty(type)) {
-      for (let port in graph.ports[type]) {
-        if (graph.ports[type].hasOwnProperty(port)) {
-          const externalPort = graph.ports[type][port]
-          if (externalPort.hasOwnProperty('nodeId')) {
-            const internalDef = this.getNodeDefinition(
-              this.findNodeWithinGraph(externalPort.nodeId, graph),
-              graph
-            )
-            const copy = JSON.parse(
-              JSON.stringify(internalDef.ports[type][externalPort.name])
-            )
-            copy.title = externalPort.title
-            copy.name = externalPort.name
-            copy.nodeId = externalPort.nodeId
-            graph.ports[type][port] = copy
-          } else {
-            // not pointing to an internal node. :start etc.
-          }
-        }
-      }
-    }
-  }
-}
-
-/**
- *
- * Recursivly returns the requires.
- *
- * Assumes the map, node is already loaded.
- *
- * Note: Will break if node.provider is an url already.
- *
- * @private
- */
-Loader.prototype._collectDependencies = function (dependencies, def) {
-  const self = this
-  def.nodes.forEach(function (node) {
-    let provider
-
-    // Just makes this a simple function, used in several locations.
-    if (/:\/\//.test(node.provider)) {
-      provider = node.provider
-    } else {
-      var da = node.provider ? node.provider : '@'
-      provider = def.providers[da].url || def.providers[da].path
-    }
-
-    const nDef = self.nodeDefinitions[provider][node.ns][node.name]
-    if (node.type === 'flow') {
-      dependencies = self._collectDependencies(dependencies, nDef)
-    } else {
-      dependencies = self._parseDependencies(dependencies, nDef)
-    }
-  })
-
-  return dependencies
-}
-
-/**
- *
- * Get the dependencies for a certain provider.
- *
- * @param {Object} def
- * @private
- */
-Loader.prototype._loadDependencies = function (def) {
-  let dependencies = {}
-
-  if (def.type === 'flow') {
-    dependencies = this._collectDependencies(dependencies, def)
-    return dependencies
-  } else {
-    dependencies = this._parseDependencies(dependencies, def)
-    return dependencies
-  }
-}
-
-// Loader itself only expects preloaded nodes.
-// There is no actual load going on.
-// Remote loader does implement loading.
-Loader.prototype.loadNode = function (providerDef, cb) {
-  const provider = providerDef.providerLocation
-  const ns = providerDef.ns
-  const name = providerDef.name
-  if (this.nodeDefinitions[provider] &&
-    this.nodeDefinitions[provider].hasOwnProperty(ns) &&
-    this.nodeDefinitions[provider][ns].hasOwnProperty(name)) {
-    cb(null, {
-      nodeDef: this.nodeDefinitions[provider][ns][name]
-    })
-  } else {
-    cb(
-      Error(
-        util.format('Could not load node %s/%s from %s', ns, name, provider)
-      )
-    )
-  }
-}
-
-Loader.prototype.loadNodeDefinitionFrom = function (provider, ns, name, callback) {
-  const self = this
-
-  // I want cumulative dependencies.
-  // Instead of only knowing all dependencies known
-  // or only the dependency from the current node.
-  // self.load could send this within the callback
-  // and then also remember the dependency from this single node.
-  // for self.load it's the second argument of the callback.
-  let dependencies = {}
-
-  this.loadNode({
-    ns: ns,
-    name: name,
-    url: provider.replace('{ns}', ns).replace('{name}', name),
-    providerLocation: provider
-  }, loadNodeCallback)
-
-  function loadNodeCallback (err, res) {
-    if (err) {
-      throw err
-    }
-
-    const nodeDef = res.nodeDef
-    // res.providerLocation
-
-    dependencies = self._parseDependencies(dependencies, nodeDef)
-
-    // quick hacking
-    if (!self.nodeDefinitions[provider]) {
-      self.nodeDefinitions[provider] = {}
-    }
-    if (!self.nodeDefinitions[provider].hasOwnProperty(ns)) {
-      self.nodeDefinitions[provider][ns] = {}
-    }
-    self.nodeDefinitions[provider][ns][name] = nodeDef
-
-    if (nodeDef.type === 'flow') {
-      self.load(nodeDef, function (/* err, ret */) {
-        callback(
-          self.nodeDefinitions[provider][ns][name],
-          self._loadDependencies(
-            self.nodeDefinitions[provider][ns][name]
-          )
-        )
-      }, false, dependencies)
-    } else {
-      callback(
-        self.nodeDefinitions[provider][ns][name],
-        self._loadDependencies(
-          self.nodeDefinitions[provider][ns][name]
-        )
-      )
-    }
-  }
-}
-
-// Ok this, seems weird, it is loading the map?
-// I give it a node which has either a provider as short key
-// or the full url, the map is needed to resolve that.
-// but then I start loading the full map.
-// which seems weird, to say the least.
-Loader.prototype.loadNodeDefinition = function (node, map, callback) {
-  let location
-  let provider
-  const self = this
-
-  if (node.provider && node.provider.indexOf('://') >= 0) {
-    // it's already an url
-    location = node.provider
-  } else if (!node.provider && (!map || !map.providers)) {
-    // for direct additions (only @ is possible)
-    location = '@'
-  } else {
-    if (!map) {
-      throw Error(
-        'loadNodeDefinition needs a map or a node with a full provider url'
-      )
-    }
-
-    if (node.provider) {
-      // 'x': ..
-      provider = map.providers[node.provider]
-    } else {
-      provider = map.providers['@']
-    }
-
-    // fix: find provider by path or url, has to do with provider
-    // already resolved (sub.sub.graphs)
-    if (!provider) {
-      for (let key in map.providers) {
-        if (map.providers[key].url === node.provider ||
-          map.providers[key].path === node.provider) {
-          provider = map.providers[key]
-        }
-      }
-      if (!provider) {
-        throw Error('unable to find provider')
-      }
-    }
-
-    if (provider.hasOwnProperty('path')) {
-      location = provider.path
-    } else if (provider.hasOwnProperty('url')) {
-      location = provider.url
-    } else {
-      throw new Error('Do not know how to handle provider')
-    }
-
-    // Remember the provider, this is important to call getDefinition
-    // at a later stage, see actor.addMap and createNode.
-    // createNode is called without a map.
-    // not perfect this, so redo this later.
-    // when empty maps are added, createNode should also be
-    // able to figure out where it's definitions are.
-    // this means the map should be preloaded.
-    // This preload should be done with an URL not with @
-    // The along with that getNodeDefinitionFrom(providerUrl)
-    // should be used. providerUrl is the only way subgraphs
-    // are indexed correctly '@' by itself is not unique enough
-    // to serve as a provider key. it is for single graphs but
-    // is not useable anything beyond that.
-    // Also however when a graph is saved the expanded
-    // urls should be translated back into short form (fix that)
-    // by looking up the provider within providers and putting
-    // the key back where now the expanded url is.
-    node.provider = location
-  }
-
-  if (!this.nodeDefinitions.hasOwnProperty(location) ||
-    !this.nodeDefinitions[location].hasOwnProperty(node.ns) ||
-    !this.nodeDefinitions[location][node.ns].hasOwnProperty(node.name)) {
-    if (!callback) {
-      return false
-    } else {
-      // not sure.. node has a full url.
-      // but it's not loaded, then we ask to load the full map.
-      // which works if provider is x but not if it's already expanded.
-      //
-      this.load(map, function () {
-        callback(self.nodeDefinitions[location][node.ns][node.name])
-      })
-    }
-  } else {
-    if (callback) {
-      callback(this.nodeDefinitions[location][node.ns][node.name])
-    } else {
-      return this.nodeDefinitions[location][node.ns][node.name]
-    }
-  }
-}
-
-/**
- *
- * Get dependencies for the type given.
- *
- * type is either `npm` or `bower`
- *
- * If no type is given will return all dependencies.
- *
- * Note: this method changed in behavior, used to be
- *  what _loadDependencies is now. which used to be getRequires()...
- *
- * @param {string} type
- * @public
- */
-Loader.prototype.getDependencies = function (type) {
-  if (type) {
-    if (this.dependencies.hasOwnProperty(type)) {
-      return this.dependencies[type]
-    } else {
-      return {}
-    }
-  } else {
-    return this.dependencies
-  }
-}
-
-/**
- *
- * Checks whether there are any dependencies.
- *
- * Type can be `npm` or `bower`
- *
- * If no type is given it will tell whether there are *any* dependencies
- *
- * @param {string} type
- * @public
- **/
-Loader.prototype.hasDependencies = function (type) {
-  if (type) {
-    if (this.dependencies.hasOwnProperty(type)) {
-      return Object.keys(this.dependencies[type]).length
-    }
-  } else {
-    for (let _type in this.dependencies) {
-      if (this.dependencies.hasOwnProperty(_type)) {
-        if (this.hasDependencies(_type)) {
-          return true
-        }
-      }
-    }
-  }
-  return false
-}
-
-/**
- *
- * Get Nodedefinitions
- *
- * Optionally with a provider url so it returns only the node definitions
- * at that provider.
- *
- * @param {String} provider (Optional)
- */
-Loader.prototype.getNodeDefinitions = function (provider) {
-  if (provider) {
-    return this.nodeDefinitions[provider]
-  } else {
-    return this.nodeDefinitions
-  }
-}
-
-module.exports = Loader
-
-},{"events":86,"util":91}],178:[function(require,module,exports){
-arguments[4][26][0].apply(exports,arguments)
-},{"./debug":179,"dup":26}],179:[function(require,module,exports){
-arguments[4][27][0].apply(exports,arguments)
-},{"dup":27,"ms":251}],180:[function(require,module,exports){
+},{"ms":209}],150:[function(require,module,exports){
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  * All rights reserved.
@@ -19207,298 +19130,7 @@ function shallowEqual(objA, objB) {
 }
 
 module.exports = shallowEqual;
-},{}],181:[function(require,module,exports){
-arguments[4][28][0].apply(exports,arguments)
-},{"dup":28}],182:[function(require,module,exports){
-'use strict';
-
-var util = require('util');
-var EventEmitter = require('events').EventEmitter;
-
-/**
- *
- * IO Box
- *
- * @param {String} name
- */
-var IOBox = function (name, args, returns) {
-
-  if (!(this instanceof IOBox)) {
-    return new IOBox(name, args, returns);
-  }
-
-  EventEmitter.apply(this, arguments);
-
-  this.name = name || 'UNNAMED';
-
-  // to ensure correct order
-  this._keys = [];
-
-  args = args || [];
-  returns = returns || [];
-
-  this.setup(args, returns);
-
-};
-
-util.inherits(IOBox, EventEmitter);
-
-/**
- *
- * Setup
- *
- * @param {Array} args
- * @param {Array} returns
- */
-IOBox.prototype.setup = function (args, returns) {
-
-  var i;
-
-  this.args = {};
-  this.returns = [];
-  this.fn = undefined;
-
-  // setup the empty input arguments object
-  for (i = 0; i < args.length; i++) {
-    this.addArg(args[i], undefined);
-  }
-
-  for (i = 0; i < returns.length; i++) {
-    this.addReturn(returns[i]);
-  }
-};
-
-/**
- *
- * Used to access the properties at the top level,
- * but still be able to get all relevant arguments
- * at once using this.args
- *
- * @param {String} key
- * @param {Mixed} initial
- */
-IOBox.prototype.addArg = function (key, initial) {
-
-  Object.defineProperty(this, key, {
-    set: function (val) {
-      this.args[key] = val;
-    },
-    get: function () {
-      return this.args[key];
-    }
-  });
-
-  this._keys.push(key);
-
-  this[key] = initial; // can be undefined
-
-};
-
-IOBox.prototype.addReturn = function (r) {
-  if (this.returns.indexOf(r) === -1) {
-    if (this._keys.indexOf(r) !== -1) {
-      this.returns.push(r);
-    }
-    else {
-      throw Error([
-        'Output `',
-        r,
-        '` is not one of',
-        this._keys.join(', ')
-      ].join(' '));
-    }
-  }
-};
-
-/**
- *
- * Sets a property of the sandbox.
- * Because the keys determine what arguments will
- * be generated for the function, it is important
- * we keep some kind of control over what is set.
- *
- * @param {String} key
- * @param {Mixed} value
- *
- */
-IOBox.prototype.set = function (key, value) {
-
-  if (this.args.hasOwnProperty(key)) {
-    this.args[key] = value;
-  }
-  else {
-    throw new Error([
-      'Will not set unknown property',
-      key
-    ].join(' '));
-  }
-};
-
-/**
- *
- * Compiles and returns the generated function.
- *
- * @param {String} fn
- * @param {Boolean} asObject
- * @return {String}
- */
-IOBox.prototype.compile = function (fn, asObject) {
-
-  if (!this.code) {
-    this.generate(fn ? fn.trim() : fn, asObject);
-  }
-
-  this.fn = new Function(this.code)();
-
-  return this.fn;
-
-};
-
-/**
- *
- * Fill with a precompiled function
- *
- * Return type in this case is determined by compiled function
- *
- * @param {String} fn
- * @return {String}
- */
-IOBox.prototype.fill = function (fn) {
-
-  // argument signature check?
-
-  this.fn = fn;
-
-  return this.fn;
-
-};
-
-/**
- *
- * Wraps the function in yet another function
- *
- * This way it's possible to get the original return.
- *
- * @param {String} fn
- * @return {String}
- */
-IOBox.prototype._returnWrap = function (fn) {
-  return ['function() {', fn, '}.call(this)'].join('\n');
-};
-/**
- *
- * Clear generated code
- */
-IOBox.prototype.clear = function () {
-  this.code = null;
-};
-
-/**
- *
- * Generates the function.
- *
- * This can be used directly
- *
- * @param {String} fn
- * @param {Boolean} asObject
- * @return {String}
- */
-IOBox.prototype.generate = function (fn, asObject) {
-
-  this.code = [
-    'return function ',
-    this.name,
-    '(',
-    this._keys.join(','),
-    ') {\n',
-    'var r = ', // r goes to 'return'
-    this._returnWrap(fn),
-    '; return ',
-    asObject ? this._asObject() : this._asArray(),
-    '; }'
-  ].join('');
-
-  return this.code;
-};
-
-/**
- *
- * Return output as array.
- *
- * @return {String}
- */
-IOBox.prototype._asArray = function () {
-  return '[' + this.returns.join(',') + ',r]';
-};
-
-/**
- *
- * Return output as object.
- *
- * @return {String}
- */
-IOBox.prototype._asObject = function () {
-  var ret = [];
-  for (var i = 0; i < this.returns.length; i++) {
-    ret.push(this.returns[i] + ':' + this.returns[i]);
-  }
-  ret.push('return:' + 'r');
-
-  return '{' + ret.join(',') + '}';
-};
-
-/**
- *
- * Renders the function to string.
- *
- * @return {String}
- */
-IOBox.prototype.toString = function () {
-  if (this.fn) return this.fn.toString();
-  return this.fn;
-};
-
-/**
- *
- * Runs the generated function
- *
- * @param {Mixed} bind   Context to bind to the function
- * @return {Mixed}
- */
-IOBox.prototype.run = function (bind) {
-
-  var v = [];
-  var k;
-
-  for (k in this.args) {
-    if (this.args.hasOwnProperty(k)) {
-      v[this._keys.indexOf(k)] = this.args[k];
-    }
-    else {
-      throw new Error('unknown input ' + k);
-    }
-  }
-
-  // returns the output, format depends on the `compile` step
-  return this.fn.apply(bind, v);
-
-};
-
-module.exports = IOBox;
-
-},{"events":86,"util":91}],183:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}],184:[function(require,module,exports){
-arguments[4][30][0].apply(exports,arguments)
-},{"dup":30}],185:[function(require,module,exports){
-arguments[4][31][0].apply(exports,arguments)
-},{"./valid-object":186,"./valid-schema":187,"dup":31}],186:[function(require,module,exports){
-arguments[4][32][0].apply(exports,arguments)
-},{"./common":183,"./formats":184,"dup":32}],187:[function(require,module,exports){
-arguments[4][33][0].apply(exports,arguments)
-},{"./common":183,"./formats":184,"./valid-object":186,"dup":33}],188:[function(require,module,exports){
-arguments[4][34][0].apply(exports,arguments)
-},{"dup":34}],189:[function(require,module,exports){
+},{}],151:[function(require,module,exports){
 // Source: http://jsfiddle.net/vWx8V/
 // http://stackoverflow.com/questions/5603195/full-list-of-javascript-keycodes
 
@@ -19646,7 +19278,7 @@ for (var alias in aliases) {
   codes[alias] = aliases[alias]
 }
 
-},{}],190:[function(require,module,exports){
+},{}],152:[function(require,module,exports){
 (function (global){
 /** Detect free variable `global` from Node.js. */
 var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
@@ -19654,13 +19286,7 @@ var freeGlobal = typeof global == 'object' && global && global.Object === Object
 module.exports = freeGlobal;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],191:[function(require,module,exports){
-arguments[4][35][0].apply(exports,arguments)
-},{"./_overArg":193,"dup":35}],192:[function(require,module,exports){
-arguments[4][36][0].apply(exports,arguments)
-},{"dup":36}],193:[function(require,module,exports){
-arguments[4][37][0].apply(exports,arguments)
-},{"dup":37}],194:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 var freeGlobal = require('./_freeGlobal');
 
 /** Detect free variable `self`. */
@@ -19671,7 +19297,7 @@ var root = freeGlobal || freeSelf || Function('return this')();
 
 module.exports = root;
 
-},{"./_freeGlobal":190}],195:[function(require,module,exports){
+},{"./_freeGlobal":152}],154:[function(require,module,exports){
 var isObject = require('./isObject'),
     now = require('./now'),
     toNumber = require('./toNumber');
@@ -19861,7 +19487,7 @@ function debounce(func, wait, options) {
 
 module.exports = debounce;
 
-},{"./isObject":196,"./now":200,"./toNumber":202}],196:[function(require,module,exports){
+},{"./isObject":155,"./now":158,"./toNumber":160}],155:[function(require,module,exports){
 /**
  * Checks if `value` is the
  * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
@@ -19894,11 +19520,9 @@ function isObject(value) {
 
 module.exports = isObject;
 
-},{}],197:[function(require,module,exports){
-arguments[4][38][0].apply(exports,arguments)
-},{"dup":38}],198:[function(require,module,exports){
-arguments[4][39][0].apply(exports,arguments)
-},{"./_getPrototype":191,"./_isHostObject":192,"./isObjectLike":197,"dup":39}],199:[function(require,module,exports){
+},{}],156:[function(require,module,exports){
+arguments[4][94][0].apply(exports,arguments)
+},{"dup":94}],157:[function(require,module,exports){
 var isObjectLike = require('./isObjectLike');
 
 /** `Object#toString` result references. */
@@ -19938,7 +19562,7 @@ function isSymbol(value) {
 
 module.exports = isSymbol;
 
-},{"./isObjectLike":197}],200:[function(require,module,exports){
+},{"./isObjectLike":156}],158:[function(require,module,exports){
 var root = require('./_root');
 
 /**
@@ -19963,7 +19587,7 @@ var now = function() {
 
 module.exports = now;
 
-},{"./_root":194}],201:[function(require,module,exports){
+},{"./_root":153}],159:[function(require,module,exports){
 var debounce = require('./debounce'),
     isObject = require('./isObject');
 
@@ -20034,7 +19658,7 @@ function throttle(func, wait, options) {
 
 module.exports = throttle;
 
-},{"./debounce":195,"./isObject":196}],202:[function(require,module,exports){
+},{"./debounce":154,"./isObject":155}],160:[function(require,module,exports){
 var isObject = require('./isObject'),
     isSymbol = require('./isSymbol');
 
@@ -20102,7 +19726,7 @@ function toNumber(value) {
 
 module.exports = toNumber;
 
-},{"./isObject":196,"./isSymbol":199}],203:[function(require,module,exports){
+},{"./isObject":155,"./isSymbol":157}],161:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20176,7 +19800,7 @@ Divider.defaultProps = defaultProps;
 Divider.contextTypes = contextTypes;
 
 exports.default = Divider;
-},{"react":416,"simple-assign":427}],204:[function(require,module,exports){
+},{"react":372,"simple-assign":383}],162:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20191,7 +19815,7 @@ var _Divider2 = _interopRequireDefault(_Divider);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _Divider2.default;
-},{"./Divider":203}],205:[function(require,module,exports){
+},{"./Divider":161}],163:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20333,7 +19957,7 @@ FontIcon.contextTypes = {
   muiTheme: _react.PropTypes.object.isRequired
 };
 exports.default = FontIcon;
-},{"../styles/transitions":240,"react":416,"simple-assign":427}],206:[function(require,module,exports){
+},{"../styles/transitions":198,"react":372,"simple-assign":383}],164:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20348,7 +19972,7 @@ var _FontIcon2 = _interopRequireDefault(_FontIcon);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _FontIcon2.default;
-},{"./FontIcon":205}],207:[function(require,module,exports){
+},{"./FontIcon":163}],165:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20655,7 +20279,7 @@ IconButton.contextTypes = {
   muiTheme: _react.PropTypes.object.isRequired
 };
 exports.default = IconButton;
-},{"../FontIcon":206,"../internal/EnhancedButton":233,"../internal/Tooltip":238,"../styles/transitions":240,"../utils/childUtils":245,"../utils/propTypes":250,"react":416,"simple-assign":427}],208:[function(require,module,exports){
+},{"../FontIcon":164,"../internal/EnhancedButton":191,"../internal/Tooltip":196,"../styles/transitions":198,"../utils/childUtils":203,"../utils/propTypes":208,"react":372,"simple-assign":383}],166:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -20670,7 +20294,7 @@ var _IconButton2 = _interopRequireDefault(_IconButton);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _IconButton2.default;
-},{"./IconButton":207}],209:[function(require,module,exports){
+},{"./IconButton":165}],167:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -20813,7 +20437,7 @@ List.contextTypes = {
 };
 exports.default = List;
 }).call(this,require('_process'))
-},{"../Subheader":222,"../utils/deprecatedPropType":247,"../utils/propTypes":250,"_process":88,"react":416,"simple-assign":427,"warning":430}],210:[function(require,module,exports){
+},{"../Subheader":180,"../utils/deprecatedPropType":205,"../utils/propTypes":208,"_process":143,"react":372,"simple-assign":383,"warning":384}],168:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21489,7 +21113,7 @@ ListItem.contextTypes = {
   muiTheme: _react.PropTypes.object.isRequired
 };
 exports.default = ListItem;
-},{"../IconButton":208,"../internal/EnhancedButton":233,"../styles/transitions":240,"../svg-icons/navigation/expand-less":242,"../svg-icons/navigation/expand-more":243,"../utils/colorManipulator":246,"./NestedList":211,"react":416,"react-dom":"react-dom","recompose/shallowEqual":423,"simple-assign":427}],211:[function(require,module,exports){
+},{"../IconButton":166,"../internal/EnhancedButton":191,"../styles/transitions":198,"../svg-icons/navigation/expand-less":200,"../svg-icons/navigation/expand-more":201,"../utils/colorManipulator":204,"./NestedList":169,"react":372,"react-dom":"react-dom","recompose/shallowEqual":379,"simple-assign":383}],169:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -21571,7 +21195,7 @@ NestedList.defaultProps = {
   open: false
 };
 exports.default = NestedList;
-},{"./List":209,"react":416,"simple-assign":427}],212:[function(require,module,exports){
+},{"./List":167,"react":372,"simple-assign":383}],170:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -22293,7 +21917,7 @@ var _initialiseProps = function _initialiseProps() {
 
 exports.default = Menu;
 }).call(this,require('_process'))
-},{"../List/List":209,"../internal/ClickAwayListener":232,"../styles/transitions":240,"../utils/autoPrefix":244,"../utils/deprecatedPropType":247,"../utils/propTypes":250,"./menuUtils":214,"_process":88,"keycode":189,"react":416,"react-dom":"react-dom","recompose/shallowEqual":423,"simple-assign":427,"warning":430}],213:[function(require,module,exports){
+},{"../List/List":167,"../internal/ClickAwayListener":190,"../styles/transitions":198,"../utils/autoPrefix":202,"../utils/deprecatedPropType":205,"../utils/propTypes":208,"./menuUtils":172,"_process":143,"keycode":151,"react":372,"react-dom":"react-dom","recompose/shallowEqual":379,"simple-assign":383,"warning":384}],171:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -22314,7 +21938,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 exports.Menu = _Menu3.default;
 exports.MenuItem = _MenuItem3.default;
 exports.default = _Menu3.default;
-},{"../MenuItem":216,"./Menu":212}],214:[function(require,module,exports){
+},{"../MenuItem":174,"./Menu":170}],172:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -22348,7 +21972,7 @@ var HotKeyHolder = exports.HotKeyHolder = function () {
 
   return HotKeyHolder;
 }();
-},{}],215:[function(require,module,exports){
+},{}],173:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -22710,7 +22334,7 @@ MenuItem.contextTypes = {
   muiTheme: _react.PropTypes.object.isRequired
 };
 exports.default = MenuItem;
-},{"../List/ListItem":210,"../Menu/Menu":212,"../Popover/Popover":219,"../svg-icons/navigation/check":241,"react":416,"react-dom":"react-dom","recompose/shallowEqual":423,"simple-assign":427}],216:[function(require,module,exports){
+},{"../List/ListItem":168,"../Menu/Menu":170,"../Popover/Popover":177,"../svg-icons/navigation/check":199,"react":372,"react-dom":"react-dom","recompose/shallowEqual":379,"simple-assign":383}],174:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -22725,7 +22349,7 @@ var _MenuItem2 = _interopRequireDefault(_MenuItem);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _MenuItem2.default;
-},{"./MenuItem":215}],217:[function(require,module,exports){
+},{"./MenuItem":173}],175:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -22860,7 +22484,7 @@ Paper.contextTypes = {
   muiTheme: _react.PropTypes.object.isRequired
 };
 exports.default = Paper;
-},{"../styles/transitions":240,"../utils/propTypes":250,"react":416,"simple-assign":427}],218:[function(require,module,exports){
+},{"../styles/transitions":198,"../utils/propTypes":208,"react":372,"simple-assign":383}],176:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -22875,7 +22499,7 @@ var _Paper2 = _interopRequireDefault(_Paper);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _Paper2.default;
-},{"./Paper":217}],219:[function(require,module,exports){
+},{"./Paper":175}],177:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -23311,7 +22935,7 @@ Popover.contextTypes = {
   muiTheme: _react.PropTypes.object.isRequired
 };
 exports.default = Popover;
-},{"../Paper":218,"../internal/RenderToLayer":235,"../utils/propTypes":250,"./PopoverAnimationDefault":220,"lodash/throttle":201,"react":416,"react-dom":"react-dom","react-event-listener":256}],220:[function(require,module,exports){
+},{"../Paper":176,"../internal/RenderToLayer":193,"../utils/propTypes":208,"./PopoverAnimationDefault":178,"lodash/throttle":159,"react":372,"react-dom":"react-dom","react-event-listener":212}],178:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -23469,7 +23093,7 @@ PopoverDefaultAnimation.contextTypes = {
   muiTheme: _react.PropTypes.object.isRequired
 };
 exports.default = PopoverDefaultAnimation;
-},{"../Paper":218,"../styles/transitions":240,"../utils/propTypes":250,"react":416,"simple-assign":427}],221:[function(require,module,exports){
+},{"../Paper":176,"../styles/transitions":198,"../utils/propTypes":208,"react":372,"simple-assign":383}],179:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -23550,7 +23174,7 @@ Subheader.defaultProps = defaultProps;
 Subheader.contextTypes = contextTypes;
 
 exports.default = Subheader;
-},{"react":416,"simple-assign":427}],222:[function(require,module,exports){
+},{"react":372,"simple-assign":383}],180:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -23565,7 +23189,7 @@ var _Subheader2 = _interopRequireDefault(_Subheader);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _Subheader2.default;
-},{"./Subheader":221}],223:[function(require,module,exports){
+},{"./Subheader":179}],181:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -23714,7 +23338,7 @@ SvgIcon.contextTypes = {
   muiTheme: _react.PropTypes.object.isRequired
 };
 exports.default = SvgIcon;
-},{"../styles/transitions":240,"react":416,"simple-assign":427}],224:[function(require,module,exports){
+},{"../styles/transitions":198,"react":372,"simple-assign":383}],182:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -23729,7 +23353,7 @@ var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _SvgIcon2.default;
-},{"./SvgIcon":223}],225:[function(require,module,exports){
+},{"./SvgIcon":181}],183:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -23953,7 +23577,7 @@ EnhancedTextarea.contextTypes = {
   muiTheme: _react.PropTypes.object.isRequired
 };
 exports.default = EnhancedTextarea;
-},{"react":416,"react-event-listener":256,"simple-assign":427}],226:[function(require,module,exports){
+},{"react":372,"react-event-listener":212,"simple-assign":383}],184:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -24524,7 +24148,7 @@ TextField.contextTypes = {
 };
 exports.default = TextField;
 }).call(this,require('_process'))
-},{"../styles/transitions":240,"../utils/colorManipulator":246,"../utils/deprecatedPropType":247,"./EnhancedTextarea":225,"./TextFieldHint":227,"./TextFieldLabel":228,"./TextFieldUnderline":229,"_process":88,"keycode":189,"react":416,"react-dom":"react-dom","recompose/shallowEqual":423,"simple-assign":427,"warning":430}],227:[function(require,module,exports){
+},{"../styles/transitions":198,"../utils/colorManipulator":204,"../utils/deprecatedPropType":205,"./EnhancedTextarea":183,"./TextFieldHint":185,"./TextFieldLabel":186,"./TextFieldUnderline":187,"_process":143,"keycode":151,"react":372,"react-dom":"react-dom","recompose/shallowEqual":379,"simple-assign":383,"warning":384}],185:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -24601,7 +24225,7 @@ TextFieldHint.defaultProps = {
 };
 
 exports.default = TextFieldHint;
-},{"../styles/transitions":240,"react":416,"simple-assign":427}],228:[function(require,module,exports){
+},{"../styles/transitions":198,"react":372,"simple-assign":383}],186:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -24714,7 +24338,7 @@ TextFieldLabel.defaultProps = {
 };
 
 exports.default = TextFieldLabel;
-},{"../styles/transitions":240,"react":416,"simple-assign":427}],229:[function(require,module,exports){
+},{"../styles/transitions":198,"react":372,"simple-assign":383}],187:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -24846,7 +24470,7 @@ TextFieldUnderline.propTypes = propTypes;
 TextFieldUnderline.defaultProps = defaultProps;
 
 exports.default = TextFieldUnderline;
-},{"../styles/transitions":240,"react":416,"simple-assign":427}],230:[function(require,module,exports){
+},{"../styles/transitions":198,"react":372,"simple-assign":383}],188:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -24861,7 +24485,7 @@ var _TextField2 = _interopRequireDefault(_TextField);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _TextField2.default;
-},{"./TextField":226}],231:[function(require,module,exports){
+},{"./TextField":184}],189:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -25018,7 +24642,7 @@ CircleRipple.contextTypes = {
   muiTheme: _react.PropTypes.object.isRequired
 };
 exports.default = CircleRipple;
-},{"../styles/transitions":240,"../utils/autoPrefix":244,"react":416,"react-dom":"react-dom","recompose/shallowEqual":423,"simple-assign":427}],232:[function(require,module,exports){
+},{"../styles/transitions":198,"../utils/autoPrefix":202,"react":372,"react-dom":"react-dom","recompose/shallowEqual":379,"simple-assign":383}],190:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -25133,7 +24757,7 @@ ClickAwayListener.propTypes = {
   onClickAway: _react.PropTypes.any
 };
 exports.default = ClickAwayListener;
-},{"../utils/events":249,"react":416,"react-dom":"react-dom"}],233:[function(require,module,exports){
+},{"../utils/events":207,"react":372,"react-dom":"react-dom"}],191:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -25535,7 +25159,7 @@ EnhancedButton.contextTypes = {
   muiTheme: _react.PropTypes.object.isRequired
 };
 exports.default = EnhancedButton;
-},{"../utils/childUtils":245,"../utils/deprecatedPropType":247,"../utils/events":249,"./FocusRipple":234,"./TouchRipple":239,"keycode":189,"react":416,"simple-assign":427}],234:[function(require,module,exports){
+},{"../utils/childUtils":203,"../utils/deprecatedPropType":205,"../utils/events":207,"./FocusRipple":192,"./TouchRipple":197,"keycode":151,"react":372,"simple-assign":383}],192:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -25720,7 +25344,7 @@ FocusRipple.contextTypes = {
   muiTheme: _react.PropTypes.object.isRequired
 };
 exports.default = FocusRipple;
-},{"../styles/transitions":240,"../utils/autoPrefix":244,"./ScaleIn":236,"react":416,"react-dom":"react-dom","recompose/shallowEqual":423,"simple-assign":427}],235:[function(require,module,exports){
+},{"../styles/transitions":198,"../utils/autoPrefix":202,"./ScaleIn":194,"react":372,"react-dom":"react-dom","recompose/shallowEqual":379,"simple-assign":383}],193:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -25889,7 +25513,7 @@ RenderToLayer.contextTypes = {
   muiTheme: _react.PropTypes.object.isRequired
 };
 exports.default = RenderToLayer;
-},{"../utils/dom":248,"react":416,"react-dom":"react-dom"}],236:[function(require,module,exports){
+},{"../utils/dom":206,"react":372,"react-dom":"react-dom"}],194:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -26003,7 +25627,7 @@ ScaleIn.contextTypes = {
   muiTheme: _react.PropTypes.object.isRequired
 };
 exports.default = ScaleIn;
-},{"./ScaleInChild":237,"react":416,"react-addons-transition-group":255,"simple-assign":427}],237:[function(require,module,exports){
+},{"./ScaleInChild":195,"react":372,"react-addons-transition-group":211,"simple-assign":383}],195:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -26158,7 +25782,7 @@ ScaleInChild.contextTypes = {
   muiTheme: _react.PropTypes.object.isRequired
 };
 exports.default = ScaleInChild;
-},{"../styles/transitions":240,"../utils/autoPrefix":244,"react":416,"react-dom":"react-dom","simple-assign":427}],238:[function(require,module,exports){
+},{"../styles/transitions":198,"../utils/autoPrefix":202,"react":372,"react-dom":"react-dom","simple-assign":383}],196:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -26369,7 +25993,7 @@ Tooltip.contextTypes = {
   muiTheme: _react.PropTypes.object.isRequired
 };
 exports.default = Tooltip;
-},{"../styles/transitions":240,"react":416,"simple-assign":427}],239:[function(require,module,exports){
+},{"../styles/transitions":198,"react":372,"simple-assign":383}],197:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -26661,7 +26285,7 @@ TouchRipple.contextTypes = {
   muiTheme: _react.PropTypes.object.isRequired
 };
 exports.default = TouchRipple;
-},{"../utils/dom":248,"./CircleRipple":231,"react":416,"react-addons-transition-group":255,"react-dom":"react-dom","simple-assign":427}],240:[function(require,module,exports){
+},{"../utils/dom":206,"./CircleRipple":189,"react":372,"react-addons-transition-group":211,"react-dom":"react-dom","simple-assign":383}],198:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -26696,7 +26320,7 @@ exports.default = {
     return property + ' ' + duration + ' ' + easeFunction + ' ' + delay;
   }
 };
-},{}],241:[function(require,module,exports){
+},{}],199:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -26729,7 +26353,7 @@ NavigationCheck.displayName = 'NavigationCheck';
 NavigationCheck.muiName = 'SvgIcon';
 
 exports.default = NavigationCheck;
-},{"../../SvgIcon":224,"react":416,"recompose/pure":422}],242:[function(require,module,exports){
+},{"../../SvgIcon":182,"react":372,"recompose/pure":378}],200:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -26762,7 +26386,7 @@ NavigationExpandLess.displayName = 'NavigationExpandLess';
 NavigationExpandLess.muiName = 'SvgIcon';
 
 exports.default = NavigationExpandLess;
-},{"../../SvgIcon":224,"react":416,"recompose/pure":422}],243:[function(require,module,exports){
+},{"../../SvgIcon":182,"react":372,"recompose/pure":378}],201:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -26795,7 +26419,7 @@ NavigationExpandMore.displayName = 'NavigationExpandMore';
 NavigationExpandMore.muiName = 'SvgIcon';
 
 exports.default = NavigationExpandMore;
-},{"../../SvgIcon":224,"react":416,"recompose/pure":422}],244:[function(require,module,exports){
+},{"../../SvgIcon":182,"react":372,"recompose/pure":378}],202:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -26806,7 +26430,7 @@ exports.default = {
     style[key] = value;
   }
 };
-},{}],245:[function(require,module,exports){
+},{}],203:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -26855,7 +26479,7 @@ function extendChildren(children, extendedProps, extendedChildren) {
     return _react2.default.cloneElement(child, newProps, newChildren);
   }) : children;
 }
-},{"react":416,"react-addons-create-fragment":254}],246:[function(require,module,exports){
+},{"react":372,"react-addons-create-fragment":210}],204:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -27088,7 +26712,7 @@ function lighten(color, coefficient) {
 
   return convertColorToString(color);
 }
-},{}],247:[function(require,module,exports){
+},{}],205:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -27129,7 +26753,7 @@ function deprecated(validator, reason) {
   };
 }
 }).call(this,require('_process'))
-},{"_process":88,"warning":430}],248:[function(require,module,exports){
+},{"_process":143,"warning":384}],206:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -27154,7 +26778,7 @@ exports.default = {
     };
   }
 };
-},{}],249:[function(require,module,exports){
+},{}],207:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -27194,7 +26818,7 @@ exports.default = {
     return ['keydown', 'keypress', 'keyup'].indexOf(event.type) !== -1;
   }
 };
-},{}],250:[function(require,module,exports){
+},{}],208:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -27226,17 +26850,138 @@ exports.default = {
   zDepth: _react.PropTypes.oneOf([0, 1, 2, 3, 4, 5])
 
 };
-},{"react":416}],251:[function(require,module,exports){
-arguments[4][40][0].apply(exports,arguments)
-},{"dup":40}],252:[function(require,module,exports){
-arguments[4][41][0].apply(exports,arguments)
-},{"dup":41}],253:[function(require,module,exports){
-arguments[4][42][0].apply(exports,arguments)
-},{"./10":252,"dup":42}],254:[function(require,module,exports){
+},{"react":372}],209:[function(require,module,exports){
+/**
+ * Helpers.
+ */
+
+var s = 1000;
+var m = s * 60;
+var h = m * 60;
+var d = h * 24;
+var y = d * 365.25;
+
+/**
+ * Parse or format the given `val`.
+ *
+ * Options:
+ *
+ *  - `long` verbose formatting [false]
+ *
+ * @param {String|Number} val
+ * @param {Object} options
+ * @return {String|Number}
+ * @api public
+ */
+
+module.exports = function(val, options){
+  options = options || {};
+  if ('string' == typeof val) return parse(val);
+  return options.long
+    ? long(val)
+    : short(val);
+};
+
+/**
+ * Parse the given `str` and return milliseconds.
+ *
+ * @param {String} str
+ * @return {Number}
+ * @api private
+ */
+
+function parse(str) {
+  str = '' + str;
+  if (str.length > 10000) return;
+  var match = /^((?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|years?|yrs?|y)?$/i.exec(str);
+  if (!match) return;
+  var n = parseFloat(match[1]);
+  var type = (match[2] || 'ms').toLowerCase();
+  switch (type) {
+    case 'years':
+    case 'year':
+    case 'yrs':
+    case 'yr':
+    case 'y':
+      return n * y;
+    case 'days':
+    case 'day':
+    case 'd':
+      return n * d;
+    case 'hours':
+    case 'hour':
+    case 'hrs':
+    case 'hr':
+    case 'h':
+      return n * h;
+    case 'minutes':
+    case 'minute':
+    case 'mins':
+    case 'min':
+    case 'm':
+      return n * m;
+    case 'seconds':
+    case 'second':
+    case 'secs':
+    case 'sec':
+    case 's':
+      return n * s;
+    case 'milliseconds':
+    case 'millisecond':
+    case 'msecs':
+    case 'msec':
+    case 'ms':
+      return n;
+  }
+}
+
+/**
+ * Short format for `ms`.
+ *
+ * @param {Number} ms
+ * @return {String}
+ * @api private
+ */
+
+function short(ms) {
+  if (ms >= d) return Math.round(ms / d) + 'd';
+  if (ms >= h) return Math.round(ms / h) + 'h';
+  if (ms >= m) return Math.round(ms / m) + 'm';
+  if (ms >= s) return Math.round(ms / s) + 's';
+  return ms + 'ms';
+}
+
+/**
+ * Long format for `ms`.
+ *
+ * @param {Number} ms
+ * @return {String}
+ * @api private
+ */
+
+function long(ms) {
+  return plural(ms, d, 'day')
+    || plural(ms, h, 'hour')
+    || plural(ms, m, 'minute')
+    || plural(ms, s, 'second')
+    || ms + ' ms';
+}
+
+/**
+ * Pluralization helper.
+ */
+
+function plural(ms, n, name) {
+  if (ms < n) return;
+  if (ms < n * 1.5) return Math.floor(ms / n) + ' ' + name;
+  return Math.ceil(ms / n) + ' ' + name + 's';
+}
+
+},{}],210:[function(require,module,exports){
 module.exports = require('react/lib/ReactFragment').create;
-},{"react/lib/ReactFragment":319}],255:[function(require,module,exports){
+},{"react/lib/ReactFragment":275}],211:[function(require,module,exports){
 module.exports = require('react/lib/ReactTransitionGroup');
-},{"react/lib/ReactTransitionGroup":344}],256:[function(require,module,exports){
+},{"react/lib/ReactTransitionGroup":300}],212:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -27399,7 +27144,7 @@ EventListener.defaultProps = {
   capture: false
 };
 exports.default = EventListener;
-},{"fbjs/lib/shallowEqual":180,"react":416}],257:[function(require,module,exports){
+},{"fbjs/lib/shallowEqual":150,"react":372}],213:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -27426,7 +27171,7 @@ var AutoFocusMixin = {
 
 module.exports = AutoFocusMixin;
 
-},{"./focusNode":379}],258:[function(require,module,exports){
+},{"./focusNode":335}],214:[function(require,module,exports){
 /**
  * Copyright 2013-2015 Facebook, Inc.
  * All rights reserved.
@@ -27921,7 +27666,7 @@ var BeforeInputEventPlugin = {
 
 module.exports = BeforeInputEventPlugin;
 
-},{"./EventConstants":270,"./EventPropagators":275,"./ExecutionEnvironment":276,"./FallbackCompositionState":277,"./SyntheticCompositionEvent":352,"./SyntheticInputEvent":356,"./keyOf":402}],259:[function(require,module,exports){
+},{"./EventConstants":226,"./EventPropagators":231,"./ExecutionEnvironment":232,"./FallbackCompositionState":233,"./SyntheticCompositionEvent":308,"./SyntheticInputEvent":312,"./keyOf":358}],215:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -28046,7 +27791,7 @@ var CSSProperty = {
 
 module.exports = CSSProperty;
 
-},{}],260:[function(require,module,exports){
+},{}],216:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -28228,7 +27973,7 @@ var CSSPropertyOperations = {
 module.exports = CSSPropertyOperations;
 
 }).call(this,require('_process'))
-},{"./CSSProperty":259,"./ExecutionEnvironment":276,"./camelizeStyleName":367,"./dangerousStyleValue":373,"./hyphenateStyleName":393,"./memoizeStringOnly":404,"./warning":415,"_process":88}],261:[function(require,module,exports){
+},{"./CSSProperty":215,"./ExecutionEnvironment":232,"./camelizeStyleName":323,"./dangerousStyleValue":329,"./hyphenateStyleName":349,"./memoizeStringOnly":360,"./warning":371,"_process":143}],217:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -28328,7 +28073,7 @@ PooledClass.addPoolingTo(CallbackQueue);
 module.exports = CallbackQueue;
 
 }).call(this,require('_process'))
-},{"./Object.assign":282,"./PooledClass":283,"./invariant":395,"_process":88}],262:[function(require,module,exports){
+},{"./Object.assign":238,"./PooledClass":239,"./invariant":351,"_process":143}],218:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -28710,7 +28455,7 @@ var ChangeEventPlugin = {
 
 module.exports = ChangeEventPlugin;
 
-},{"./EventConstants":270,"./EventPluginHub":272,"./EventPropagators":275,"./ExecutionEnvironment":276,"./ReactUpdates":346,"./SyntheticEvent":354,"./isEventSupported":396,"./isTextInputElement":398,"./keyOf":402}],263:[function(require,module,exports){
+},{"./EventConstants":226,"./EventPluginHub":228,"./EventPropagators":231,"./ExecutionEnvironment":232,"./ReactUpdates":302,"./SyntheticEvent":310,"./isEventSupported":352,"./isTextInputElement":354,"./keyOf":358}],219:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -28735,7 +28480,7 @@ var ClientReactRootIndex = {
 
 module.exports = ClientReactRootIndex;
 
-},{}],264:[function(require,module,exports){
+},{}],220:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -28873,7 +28618,7 @@ var DOMChildrenOperations = {
 module.exports = DOMChildrenOperations;
 
 }).call(this,require('_process'))
-},{"./Danger":267,"./ReactMultiChildUpdateTypes":328,"./invariant":395,"./setTextContent":410,"_process":88}],265:[function(require,module,exports){
+},{"./Danger":223,"./ReactMultiChildUpdateTypes":284,"./invariant":351,"./setTextContent":366,"_process":143}],221:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -29172,7 +28917,7 @@ var DOMProperty = {
 module.exports = DOMProperty;
 
 }).call(this,require('_process'))
-},{"./invariant":395,"_process":88}],266:[function(require,module,exports){
+},{"./invariant":351,"_process":143}],222:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -29364,7 +29109,7 @@ var DOMPropertyOperations = {
 module.exports = DOMPropertyOperations;
 
 }).call(this,require('_process'))
-},{"./DOMProperty":265,"./quoteAttributeValueForBrowser":408,"./warning":415,"_process":88}],267:[function(require,module,exports){
+},{"./DOMProperty":221,"./quoteAttributeValueForBrowser":364,"./warning":371,"_process":143}],223:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -29551,7 +29296,7 @@ var Danger = {
 module.exports = Danger;
 
 }).call(this,require('_process'))
-},{"./ExecutionEnvironment":276,"./createNodesFromMarkup":372,"./emptyFunction":374,"./getMarkupWrap":387,"./invariant":395,"_process":88}],268:[function(require,module,exports){
+},{"./ExecutionEnvironment":232,"./createNodesFromMarkup":328,"./emptyFunction":330,"./getMarkupWrap":343,"./invariant":351,"_process":143}],224:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -29590,7 +29335,7 @@ var DefaultEventPluginOrder = [
 
 module.exports = DefaultEventPluginOrder;
 
-},{"./keyOf":402}],269:[function(require,module,exports){
+},{"./keyOf":358}],225:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -29730,7 +29475,7 @@ var EnterLeaveEventPlugin = {
 
 module.exports = EnterLeaveEventPlugin;
 
-},{"./EventConstants":270,"./EventPropagators":275,"./ReactMount":326,"./SyntheticMouseEvent":358,"./keyOf":402}],270:[function(require,module,exports){
+},{"./EventConstants":226,"./EventPropagators":231,"./ReactMount":282,"./SyntheticMouseEvent":314,"./keyOf":358}],226:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -29802,7 +29547,7 @@ var EventConstants = {
 
 module.exports = EventConstants;
 
-},{"./keyMirror":401}],271:[function(require,module,exports){
+},{"./keyMirror":357}],227:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -29892,7 +29637,7 @@ var EventListener = {
 module.exports = EventListener;
 
 }).call(this,require('_process'))
-},{"./emptyFunction":374,"_process":88}],272:[function(require,module,exports){
+},{"./emptyFunction":330,"_process":143}],228:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -30170,7 +29915,7 @@ var EventPluginHub = {
 module.exports = EventPluginHub;
 
 }).call(this,require('_process'))
-},{"./EventPluginRegistry":273,"./EventPluginUtils":274,"./accumulateInto":364,"./forEachAccumulated":380,"./invariant":395,"_process":88}],273:[function(require,module,exports){
+},{"./EventPluginRegistry":229,"./EventPluginUtils":230,"./accumulateInto":320,"./forEachAccumulated":336,"./invariant":351,"_process":143}],229:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -30450,7 +30195,7 @@ var EventPluginRegistry = {
 module.exports = EventPluginRegistry;
 
 }).call(this,require('_process'))
-},{"./invariant":395,"_process":88}],274:[function(require,module,exports){
+},{"./invariant":351,"_process":143}],230:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -30671,7 +30416,7 @@ var EventPluginUtils = {
 module.exports = EventPluginUtils;
 
 }).call(this,require('_process'))
-},{"./EventConstants":270,"./invariant":395,"_process":88}],275:[function(require,module,exports){
+},{"./EventConstants":226,"./invariant":351,"_process":143}],231:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -30813,7 +30558,7 @@ var EventPropagators = {
 module.exports = EventPropagators;
 
 }).call(this,require('_process'))
-},{"./EventConstants":270,"./EventPluginHub":272,"./accumulateInto":364,"./forEachAccumulated":380,"_process":88}],276:[function(require,module,exports){
+},{"./EventConstants":226,"./EventPluginHub":228,"./accumulateInto":320,"./forEachAccumulated":336,"_process":143}],232:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -30857,7 +30602,7 @@ var ExecutionEnvironment = {
 
 module.exports = ExecutionEnvironment;
 
-},{}],277:[function(require,module,exports){
+},{}],233:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -30948,7 +30693,7 @@ PooledClass.addPoolingTo(FallbackCompositionState);
 
 module.exports = FallbackCompositionState;
 
-},{"./Object.assign":282,"./PooledClass":283,"./getTextContentAccessor":390}],278:[function(require,module,exports){
+},{"./Object.assign":238,"./PooledClass":239,"./getTextContentAccessor":346}],234:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -31159,7 +30904,7 @@ var HTMLDOMPropertyConfig = {
 
 module.exports = HTMLDOMPropertyConfig;
 
-},{"./DOMProperty":265,"./ExecutionEnvironment":276}],279:[function(require,module,exports){
+},{"./DOMProperty":221,"./ExecutionEnvironment":232}],235:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -31315,7 +31060,7 @@ var LinkedValueUtils = {
 module.exports = LinkedValueUtils;
 
 }).call(this,require('_process'))
-},{"./ReactPropTypes":335,"./invariant":395,"_process":88}],280:[function(require,module,exports){
+},{"./ReactPropTypes":291,"./invariant":351,"_process":143}],236:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-2015, Facebook, Inc.
@@ -31372,7 +31117,7 @@ var LocalEventTrapMixin = {
 module.exports = LocalEventTrapMixin;
 
 }).call(this,require('_process'))
-},{"./ReactBrowserEventEmitter":286,"./accumulateInto":364,"./forEachAccumulated":380,"./invariant":395,"_process":88}],281:[function(require,module,exports){
+},{"./ReactBrowserEventEmitter":242,"./accumulateInto":320,"./forEachAccumulated":336,"./invariant":351,"_process":143}],237:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -31430,7 +31175,7 @@ var MobileSafariClickEventPlugin = {
 
 module.exports = MobileSafariClickEventPlugin;
 
-},{"./EventConstants":270,"./emptyFunction":374}],282:[function(require,module,exports){
+},{"./EventConstants":226,"./emptyFunction":330}],238:[function(require,module,exports){
 /**
  * Copyright 2014-2015, Facebook, Inc.
  * All rights reserved.
@@ -31479,7 +31224,7 @@ function assign(target, sources) {
 
 module.exports = assign;
 
-},{}],283:[function(require,module,exports){
+},{}],239:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -31595,7 +31340,7 @@ var PooledClass = {
 module.exports = PooledClass;
 
 }).call(this,require('_process'))
-},{"./invariant":395,"_process":88}],284:[function(require,module,exports){
+},{"./invariant":351,"_process":143}],240:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -31747,7 +31492,7 @@ React.version = '0.13.3';
 module.exports = React;
 
 }).call(this,require('_process'))
-},{"./EventPluginUtils":274,"./ExecutionEnvironment":276,"./Object.assign":282,"./ReactChildren":288,"./ReactClass":289,"./ReactComponent":290,"./ReactContext":294,"./ReactCurrentOwner":295,"./ReactDOM":296,"./ReactDOMTextComponent":307,"./ReactDefaultInjection":310,"./ReactElement":313,"./ReactElementValidator":314,"./ReactInstanceHandles":322,"./ReactMount":326,"./ReactPerf":331,"./ReactPropTypes":335,"./ReactReconciler":338,"./ReactServerRendering":341,"./findDOMNode":377,"./onlyChild":405,"_process":88}],285:[function(require,module,exports){
+},{"./EventPluginUtils":230,"./ExecutionEnvironment":232,"./Object.assign":238,"./ReactChildren":244,"./ReactClass":245,"./ReactComponent":246,"./ReactContext":250,"./ReactCurrentOwner":251,"./ReactDOM":252,"./ReactDOMTextComponent":263,"./ReactDefaultInjection":266,"./ReactElement":269,"./ReactElementValidator":270,"./ReactInstanceHandles":278,"./ReactMount":282,"./ReactPerf":287,"./ReactPropTypes":291,"./ReactReconciler":294,"./ReactServerRendering":297,"./findDOMNode":333,"./onlyChild":361,"_process":143}],241:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -31778,7 +31523,7 @@ var ReactBrowserComponentMixin = {
 
 module.exports = ReactBrowserComponentMixin;
 
-},{"./findDOMNode":377}],286:[function(require,module,exports){
+},{"./findDOMNode":333}],242:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -32131,7 +31876,7 @@ var ReactBrowserEventEmitter = assign({}, ReactEventEmitterMixin, {
 
 module.exports = ReactBrowserEventEmitter;
 
-},{"./EventConstants":270,"./EventPluginHub":272,"./EventPluginRegistry":273,"./Object.assign":282,"./ReactEventEmitterMixin":317,"./ViewportMetrics":363,"./isEventSupported":396}],287:[function(require,module,exports){
+},{"./EventConstants":226,"./EventPluginHub":228,"./EventPluginRegistry":229,"./Object.assign":238,"./ReactEventEmitterMixin":273,"./ViewportMetrics":319,"./isEventSupported":352}],243:[function(require,module,exports){
 /**
  * Copyright 2014-2015, Facebook, Inc.
  * All rights reserved.
@@ -32258,7 +32003,7 @@ var ReactChildReconciler = {
 
 module.exports = ReactChildReconciler;
 
-},{"./ReactReconciler":338,"./flattenChildren":378,"./instantiateReactComponent":394,"./shouldUpdateReactComponent":412}],288:[function(require,module,exports){
+},{"./ReactReconciler":294,"./flattenChildren":334,"./instantiateReactComponent":350,"./shouldUpdateReactComponent":368}],244:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -32411,7 +32156,7 @@ var ReactChildren = {
 module.exports = ReactChildren;
 
 }).call(this,require('_process'))
-},{"./PooledClass":283,"./ReactFragment":319,"./traverseAllChildren":414,"./warning":415,"_process":88}],289:[function(require,module,exports){
+},{"./PooledClass":239,"./ReactFragment":275,"./traverseAllChildren":370,"./warning":371,"_process":143}],245:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -33357,7 +33102,7 @@ var ReactClass = {
 module.exports = ReactClass;
 
 }).call(this,require('_process'))
-},{"./Object.assign":282,"./ReactComponent":290,"./ReactCurrentOwner":295,"./ReactElement":313,"./ReactErrorUtils":316,"./ReactInstanceMap":323,"./ReactLifeCycle":324,"./ReactPropTypeLocationNames":333,"./ReactPropTypeLocations":334,"./ReactUpdateQueue":345,"./invariant":395,"./keyMirror":401,"./keyOf":402,"./warning":415,"_process":88}],290:[function(require,module,exports){
+},{"./Object.assign":238,"./ReactComponent":246,"./ReactCurrentOwner":251,"./ReactElement":269,"./ReactErrorUtils":272,"./ReactInstanceMap":279,"./ReactLifeCycle":280,"./ReactPropTypeLocationNames":289,"./ReactPropTypeLocations":290,"./ReactUpdateQueue":301,"./invariant":351,"./keyMirror":357,"./keyOf":358,"./warning":371,"_process":143}],246:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -33511,7 +33256,7 @@ if ("production" !== process.env.NODE_ENV) {
 module.exports = ReactComponent;
 
 }).call(this,require('_process'))
-},{"./ReactUpdateQueue":345,"./invariant":395,"./warning":415,"_process":88}],291:[function(require,module,exports){
+},{"./ReactUpdateQueue":301,"./invariant":351,"./warning":371,"_process":143}],247:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -33558,7 +33303,7 @@ var ReactComponentBrowserEnvironment = {
 
 module.exports = ReactComponentBrowserEnvironment;
 
-},{"./ReactDOMIDOperations":300,"./ReactMount":326}],292:[function(require,module,exports){
+},{"./ReactDOMIDOperations":256,"./ReactMount":282}],248:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-2015, Facebook, Inc.
@@ -33619,7 +33364,7 @@ var ReactComponentEnvironment = {
 module.exports = ReactComponentEnvironment;
 
 }).call(this,require('_process'))
-},{"./invariant":395,"_process":88}],293:[function(require,module,exports){
+},{"./invariant":351,"_process":143}],249:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -34532,7 +34277,7 @@ var ReactCompositeComponent = {
 module.exports = ReactCompositeComponent;
 
 }).call(this,require('_process'))
-},{"./Object.assign":282,"./ReactComponentEnvironment":292,"./ReactContext":294,"./ReactCurrentOwner":295,"./ReactElement":313,"./ReactElementValidator":314,"./ReactInstanceMap":323,"./ReactLifeCycle":324,"./ReactNativeComponent":329,"./ReactPerf":331,"./ReactPropTypeLocationNames":333,"./ReactPropTypeLocations":334,"./ReactReconciler":338,"./ReactUpdates":346,"./emptyObject":375,"./invariant":395,"./shouldUpdateReactComponent":412,"./warning":415,"_process":88}],294:[function(require,module,exports){
+},{"./Object.assign":238,"./ReactComponentEnvironment":248,"./ReactContext":250,"./ReactCurrentOwner":251,"./ReactElement":269,"./ReactElementValidator":270,"./ReactInstanceMap":279,"./ReactLifeCycle":280,"./ReactNativeComponent":285,"./ReactPerf":287,"./ReactPropTypeLocationNames":289,"./ReactPropTypeLocations":290,"./ReactReconciler":294,"./ReactUpdates":302,"./emptyObject":331,"./invariant":351,"./shouldUpdateReactComponent":368,"./warning":371,"_process":143}],250:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -34610,7 +34355,7 @@ var ReactContext = {
 module.exports = ReactContext;
 
 }).call(this,require('_process'))
-},{"./Object.assign":282,"./emptyObject":375,"./warning":415,"_process":88}],295:[function(require,module,exports){
+},{"./Object.assign":238,"./emptyObject":331,"./warning":371,"_process":143}],251:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -34644,7 +34389,7 @@ var ReactCurrentOwner = {
 
 module.exports = ReactCurrentOwner;
 
-},{}],296:[function(require,module,exports){
+},{}],252:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -34823,7 +34568,7 @@ var ReactDOM = mapObject({
 module.exports = ReactDOM;
 
 }).call(this,require('_process'))
-},{"./ReactElement":313,"./ReactElementValidator":314,"./mapObject":403,"_process":88}],297:[function(require,module,exports){
+},{"./ReactElement":269,"./ReactElementValidator":270,"./mapObject":359,"_process":143}],253:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -34887,7 +34632,7 @@ var ReactDOMButton = ReactClass.createClass({
 
 module.exports = ReactDOMButton;
 
-},{"./AutoFocusMixin":257,"./ReactBrowserComponentMixin":285,"./ReactClass":289,"./ReactElement":313,"./keyMirror":401}],298:[function(require,module,exports){
+},{"./AutoFocusMixin":213,"./ReactBrowserComponentMixin":241,"./ReactClass":245,"./ReactElement":269,"./keyMirror":357}],254:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -35397,7 +35142,7 @@ ReactDOMComponent.injection = {
 module.exports = ReactDOMComponent;
 
 }).call(this,require('_process'))
-},{"./CSSPropertyOperations":260,"./DOMProperty":265,"./DOMPropertyOperations":266,"./Object.assign":282,"./ReactBrowserEventEmitter":286,"./ReactComponentBrowserEnvironment":291,"./ReactMount":326,"./ReactMultiChild":327,"./ReactPerf":331,"./escapeTextContentForBrowser":376,"./invariant":395,"./isEventSupported":396,"./keyOf":402,"./warning":415,"_process":88}],299:[function(require,module,exports){
+},{"./CSSPropertyOperations":216,"./DOMProperty":221,"./DOMPropertyOperations":222,"./Object.assign":238,"./ReactBrowserEventEmitter":242,"./ReactComponentBrowserEnvironment":247,"./ReactMount":282,"./ReactMultiChild":283,"./ReactPerf":287,"./escapeTextContentForBrowser":332,"./invariant":351,"./isEventSupported":352,"./keyOf":358,"./warning":371,"_process":143}],255:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -35446,7 +35191,7 @@ var ReactDOMForm = ReactClass.createClass({
 
 module.exports = ReactDOMForm;
 
-},{"./EventConstants":270,"./LocalEventTrapMixin":280,"./ReactBrowserComponentMixin":285,"./ReactClass":289,"./ReactElement":313}],300:[function(require,module,exports){
+},{"./EventConstants":226,"./LocalEventTrapMixin":236,"./ReactBrowserComponentMixin":241,"./ReactClass":245,"./ReactElement":269}],256:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -35614,7 +35359,7 @@ ReactPerf.measureMethods(ReactDOMIDOperations, 'ReactDOMIDOperations', {
 module.exports = ReactDOMIDOperations;
 
 }).call(this,require('_process'))
-},{"./CSSPropertyOperations":260,"./DOMChildrenOperations":264,"./DOMPropertyOperations":266,"./ReactMount":326,"./ReactPerf":331,"./invariant":395,"./setInnerHTML":409,"_process":88}],301:[function(require,module,exports){
+},{"./CSSPropertyOperations":216,"./DOMChildrenOperations":220,"./DOMPropertyOperations":222,"./ReactMount":282,"./ReactPerf":287,"./invariant":351,"./setInnerHTML":365,"_process":143}],257:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -35659,7 +35404,7 @@ var ReactDOMIframe = ReactClass.createClass({
 
 module.exports = ReactDOMIframe;
 
-},{"./EventConstants":270,"./LocalEventTrapMixin":280,"./ReactBrowserComponentMixin":285,"./ReactClass":289,"./ReactElement":313}],302:[function(require,module,exports){
+},{"./EventConstants":226,"./LocalEventTrapMixin":236,"./ReactBrowserComponentMixin":241,"./ReactClass":245,"./ReactElement":269}],258:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -35705,7 +35450,7 @@ var ReactDOMImg = ReactClass.createClass({
 
 module.exports = ReactDOMImg;
 
-},{"./EventConstants":270,"./LocalEventTrapMixin":280,"./ReactBrowserComponentMixin":285,"./ReactClass":289,"./ReactElement":313}],303:[function(require,module,exports){
+},{"./EventConstants":226,"./LocalEventTrapMixin":236,"./ReactBrowserComponentMixin":241,"./ReactClass":245,"./ReactElement":269}],259:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -35882,7 +35627,7 @@ var ReactDOMInput = ReactClass.createClass({
 module.exports = ReactDOMInput;
 
 }).call(this,require('_process'))
-},{"./AutoFocusMixin":257,"./DOMPropertyOperations":266,"./LinkedValueUtils":279,"./Object.assign":282,"./ReactBrowserComponentMixin":285,"./ReactClass":289,"./ReactElement":313,"./ReactMount":326,"./ReactUpdates":346,"./invariant":395,"_process":88}],304:[function(require,module,exports){
+},{"./AutoFocusMixin":213,"./DOMPropertyOperations":222,"./LinkedValueUtils":235,"./Object.assign":238,"./ReactBrowserComponentMixin":241,"./ReactClass":245,"./ReactElement":269,"./ReactMount":282,"./ReactUpdates":302,"./invariant":351,"_process":143}],260:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -35934,7 +35679,7 @@ var ReactDOMOption = ReactClass.createClass({
 module.exports = ReactDOMOption;
 
 }).call(this,require('_process'))
-},{"./ReactBrowserComponentMixin":285,"./ReactClass":289,"./ReactElement":313,"./warning":415,"_process":88}],305:[function(require,module,exports){
+},{"./ReactBrowserComponentMixin":241,"./ReactClass":245,"./ReactElement":269,"./warning":371,"_process":143}],261:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -36112,7 +35857,7 @@ var ReactDOMSelect = ReactClass.createClass({
 
 module.exports = ReactDOMSelect;
 
-},{"./AutoFocusMixin":257,"./LinkedValueUtils":279,"./Object.assign":282,"./ReactBrowserComponentMixin":285,"./ReactClass":289,"./ReactElement":313,"./ReactUpdates":346}],306:[function(require,module,exports){
+},{"./AutoFocusMixin":213,"./LinkedValueUtils":235,"./Object.assign":238,"./ReactBrowserComponentMixin":241,"./ReactClass":245,"./ReactElement":269,"./ReactUpdates":302}],262:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -36325,7 +36070,7 @@ var ReactDOMSelection = {
 
 module.exports = ReactDOMSelection;
 
-},{"./ExecutionEnvironment":276,"./getNodeForCharacterOffset":388,"./getTextContentAccessor":390}],307:[function(require,module,exports){
+},{"./ExecutionEnvironment":232,"./getNodeForCharacterOffset":344,"./getTextContentAccessor":346}],263:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -36442,7 +36187,7 @@ assign(ReactDOMTextComponent.prototype, {
 
 module.exports = ReactDOMTextComponent;
 
-},{"./DOMPropertyOperations":266,"./Object.assign":282,"./ReactComponentBrowserEnvironment":291,"./ReactDOMComponent":298,"./escapeTextContentForBrowser":376}],308:[function(require,module,exports){
+},{"./DOMPropertyOperations":222,"./Object.assign":238,"./ReactComponentBrowserEnvironment":247,"./ReactDOMComponent":254,"./escapeTextContentForBrowser":332}],264:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -36582,7 +36327,7 @@ var ReactDOMTextarea = ReactClass.createClass({
 module.exports = ReactDOMTextarea;
 
 }).call(this,require('_process'))
-},{"./AutoFocusMixin":257,"./DOMPropertyOperations":266,"./LinkedValueUtils":279,"./Object.assign":282,"./ReactBrowserComponentMixin":285,"./ReactClass":289,"./ReactElement":313,"./ReactUpdates":346,"./invariant":395,"./warning":415,"_process":88}],309:[function(require,module,exports){
+},{"./AutoFocusMixin":213,"./DOMPropertyOperations":222,"./LinkedValueUtils":235,"./Object.assign":238,"./ReactBrowserComponentMixin":241,"./ReactClass":245,"./ReactElement":269,"./ReactUpdates":302,"./invariant":351,"./warning":371,"_process":143}],265:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -36655,7 +36400,7 @@ var ReactDefaultBatchingStrategy = {
 
 module.exports = ReactDefaultBatchingStrategy;
 
-},{"./Object.assign":282,"./ReactUpdates":346,"./Transaction":362,"./emptyFunction":374}],310:[function(require,module,exports){
+},{"./Object.assign":238,"./ReactUpdates":302,"./Transaction":318,"./emptyFunction":330}],266:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -36814,7 +36559,7 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"./BeforeInputEventPlugin":258,"./ChangeEventPlugin":262,"./ClientReactRootIndex":263,"./DefaultEventPluginOrder":268,"./EnterLeaveEventPlugin":269,"./ExecutionEnvironment":276,"./HTMLDOMPropertyConfig":278,"./MobileSafariClickEventPlugin":281,"./ReactBrowserComponentMixin":285,"./ReactClass":289,"./ReactComponentBrowserEnvironment":291,"./ReactDOMButton":297,"./ReactDOMComponent":298,"./ReactDOMForm":299,"./ReactDOMIDOperations":300,"./ReactDOMIframe":301,"./ReactDOMImg":302,"./ReactDOMInput":303,"./ReactDOMOption":304,"./ReactDOMSelect":305,"./ReactDOMTextComponent":307,"./ReactDOMTextarea":308,"./ReactDefaultBatchingStrategy":309,"./ReactDefaultPerf":311,"./ReactElement":313,"./ReactEventListener":318,"./ReactInjection":320,"./ReactInstanceHandles":322,"./ReactMount":326,"./ReactReconcileTransaction":337,"./SVGDOMPropertyConfig":347,"./SelectEventPlugin":348,"./ServerReactRootIndex":349,"./SimpleEventPlugin":350,"./createFullPageComponent":371,"_process":88}],311:[function(require,module,exports){
+},{"./BeforeInputEventPlugin":214,"./ChangeEventPlugin":218,"./ClientReactRootIndex":219,"./DefaultEventPluginOrder":224,"./EnterLeaveEventPlugin":225,"./ExecutionEnvironment":232,"./HTMLDOMPropertyConfig":234,"./MobileSafariClickEventPlugin":237,"./ReactBrowserComponentMixin":241,"./ReactClass":245,"./ReactComponentBrowserEnvironment":247,"./ReactDOMButton":253,"./ReactDOMComponent":254,"./ReactDOMForm":255,"./ReactDOMIDOperations":256,"./ReactDOMIframe":257,"./ReactDOMImg":258,"./ReactDOMInput":259,"./ReactDOMOption":260,"./ReactDOMSelect":261,"./ReactDOMTextComponent":263,"./ReactDOMTextarea":264,"./ReactDefaultBatchingStrategy":265,"./ReactDefaultPerf":267,"./ReactElement":269,"./ReactEventListener":274,"./ReactInjection":276,"./ReactInstanceHandles":278,"./ReactMount":282,"./ReactReconcileTransaction":293,"./SVGDOMPropertyConfig":303,"./SelectEventPlugin":304,"./ServerReactRootIndex":305,"./SimpleEventPlugin":306,"./createFullPageComponent":327,"_process":143}],267:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -37080,7 +36825,7 @@ var ReactDefaultPerf = {
 
 module.exports = ReactDefaultPerf;
 
-},{"./DOMProperty":265,"./ReactDefaultPerfAnalysis":312,"./ReactMount":326,"./ReactPerf":331,"./performanceNow":407}],312:[function(require,module,exports){
+},{"./DOMProperty":221,"./ReactDefaultPerfAnalysis":268,"./ReactMount":282,"./ReactPerf":287,"./performanceNow":363}],268:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -37286,7 +37031,7 @@ var ReactDefaultPerfAnalysis = {
 
 module.exports = ReactDefaultPerfAnalysis;
 
-},{"./Object.assign":282}],313:[function(require,module,exports){
+},{"./Object.assign":238}],269:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-2015, Facebook, Inc.
@@ -37594,7 +37339,7 @@ ReactElement.isValidElement = function(object) {
 module.exports = ReactElement;
 
 }).call(this,require('_process'))
-},{"./Object.assign":282,"./ReactContext":294,"./ReactCurrentOwner":295,"./warning":415,"_process":88}],314:[function(require,module,exports){
+},{"./Object.assign":238,"./ReactContext":250,"./ReactCurrentOwner":251,"./warning":371,"_process":143}],270:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-2015, Facebook, Inc.
@@ -38059,7 +37804,7 @@ var ReactElementValidator = {
 module.exports = ReactElementValidator;
 
 }).call(this,require('_process'))
-},{"./ReactCurrentOwner":295,"./ReactElement":313,"./ReactFragment":319,"./ReactNativeComponent":329,"./ReactPropTypeLocationNames":333,"./ReactPropTypeLocations":334,"./getIteratorFn":386,"./invariant":395,"./warning":415,"_process":88}],315:[function(require,module,exports){
+},{"./ReactCurrentOwner":251,"./ReactElement":269,"./ReactFragment":275,"./ReactNativeComponent":285,"./ReactPropTypeLocationNames":289,"./ReactPropTypeLocations":290,"./getIteratorFn":342,"./invariant":351,"./warning":371,"_process":143}],271:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-2015, Facebook, Inc.
@@ -38154,7 +37899,7 @@ var ReactEmptyComponent = {
 module.exports = ReactEmptyComponent;
 
 }).call(this,require('_process'))
-},{"./ReactElement":313,"./ReactInstanceMap":323,"./invariant":395,"_process":88}],316:[function(require,module,exports){
+},{"./ReactElement":269,"./ReactInstanceMap":279,"./invariant":351,"_process":143}],272:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -38186,7 +37931,7 @@ var ReactErrorUtils = {
 
 module.exports = ReactErrorUtils;
 
-},{}],317:[function(require,module,exports){
+},{}],273:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -38236,7 +37981,7 @@ var ReactEventEmitterMixin = {
 
 module.exports = ReactEventEmitterMixin;
 
-},{"./EventPluginHub":272}],318:[function(require,module,exports){
+},{"./EventPluginHub":228}],274:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -38419,7 +38164,7 @@ var ReactEventListener = {
 
 module.exports = ReactEventListener;
 
-},{"./EventListener":271,"./ExecutionEnvironment":276,"./Object.assign":282,"./PooledClass":283,"./ReactInstanceHandles":322,"./ReactMount":326,"./ReactUpdates":346,"./getEventTarget":385,"./getUnboundedScrollPosition":391}],319:[function(require,module,exports){
+},{"./EventListener":227,"./ExecutionEnvironment":232,"./Object.assign":238,"./PooledClass":239,"./ReactInstanceHandles":278,"./ReactMount":282,"./ReactUpdates":302,"./getEventTarget":341,"./getUnboundedScrollPosition":347}],275:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2015, Facebook, Inc.
@@ -38604,7 +38349,7 @@ var ReactFragment = {
 module.exports = ReactFragment;
 
 }).call(this,require('_process'))
-},{"./ReactElement":313,"./warning":415,"_process":88}],320:[function(require,module,exports){
+},{"./ReactElement":269,"./warning":371,"_process":143}],276:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -38646,7 +38391,7 @@ var ReactInjection = {
 
 module.exports = ReactInjection;
 
-},{"./DOMProperty":265,"./EventPluginHub":272,"./ReactBrowserEventEmitter":286,"./ReactClass":289,"./ReactComponentEnvironment":292,"./ReactDOMComponent":298,"./ReactEmptyComponent":315,"./ReactNativeComponent":329,"./ReactPerf":331,"./ReactRootIndex":340,"./ReactUpdates":346}],321:[function(require,module,exports){
+},{"./DOMProperty":221,"./EventPluginHub":228,"./ReactBrowserEventEmitter":242,"./ReactClass":245,"./ReactComponentEnvironment":248,"./ReactDOMComponent":254,"./ReactEmptyComponent":271,"./ReactNativeComponent":285,"./ReactPerf":287,"./ReactRootIndex":296,"./ReactUpdates":302}],277:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -38781,7 +38526,7 @@ var ReactInputSelection = {
 
 module.exports = ReactInputSelection;
 
-},{"./ReactDOMSelection":306,"./containsNode":369,"./focusNode":379,"./getActiveElement":381}],322:[function(require,module,exports){
+},{"./ReactDOMSelection":262,"./containsNode":325,"./focusNode":335,"./getActiveElement":337}],278:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -39117,7 +38862,7 @@ var ReactInstanceHandles = {
 module.exports = ReactInstanceHandles;
 
 }).call(this,require('_process'))
-},{"./ReactRootIndex":340,"./invariant":395,"_process":88}],323:[function(require,module,exports){
+},{"./ReactRootIndex":296,"./invariant":351,"_process":143}],279:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -39166,7 +38911,7 @@ var ReactInstanceMap = {
 
 module.exports = ReactInstanceMap;
 
-},{}],324:[function(require,module,exports){
+},{}],280:[function(require,module,exports){
 /**
  * Copyright 2015, Facebook, Inc.
  * All rights reserved.
@@ -39203,7 +38948,7 @@ var ReactLifeCycle = {
 
 module.exports = ReactLifeCycle;
 
-},{}],325:[function(require,module,exports){
+},{}],281:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -39251,7 +38996,7 @@ var ReactMarkupChecksum = {
 
 module.exports = ReactMarkupChecksum;
 
-},{"./adler32":365}],326:[function(require,module,exports){
+},{"./adler32":321}],282:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -40142,7 +39887,7 @@ ReactPerf.measureMethods(ReactMount, 'ReactMount', {
 module.exports = ReactMount;
 
 }).call(this,require('_process'))
-},{"./DOMProperty":265,"./ReactBrowserEventEmitter":286,"./ReactCurrentOwner":295,"./ReactElement":313,"./ReactElementValidator":314,"./ReactEmptyComponent":315,"./ReactInstanceHandles":322,"./ReactInstanceMap":323,"./ReactMarkupChecksum":325,"./ReactPerf":331,"./ReactReconciler":338,"./ReactUpdateQueue":345,"./ReactUpdates":346,"./containsNode":369,"./emptyObject":375,"./getReactRootElementInContainer":389,"./instantiateReactComponent":394,"./invariant":395,"./setInnerHTML":409,"./shouldUpdateReactComponent":412,"./warning":415,"_process":88}],327:[function(require,module,exports){
+},{"./DOMProperty":221,"./ReactBrowserEventEmitter":242,"./ReactCurrentOwner":251,"./ReactElement":269,"./ReactElementValidator":270,"./ReactEmptyComponent":271,"./ReactInstanceHandles":278,"./ReactInstanceMap":279,"./ReactMarkupChecksum":281,"./ReactPerf":287,"./ReactReconciler":294,"./ReactUpdateQueue":301,"./ReactUpdates":302,"./containsNode":325,"./emptyObject":331,"./getReactRootElementInContainer":345,"./instantiateReactComponent":350,"./invariant":351,"./setInnerHTML":365,"./shouldUpdateReactComponent":368,"./warning":371,"_process":143}],283:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -40572,7 +40317,7 @@ var ReactMultiChild = {
 
 module.exports = ReactMultiChild;
 
-},{"./ReactChildReconciler":287,"./ReactComponentEnvironment":292,"./ReactMultiChildUpdateTypes":328,"./ReactReconciler":338}],328:[function(require,module,exports){
+},{"./ReactChildReconciler":243,"./ReactComponentEnvironment":248,"./ReactMultiChildUpdateTypes":284,"./ReactReconciler":294}],284:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -40605,7 +40350,7 @@ var ReactMultiChildUpdateTypes = keyMirror({
 
 module.exports = ReactMultiChildUpdateTypes;
 
-},{"./keyMirror":401}],329:[function(require,module,exports){
+},{"./keyMirror":357}],285:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-2015, Facebook, Inc.
@@ -40712,7 +40457,7 @@ var ReactNativeComponent = {
 module.exports = ReactNativeComponent;
 
 }).call(this,require('_process'))
-},{"./Object.assign":282,"./invariant":395,"_process":88}],330:[function(require,module,exports){
+},{"./Object.assign":238,"./invariant":351,"_process":143}],286:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -40824,7 +40569,7 @@ var ReactOwner = {
 module.exports = ReactOwner;
 
 }).call(this,require('_process'))
-},{"./invariant":395,"_process":88}],331:[function(require,module,exports){
+},{"./invariant":351,"_process":143}],287:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -40928,7 +40673,7 @@ function _noMeasure(objName, fnName, func) {
 module.exports = ReactPerf;
 
 }).call(this,require('_process'))
-},{"_process":88}],332:[function(require,module,exports){
+},{"_process":143}],288:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -41038,7 +40783,7 @@ var ReactPropTransferer = {
 
 module.exports = ReactPropTransferer;
 
-},{"./Object.assign":282,"./emptyFunction":374,"./joinClasses":400}],333:[function(require,module,exports){
+},{"./Object.assign":238,"./emptyFunction":330,"./joinClasses":356}],289:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -41066,7 +40811,7 @@ if ("production" !== process.env.NODE_ENV) {
 module.exports = ReactPropTypeLocationNames;
 
 }).call(this,require('_process'))
-},{"_process":88}],334:[function(require,module,exports){
+},{"_process":143}],290:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -41090,7 +40835,7 @@ var ReactPropTypeLocations = keyMirror({
 
 module.exports = ReactPropTypeLocations;
 
-},{"./keyMirror":401}],335:[function(require,module,exports){
+},{"./keyMirror":357}],291:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -41439,7 +41184,7 @@ function getPreciseType(propValue) {
 
 module.exports = ReactPropTypes;
 
-},{"./ReactElement":313,"./ReactFragment":319,"./ReactPropTypeLocationNames":333,"./emptyFunction":374}],336:[function(require,module,exports){
+},{"./ReactElement":269,"./ReactFragment":275,"./ReactPropTypeLocationNames":289,"./emptyFunction":330}],292:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -41495,7 +41240,7 @@ PooledClass.addPoolingTo(ReactPutListenerQueue);
 
 module.exports = ReactPutListenerQueue;
 
-},{"./Object.assign":282,"./PooledClass":283,"./ReactBrowserEventEmitter":286}],337:[function(require,module,exports){
+},{"./Object.assign":238,"./PooledClass":239,"./ReactBrowserEventEmitter":242}],293:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -41671,7 +41416,7 @@ PooledClass.addPoolingTo(ReactReconcileTransaction);
 
 module.exports = ReactReconcileTransaction;
 
-},{"./CallbackQueue":261,"./Object.assign":282,"./PooledClass":283,"./ReactBrowserEventEmitter":286,"./ReactInputSelection":321,"./ReactPutListenerQueue":336,"./Transaction":362}],338:[function(require,module,exports){
+},{"./CallbackQueue":217,"./Object.assign":238,"./PooledClass":239,"./ReactBrowserEventEmitter":242,"./ReactInputSelection":277,"./ReactPutListenerQueue":292,"./Transaction":318}],294:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -41795,7 +41540,7 @@ var ReactReconciler = {
 module.exports = ReactReconciler;
 
 }).call(this,require('_process'))
-},{"./ReactElementValidator":314,"./ReactRef":339,"_process":88}],339:[function(require,module,exports){
+},{"./ReactElementValidator":270,"./ReactRef":295,"_process":143}],295:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -41866,7 +41611,7 @@ ReactRef.detachRefs = function(instance, element) {
 
 module.exports = ReactRef;
 
-},{"./ReactOwner":330}],340:[function(require,module,exports){
+},{"./ReactOwner":286}],296:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -41897,7 +41642,7 @@ var ReactRootIndex = {
 
 module.exports = ReactRootIndex;
 
-},{}],341:[function(require,module,exports){
+},{}],297:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -41979,7 +41724,7 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"./ReactElement":313,"./ReactInstanceHandles":322,"./ReactMarkupChecksum":325,"./ReactServerRenderingTransaction":342,"./emptyObject":375,"./instantiateReactComponent":394,"./invariant":395,"_process":88}],342:[function(require,module,exports){
+},{"./ReactElement":269,"./ReactInstanceHandles":278,"./ReactMarkupChecksum":281,"./ReactServerRenderingTransaction":298,"./emptyObject":331,"./instantiateReactComponent":350,"./invariant":351,"_process":143}],298:[function(require,module,exports){
 /**
  * Copyright 2014-2015, Facebook, Inc.
  * All rights reserved.
@@ -42092,7 +41837,7 @@ PooledClass.addPoolingTo(ReactServerRenderingTransaction);
 
 module.exports = ReactServerRenderingTransaction;
 
-},{"./CallbackQueue":261,"./Object.assign":282,"./PooledClass":283,"./ReactPutListenerQueue":336,"./Transaction":362,"./emptyFunction":374}],343:[function(require,module,exports){
+},{"./CallbackQueue":217,"./Object.assign":238,"./PooledClass":239,"./ReactPutListenerQueue":292,"./Transaction":318,"./emptyFunction":330}],299:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -42197,7 +41942,7 @@ var ReactTransitionChildMapping = {
 
 module.exports = ReactTransitionChildMapping;
 
-},{"./ReactChildren":288,"./ReactFragment":319}],344:[function(require,module,exports){
+},{"./ReactChildren":244,"./ReactFragment":275}],300:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -42427,7 +42172,7 @@ var ReactTransitionGroup = React.createClass({
 
 module.exports = ReactTransitionGroup;
 
-},{"./Object.assign":282,"./React":284,"./ReactTransitionChildMapping":343,"./cloneWithProps":368,"./emptyFunction":374}],345:[function(require,module,exports){
+},{"./Object.assign":238,"./React":240,"./ReactTransitionChildMapping":299,"./cloneWithProps":324,"./emptyFunction":330}],301:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2015, Facebook, Inc.
@@ -42726,7 +42471,7 @@ var ReactUpdateQueue = {
 module.exports = ReactUpdateQueue;
 
 }).call(this,require('_process'))
-},{"./Object.assign":282,"./ReactCurrentOwner":295,"./ReactElement":313,"./ReactInstanceMap":323,"./ReactLifeCycle":324,"./ReactUpdates":346,"./invariant":395,"./warning":415,"_process":88}],346:[function(require,module,exports){
+},{"./Object.assign":238,"./ReactCurrentOwner":251,"./ReactElement":269,"./ReactInstanceMap":279,"./ReactLifeCycle":280,"./ReactUpdates":302,"./invariant":351,"./warning":371,"_process":143}],302:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -43008,7 +42753,7 @@ var ReactUpdates = {
 module.exports = ReactUpdates;
 
 }).call(this,require('_process'))
-},{"./CallbackQueue":261,"./Object.assign":282,"./PooledClass":283,"./ReactCurrentOwner":295,"./ReactPerf":331,"./ReactReconciler":338,"./Transaction":362,"./invariant":395,"./warning":415,"_process":88}],347:[function(require,module,exports){
+},{"./CallbackQueue":217,"./Object.assign":238,"./PooledClass":239,"./ReactCurrentOwner":251,"./ReactPerf":287,"./ReactReconciler":294,"./Transaction":318,"./invariant":351,"./warning":371,"_process":143}],303:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -43102,7 +42847,7 @@ var SVGDOMPropertyConfig = {
 
 module.exports = SVGDOMPropertyConfig;
 
-},{"./DOMProperty":265}],348:[function(require,module,exports){
+},{"./DOMProperty":221}],304:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -43297,7 +43042,7 @@ var SelectEventPlugin = {
 
 module.exports = SelectEventPlugin;
 
-},{"./EventConstants":270,"./EventPropagators":275,"./ReactInputSelection":321,"./SyntheticEvent":354,"./getActiveElement":381,"./isTextInputElement":398,"./keyOf":402,"./shallowEqual":411}],349:[function(require,module,exports){
+},{"./EventConstants":226,"./EventPropagators":231,"./ReactInputSelection":277,"./SyntheticEvent":310,"./getActiveElement":337,"./isTextInputElement":354,"./keyOf":358,"./shallowEqual":367}],305:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -43328,7 +43073,7 @@ var ServerReactRootIndex = {
 
 module.exports = ServerReactRootIndex;
 
-},{}],350:[function(require,module,exports){
+},{}],306:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -43756,7 +43501,7 @@ var SimpleEventPlugin = {
 module.exports = SimpleEventPlugin;
 
 }).call(this,require('_process'))
-},{"./EventConstants":270,"./EventPluginUtils":274,"./EventPropagators":275,"./SyntheticClipboardEvent":351,"./SyntheticDragEvent":353,"./SyntheticEvent":354,"./SyntheticFocusEvent":355,"./SyntheticKeyboardEvent":357,"./SyntheticMouseEvent":358,"./SyntheticTouchEvent":359,"./SyntheticUIEvent":360,"./SyntheticWheelEvent":361,"./getEventCharCode":382,"./invariant":395,"./keyOf":402,"./warning":415,"_process":88}],351:[function(require,module,exports){
+},{"./EventConstants":226,"./EventPluginUtils":230,"./EventPropagators":231,"./SyntheticClipboardEvent":307,"./SyntheticDragEvent":309,"./SyntheticEvent":310,"./SyntheticFocusEvent":311,"./SyntheticKeyboardEvent":313,"./SyntheticMouseEvent":314,"./SyntheticTouchEvent":315,"./SyntheticUIEvent":316,"./SyntheticWheelEvent":317,"./getEventCharCode":338,"./invariant":351,"./keyOf":358,"./warning":371,"_process":143}],307:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -43801,7 +43546,7 @@ SyntheticEvent.augmentClass(SyntheticClipboardEvent, ClipboardEventInterface);
 
 module.exports = SyntheticClipboardEvent;
 
-},{"./SyntheticEvent":354}],352:[function(require,module,exports){
+},{"./SyntheticEvent":310}],308:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -43846,7 +43591,7 @@ SyntheticEvent.augmentClass(
 
 module.exports = SyntheticCompositionEvent;
 
-},{"./SyntheticEvent":354}],353:[function(require,module,exports){
+},{"./SyntheticEvent":310}],309:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -43885,7 +43630,7 @@ SyntheticMouseEvent.augmentClass(SyntheticDragEvent, DragEventInterface);
 
 module.exports = SyntheticDragEvent;
 
-},{"./SyntheticMouseEvent":358}],354:[function(require,module,exports){
+},{"./SyntheticMouseEvent":314}],310:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -44051,7 +43796,7 @@ PooledClass.addPoolingTo(SyntheticEvent, PooledClass.threeArgumentPooler);
 
 module.exports = SyntheticEvent;
 
-},{"./Object.assign":282,"./PooledClass":283,"./emptyFunction":374,"./getEventTarget":385}],355:[function(require,module,exports){
+},{"./Object.assign":238,"./PooledClass":239,"./emptyFunction":330,"./getEventTarget":341}],311:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -44090,7 +43835,7 @@ SyntheticUIEvent.augmentClass(SyntheticFocusEvent, FocusEventInterface);
 
 module.exports = SyntheticFocusEvent;
 
-},{"./SyntheticUIEvent":360}],356:[function(require,module,exports){
+},{"./SyntheticUIEvent":316}],312:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -44136,7 +43881,7 @@ SyntheticEvent.augmentClass(
 
 module.exports = SyntheticInputEvent;
 
-},{"./SyntheticEvent":354}],357:[function(require,module,exports){
+},{"./SyntheticEvent":310}],313:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -44223,7 +43968,7 @@ SyntheticUIEvent.augmentClass(SyntheticKeyboardEvent, KeyboardEventInterface);
 
 module.exports = SyntheticKeyboardEvent;
 
-},{"./SyntheticUIEvent":360,"./getEventCharCode":382,"./getEventKey":383,"./getEventModifierState":384}],358:[function(require,module,exports){
+},{"./SyntheticUIEvent":316,"./getEventCharCode":338,"./getEventKey":339,"./getEventModifierState":340}],314:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -44304,7 +44049,7 @@ SyntheticUIEvent.augmentClass(SyntheticMouseEvent, MouseEventInterface);
 
 module.exports = SyntheticMouseEvent;
 
-},{"./SyntheticUIEvent":360,"./ViewportMetrics":363,"./getEventModifierState":384}],359:[function(require,module,exports){
+},{"./SyntheticUIEvent":316,"./ViewportMetrics":319,"./getEventModifierState":340}],315:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -44352,7 +44097,7 @@ SyntheticUIEvent.augmentClass(SyntheticTouchEvent, TouchEventInterface);
 
 module.exports = SyntheticTouchEvent;
 
-},{"./SyntheticUIEvent":360,"./getEventModifierState":384}],360:[function(require,module,exports){
+},{"./SyntheticUIEvent":316,"./getEventModifierState":340}],316:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -44414,7 +44159,7 @@ SyntheticEvent.augmentClass(SyntheticUIEvent, UIEventInterface);
 
 module.exports = SyntheticUIEvent;
 
-},{"./SyntheticEvent":354,"./getEventTarget":385}],361:[function(require,module,exports){
+},{"./SyntheticEvent":310,"./getEventTarget":341}],317:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -44475,7 +44220,7 @@ SyntheticMouseEvent.augmentClass(SyntheticWheelEvent, WheelEventInterface);
 
 module.exports = SyntheticWheelEvent;
 
-},{"./SyntheticMouseEvent":358}],362:[function(require,module,exports){
+},{"./SyntheticMouseEvent":314}],318:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -44716,7 +44461,7 @@ var Transaction = {
 module.exports = Transaction;
 
 }).call(this,require('_process'))
-},{"./invariant":395,"_process":88}],363:[function(require,module,exports){
+},{"./invariant":351,"_process":143}],319:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -44745,7 +44490,7 @@ var ViewportMetrics = {
 
 module.exports = ViewportMetrics;
 
-},{}],364:[function(require,module,exports){
+},{}],320:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-2015, Facebook, Inc.
@@ -44811,7 +44556,7 @@ function accumulateInto(current, next) {
 module.exports = accumulateInto;
 
 }).call(this,require('_process'))
-},{"./invariant":395,"_process":88}],365:[function(require,module,exports){
+},{"./invariant":351,"_process":143}],321:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -44845,7 +44590,7 @@ function adler32(data) {
 
 module.exports = adler32;
 
-},{}],366:[function(require,module,exports){
+},{}],322:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -44877,7 +44622,7 @@ function camelize(string) {
 
 module.exports = camelize;
 
-},{}],367:[function(require,module,exports){
+},{}],323:[function(require,module,exports){
 /**
  * Copyright 2014-2015, Facebook, Inc.
  * All rights reserved.
@@ -44919,7 +44664,7 @@ function camelizeStyleName(string) {
 
 module.exports = camelizeStyleName;
 
-},{"./camelize":366}],368:[function(require,module,exports){
+},{"./camelize":322}],324:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -44978,7 +44723,7 @@ function cloneWithProps(child, props) {
 module.exports = cloneWithProps;
 
 }).call(this,require('_process'))
-},{"./ReactElement":313,"./ReactPropTransferer":332,"./keyOf":402,"./warning":415,"_process":88}],369:[function(require,module,exports){
+},{"./ReactElement":269,"./ReactPropTransferer":288,"./keyOf":358,"./warning":371,"_process":143}],325:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -45022,7 +44767,7 @@ function containsNode(outerNode, innerNode) {
 
 module.exports = containsNode;
 
-},{"./isTextNode":399}],370:[function(require,module,exports){
+},{"./isTextNode":355}],326:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -45108,7 +44853,7 @@ function createArrayFromMixed(obj) {
 
 module.exports = createArrayFromMixed;
 
-},{"./toArray":413}],371:[function(require,module,exports){
+},{"./toArray":369}],327:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -45170,7 +44915,7 @@ function createFullPageComponent(tag) {
 module.exports = createFullPageComponent;
 
 }).call(this,require('_process'))
-},{"./ReactClass":289,"./ReactElement":313,"./invariant":395,"_process":88}],372:[function(require,module,exports){
+},{"./ReactClass":245,"./ReactElement":269,"./invariant":351,"_process":143}],328:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -45260,7 +45005,7 @@ function createNodesFromMarkup(markup, handleScript) {
 module.exports = createNodesFromMarkup;
 
 }).call(this,require('_process'))
-},{"./ExecutionEnvironment":276,"./createArrayFromMixed":370,"./getMarkupWrap":387,"./invariant":395,"_process":88}],373:[function(require,module,exports){
+},{"./ExecutionEnvironment":232,"./createArrayFromMixed":326,"./getMarkupWrap":343,"./invariant":351,"_process":143}],329:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -45318,7 +45063,7 @@ function dangerousStyleValue(name, value) {
 
 module.exports = dangerousStyleValue;
 
-},{"./CSSProperty":259}],374:[function(require,module,exports){
+},{"./CSSProperty":215}],330:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -45352,7 +45097,7 @@ emptyFunction.thatReturnsArgument = function(arg) { return arg; };
 
 module.exports = emptyFunction;
 
-},{}],375:[function(require,module,exports){
+},{}],331:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -45376,7 +45121,7 @@ if ("production" !== process.env.NODE_ENV) {
 module.exports = emptyObject;
 
 }).call(this,require('_process'))
-},{"_process":88}],376:[function(require,module,exports){
+},{"_process":143}],332:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -45416,7 +45161,7 @@ function escapeTextContentForBrowser(text) {
 
 module.exports = escapeTextContentForBrowser;
 
-},{}],377:[function(require,module,exports){
+},{}],333:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -45489,7 +45234,7 @@ function findDOMNode(componentOrElement) {
 module.exports = findDOMNode;
 
 }).call(this,require('_process'))
-},{"./ReactCurrentOwner":295,"./ReactInstanceMap":323,"./ReactMount":326,"./invariant":395,"./isNode":397,"./warning":415,"_process":88}],378:[function(require,module,exports){
+},{"./ReactCurrentOwner":251,"./ReactInstanceMap":279,"./ReactMount":282,"./invariant":351,"./isNode":353,"./warning":371,"_process":143}],334:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -45547,7 +45292,7 @@ function flattenChildren(children) {
 module.exports = flattenChildren;
 
 }).call(this,require('_process'))
-},{"./traverseAllChildren":414,"./warning":415,"_process":88}],379:[function(require,module,exports){
+},{"./traverseAllChildren":370,"./warning":371,"_process":143}],335:[function(require,module,exports){
 /**
  * Copyright 2014-2015, Facebook, Inc.
  * All rights reserved.
@@ -45576,7 +45321,7 @@ function focusNode(node) {
 
 module.exports = focusNode;
 
-},{}],380:[function(require,module,exports){
+},{}],336:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -45607,7 +45352,7 @@ var forEachAccumulated = function(arr, cb, scope) {
 
 module.exports = forEachAccumulated;
 
-},{}],381:[function(require,module,exports){
+},{}],337:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -45636,7 +45381,7 @@ function getActiveElement() /*?DOMElement*/ {
 
 module.exports = getActiveElement;
 
-},{}],382:[function(require,module,exports){
+},{}],338:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -45688,7 +45433,7 @@ function getEventCharCode(nativeEvent) {
 
 module.exports = getEventCharCode;
 
-},{}],383:[function(require,module,exports){
+},{}],339:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -45793,7 +45538,7 @@ function getEventKey(nativeEvent) {
 
 module.exports = getEventKey;
 
-},{"./getEventCharCode":382}],384:[function(require,module,exports){
+},{"./getEventCharCode":338}],340:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -45840,7 +45585,7 @@ function getEventModifierState(nativeEvent) {
 
 module.exports = getEventModifierState;
 
-},{}],385:[function(require,module,exports){
+},{}],341:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -45871,7 +45616,7 @@ function getEventTarget(nativeEvent) {
 
 module.exports = getEventTarget;
 
-},{}],386:[function(require,module,exports){
+},{}],342:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -45915,7 +45660,7 @@ function getIteratorFn(maybeIterable) {
 
 module.exports = getIteratorFn;
 
-},{}],387:[function(require,module,exports){
+},{}],343:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -46034,7 +45779,7 @@ function getMarkupWrap(nodeName) {
 module.exports = getMarkupWrap;
 
 }).call(this,require('_process'))
-},{"./ExecutionEnvironment":276,"./invariant":395,"_process":88}],388:[function(require,module,exports){
+},{"./ExecutionEnvironment":232,"./invariant":351,"_process":143}],344:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -46109,7 +45854,7 @@ function getNodeForCharacterOffset(root, offset) {
 
 module.exports = getNodeForCharacterOffset;
 
-},{}],389:[function(require,module,exports){
+},{}],345:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -46144,7 +45889,7 @@ function getReactRootElementInContainer(container) {
 
 module.exports = getReactRootElementInContainer;
 
-},{}],390:[function(require,module,exports){
+},{}],346:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -46181,7 +45926,7 @@ function getTextContentAccessor() {
 
 module.exports = getTextContentAccessor;
 
-},{"./ExecutionEnvironment":276}],391:[function(require,module,exports){
+},{"./ExecutionEnvironment":232}],347:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -46221,7 +45966,7 @@ function getUnboundedScrollPosition(scrollable) {
 
 module.exports = getUnboundedScrollPosition;
 
-},{}],392:[function(require,module,exports){
+},{}],348:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -46254,7 +45999,7 @@ function hyphenate(string) {
 
 module.exports = hyphenate;
 
-},{}],393:[function(require,module,exports){
+},{}],349:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -46295,7 +46040,7 @@ function hyphenateStyleName(string) {
 
 module.exports = hyphenateStyleName;
 
-},{"./hyphenate":392}],394:[function(require,module,exports){
+},{"./hyphenate":348}],350:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -46433,7 +46178,7 @@ function instantiateReactComponent(node, parentCompositeType) {
 module.exports = instantiateReactComponent;
 
 }).call(this,require('_process'))
-},{"./Object.assign":282,"./ReactCompositeComponent":293,"./ReactEmptyComponent":315,"./ReactNativeComponent":329,"./invariant":395,"./warning":415,"_process":88}],395:[function(require,module,exports){
+},{"./Object.assign":238,"./ReactCompositeComponent":249,"./ReactEmptyComponent":271,"./ReactNativeComponent":285,"./invariant":351,"./warning":371,"_process":143}],351:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -46490,7 +46235,7 @@ var invariant = function(condition, format, a, b, c, d, e, f) {
 module.exports = invariant;
 
 }).call(this,require('_process'))
-},{"_process":88}],396:[function(require,module,exports){
+},{"_process":143}],352:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -46555,7 +46300,7 @@ function isEventSupported(eventNameSuffix, capture) {
 
 module.exports = isEventSupported;
 
-},{"./ExecutionEnvironment":276}],397:[function(require,module,exports){
+},{"./ExecutionEnvironment":232}],353:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -46582,7 +46327,7 @@ function isNode(object) {
 
 module.exports = isNode;
 
-},{}],398:[function(require,module,exports){
+},{}],354:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -46625,7 +46370,7 @@ function isTextInputElement(elem) {
 
 module.exports = isTextInputElement;
 
-},{}],399:[function(require,module,exports){
+},{}],355:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -46650,7 +46395,7 @@ function isTextNode(object) {
 
 module.exports = isTextNode;
 
-},{"./isNode":397}],400:[function(require,module,exports){
+},{"./isNode":353}],356:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -46691,7 +46436,7 @@ function joinClasses(className/*, ... */) {
 
 module.exports = joinClasses;
 
-},{}],401:[function(require,module,exports){
+},{}],357:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -46746,7 +46491,7 @@ var keyMirror = function(obj) {
 module.exports = keyMirror;
 
 }).call(this,require('_process'))
-},{"./invariant":395,"_process":88}],402:[function(require,module,exports){
+},{"./invariant":351,"_process":143}],358:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -46782,7 +46527,7 @@ var keyOf = function(oneKeyObj) {
 
 module.exports = keyOf;
 
-},{}],403:[function(require,module,exports){
+},{}],359:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -46835,7 +46580,7 @@ function mapObject(object, callback, context) {
 
 module.exports = mapObject;
 
-},{}],404:[function(require,module,exports){
+},{}],360:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -46868,7 +46613,7 @@ function memoizeStringOnly(callback) {
 
 module.exports = memoizeStringOnly;
 
-},{}],405:[function(require,module,exports){
+},{}],361:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -46908,7 +46653,7 @@ function onlyChild(children) {
 module.exports = onlyChild;
 
 }).call(this,require('_process'))
-},{"./ReactElement":313,"./invariant":395,"_process":88}],406:[function(require,module,exports){
+},{"./ReactElement":269,"./invariant":351,"_process":143}],362:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -46936,7 +46681,7 @@ if (ExecutionEnvironment.canUseDOM) {
 
 module.exports = performance || {};
 
-},{"./ExecutionEnvironment":276}],407:[function(require,module,exports){
+},{"./ExecutionEnvironment":232}],363:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -46964,7 +46709,7 @@ var performanceNow = performance.now.bind(performance);
 
 module.exports = performanceNow;
 
-},{"./performance":406}],408:[function(require,module,exports){
+},{"./performance":362}],364:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -46992,7 +46737,7 @@ function quoteAttributeValueForBrowser(value) {
 
 module.exports = quoteAttributeValueForBrowser;
 
-},{"./escapeTextContentForBrowser":376}],409:[function(require,module,exports){
+},{"./escapeTextContentForBrowser":332}],365:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -47081,7 +46826,7 @@ if (ExecutionEnvironment.canUseDOM) {
 
 module.exports = setInnerHTML;
 
-},{"./ExecutionEnvironment":276}],410:[function(require,module,exports){
+},{"./ExecutionEnvironment":232}],366:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -47123,7 +46868,7 @@ if (ExecutionEnvironment.canUseDOM) {
 
 module.exports = setTextContent;
 
-},{"./ExecutionEnvironment":276,"./escapeTextContentForBrowser":376,"./setInnerHTML":409}],411:[function(require,module,exports){
+},{"./ExecutionEnvironment":232,"./escapeTextContentForBrowser":332,"./setInnerHTML":365}],367:[function(require,module,exports){
 /**
  * Copyright 2013-2015, Facebook, Inc.
  * All rights reserved.
@@ -47167,7 +46912,7 @@ function shallowEqual(objA, objB) {
 
 module.exports = shallowEqual;
 
-},{}],412:[function(require,module,exports){
+},{}],368:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -47271,7 +47016,7 @@ function shouldUpdateReactComponent(prevElement, nextElement) {
 module.exports = shouldUpdateReactComponent;
 
 }).call(this,require('_process'))
-},{"./warning":415,"_process":88}],413:[function(require,module,exports){
+},{"./warning":371,"_process":143}],369:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-2015, Facebook, Inc.
@@ -47343,7 +47088,7 @@ function toArray(obj) {
 module.exports = toArray;
 
 }).call(this,require('_process'))
-},{"./invariant":395,"_process":88}],414:[function(require,module,exports){
+},{"./invariant":351,"_process":143}],370:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2013-2015, Facebook, Inc.
@@ -47596,7 +47341,7 @@ function traverseAllChildren(children, callback, traverseContext) {
 module.exports = traverseAllChildren;
 
 }).call(this,require('_process'))
-},{"./ReactElement":313,"./ReactFragment":319,"./ReactInstanceHandles":322,"./getIteratorFn":386,"./invariant":395,"./warning":415,"_process":88}],415:[function(require,module,exports){
+},{"./ReactElement":269,"./ReactFragment":275,"./ReactInstanceHandles":278,"./getIteratorFn":342,"./invariant":351,"./warning":371,"_process":143}],371:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-2015, Facebook, Inc.
@@ -47659,10 +47404,10 @@ if ("production" !== process.env.NODE_ENV) {
 module.exports = warning;
 
 }).call(this,require('_process'))
-},{"./emptyFunction":374,"_process":88}],416:[function(require,module,exports){
+},{"./emptyFunction":330,"_process":143}],372:[function(require,module,exports){
 module.exports = require('./lib/React');
 
-},{"./lib/React":284}],417:[function(require,module,exports){
+},{"./lib/React":240}],373:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47685,7 +47430,7 @@ var createFactory = function createFactory(type) {
 };
 
 exports.default = createFactory;
-},{"./isReferentiallyTransparentFunctionComponent":421,"./utils/createEagerElementUtil":425}],418:[function(require,module,exports){
+},{"./isReferentiallyTransparentFunctionComponent":377,"./utils/createEagerElementUtil":381}],374:[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -47740,7 +47485,7 @@ var createHelper = function createHelper(func, helperName) {
 
 exports.default = createHelper;
 }).call(this,require('_process'))
-},{"./wrapDisplayName":426,"_process":88}],419:[function(require,module,exports){
+},{"./wrapDisplayName":382,"_process":143}],375:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47757,7 +47502,7 @@ var getDisplayName = function getDisplayName(Component) {
 };
 
 exports.default = getDisplayName;
-},{}],420:[function(require,module,exports){
+},{}],376:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47766,7 +47511,7 @@ var isClassComponent = function isClassComponent(Component) {
 };
 
 exports.default = isClassComponent;
-},{}],421:[function(require,module,exports){
+},{}],377:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47782,7 +47527,7 @@ var isReferentiallyTransparentFunctionComponent = function isReferentiallyTransp
 };
 
 exports.default = isReferentiallyTransparentFunctionComponent;
-},{"./isClassComponent.js":420}],422:[function(require,module,exports){
+},{"./isClassComponent.js":376}],378:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47806,7 +47551,7 @@ var pure = (0, _shouldUpdate2.default)(function (props, nextProps) {
 });
 
 exports.default = (0, _createHelper2.default)(pure, 'pure', true, true);
-},{"./createHelper":418,"./shallowEqual":423,"./shouldUpdate":424}],423:[function(require,module,exports){
+},{"./createHelper":374,"./shallowEqual":379,"./shouldUpdate":380}],379:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47818,7 +47563,7 @@ var _shallowEqual2 = _interopRequireDefault(_shallowEqual);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _shallowEqual2.default;
-},{"fbjs/lib/shallowEqual":180}],424:[function(require,module,exports){
+},{"fbjs/lib/shallowEqual":150}],380:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47867,7 +47612,7 @@ var shouldUpdate = function shouldUpdate(test) {
 };
 
 exports.default = (0, _createHelper2.default)(shouldUpdate, 'shouldUpdate');
-},{"./createEagerFactory":417,"./createHelper":418,"react":416}],425:[function(require,module,exports){
+},{"./createEagerFactory":373,"./createHelper":374,"react":372}],381:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47902,7 +47647,7 @@ var createEagerElementUtil = function createEagerElementUtil(hasKey, isReferenti
 };
 
 exports.default = createEagerElementUtil;
-},{"react":416}],426:[function(require,module,exports){
+},{"react":372}],382:[function(require,module,exports){
 'use strict';
 
 exports.__esModule = true;
@@ -47918,7 +47663,7 @@ var wrapDisplayName = function wrapDisplayName(BaseComponent, hocName) {
 };
 
 exports.default = wrapDisplayName;
-},{"./getDisplayName":419}],427:[function(require,module,exports){
+},{"./getDisplayName":375}],383:[function(require,module,exports){
 module.exports = function (target) {
   for (var i = 1; i < arguments.length; i++) {
     var source = arguments[i];
@@ -47931,227 +47676,7 @@ module.exports = function (target) {
   return target;
 };
 
-},{}],428:[function(require,module,exports){
-(function (global){
-
-var rng;
-
-if (global.crypto && crypto.getRandomValues) {
-  // WHATWG crypto-based RNG - http://wiki.whatwg.org/wiki/Crypto
-  // Moderately fast, high quality
-  var _rnds8 = new Uint8Array(16);
-  rng = function whatwgRNG() {
-    crypto.getRandomValues(_rnds8);
-    return _rnds8;
-  };
-}
-
-if (!rng) {
-  // Math.random()-based (RNG)
-  //
-  // If all else fails, use Math.random().  It's fast, but is of unspecified
-  // quality.
-  var  _rnds = new Array(16);
-  rng = function() {
-    for (var i = 0, r; i < 16; i++) {
-      if ((i & 0x03) === 0) r = Math.random() * 0x100000000;
-      _rnds[i] = r >>> ((i & 0x03) << 3) & 0xff;
-    }
-
-    return _rnds;
-  };
-}
-
-module.exports = rng;
-
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],429:[function(require,module,exports){
-//     uuid.js
-//
-//     Copyright (c) 2010-2012 Robert Kieffer
-//     MIT License - http://opensource.org/licenses/mit-license.php
-
-// Unique ID creation requires a high quality random # generator.  We feature
-// detect to determine the best RNG source, normalizing to a function that
-// returns 128-bits of randomness, since that's what's usually required
-var _rng = require('./rng');
-
-// Maps for number <-> hex string conversion
-var _byteToHex = [];
-var _hexToByte = {};
-for (var i = 0; i < 256; i++) {
-  _byteToHex[i] = (i + 0x100).toString(16).substr(1);
-  _hexToByte[_byteToHex[i]] = i;
-}
-
-// **`parse()` - Parse a UUID into it's component bytes**
-function parse(s, buf, offset) {
-  var i = (buf && offset) || 0, ii = 0;
-
-  buf = buf || [];
-  s.toLowerCase().replace(/[0-9a-f]{2}/g, function(oct) {
-    if (ii < 16) { // Don't overflow!
-      buf[i + ii++] = _hexToByte[oct];
-    }
-  });
-
-  // Zero out remaining bytes if string was short
-  while (ii < 16) {
-    buf[i + ii++] = 0;
-  }
-
-  return buf;
-}
-
-// **`unparse()` - Convert UUID byte array (ala parse()) into a string**
-function unparse(buf, offset) {
-  var i = offset || 0, bth = _byteToHex;
-  return  bth[buf[i++]] + bth[buf[i++]] +
-          bth[buf[i++]] + bth[buf[i++]] + '-' +
-          bth[buf[i++]] + bth[buf[i++]] + '-' +
-          bth[buf[i++]] + bth[buf[i++]] + '-' +
-          bth[buf[i++]] + bth[buf[i++]] + '-' +
-          bth[buf[i++]] + bth[buf[i++]] +
-          bth[buf[i++]] + bth[buf[i++]] +
-          bth[buf[i++]] + bth[buf[i++]];
-}
-
-// **`v1()` - Generate time-based UUID**
-//
-// Inspired by https://github.com/LiosK/UUID.js
-// and http://docs.python.org/library/uuid.html
-
-// random #'s we need to init node and clockseq
-var _seedBytes = _rng();
-
-// Per 4.5, create and 48-bit node id, (47 random bits + multicast bit = 1)
-var _nodeId = [
-  _seedBytes[0] | 0x01,
-  _seedBytes[1], _seedBytes[2], _seedBytes[3], _seedBytes[4], _seedBytes[5]
-];
-
-// Per 4.2.2, randomize (14 bit) clockseq
-var _clockseq = (_seedBytes[6] << 8 | _seedBytes[7]) & 0x3fff;
-
-// Previous uuid creation time
-var _lastMSecs = 0, _lastNSecs = 0;
-
-// See https://github.com/broofa/node-uuid for API details
-function v1(options, buf, offset) {
-  var i = buf && offset || 0;
-  var b = buf || [];
-
-  options = options || {};
-
-  var clockseq = options.clockseq !== undefined ? options.clockseq : _clockseq;
-
-  // UUID timestamps are 100 nano-second units since the Gregorian epoch,
-  // (1582-10-15 00:00).  JSNumbers aren't precise enough for this, so
-  // time is handled internally as 'msecs' (integer milliseconds) and 'nsecs'
-  // (100-nanoseconds offset from msecs) since unix epoch, 1970-01-01 00:00.
-  var msecs = options.msecs !== undefined ? options.msecs : new Date().getTime();
-
-  // Per 4.2.1.2, use count of uuid's generated during the current clock
-  // cycle to simulate higher resolution clock
-  var nsecs = options.nsecs !== undefined ? options.nsecs : _lastNSecs + 1;
-
-  // Time since last uuid creation (in msecs)
-  var dt = (msecs - _lastMSecs) + (nsecs - _lastNSecs)/10000;
-
-  // Per 4.2.1.2, Bump clockseq on clock regression
-  if (dt < 0 && options.clockseq === undefined) {
-    clockseq = clockseq + 1 & 0x3fff;
-  }
-
-  // Reset nsecs if clock regresses (new clockseq) or we've moved onto a new
-  // time interval
-  if ((dt < 0 || msecs > _lastMSecs) && options.nsecs === undefined) {
-    nsecs = 0;
-  }
-
-  // Per 4.2.1.2 Throw error if too many uuids are requested
-  if (nsecs >= 10000) {
-    throw new Error('uuid.v1(): Can\'t create more than 10M uuids/sec');
-  }
-
-  _lastMSecs = msecs;
-  _lastNSecs = nsecs;
-  _clockseq = clockseq;
-
-  // Per 4.1.4 - Convert from unix epoch to Gregorian epoch
-  msecs += 12219292800000;
-
-  // `time_low`
-  var tl = ((msecs & 0xfffffff) * 10000 + nsecs) % 0x100000000;
-  b[i++] = tl >>> 24 & 0xff;
-  b[i++] = tl >>> 16 & 0xff;
-  b[i++] = tl >>> 8 & 0xff;
-  b[i++] = tl & 0xff;
-
-  // `time_mid`
-  var tmh = (msecs / 0x100000000 * 10000) & 0xfffffff;
-  b[i++] = tmh >>> 8 & 0xff;
-  b[i++] = tmh & 0xff;
-
-  // `time_high_and_version`
-  b[i++] = tmh >>> 24 & 0xf | 0x10; // include version
-  b[i++] = tmh >>> 16 & 0xff;
-
-  // `clock_seq_hi_and_reserved` (Per 4.2.2 - include variant)
-  b[i++] = clockseq >>> 8 | 0x80;
-
-  // `clock_seq_low`
-  b[i++] = clockseq & 0xff;
-
-  // `node`
-  var node = options.node || _nodeId;
-  for (var n = 0; n < 6; n++) {
-    b[i + n] = node[n];
-  }
-
-  return buf ? buf : unparse(b);
-}
-
-// **`v4()` - Generate random UUID**
-
-// See https://github.com/broofa/node-uuid for API details
-function v4(options, buf, offset) {
-  // Deprecated - 'format' argument, as supported in v1.2
-  var i = buf && offset || 0;
-
-  if (typeof(options) == 'string') {
-    buf = options == 'binary' ? new Array(16) : null;
-    options = null;
-  }
-  options = options || {};
-
-  var rnds = options.random || (options.rng || _rng)();
-
-  // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
-  rnds[6] = (rnds[6] & 0x0f) | 0x40;
-  rnds[8] = (rnds[8] & 0x3f) | 0x80;
-
-  // Copy bytes to buffer, if provided
-  if (buf) {
-    for (var ii = 0; ii < 16; ii++) {
-      buf[i + ii] = rnds[ii];
-    }
-  }
-
-  return buf || unparse(rnds);
-}
-
-// Export public API
-var uuid = v4;
-uuid.v1 = v1;
-uuid.v4 = v4;
-uuid.parse = parse;
-uuid.unparse = unparse;
-
-module.exports = uuid;
-
-},{"./rng":428}],430:[function(require,module,exports){
+},{}],384:[function(require,module,exports){
 (function (process){
 /**
  * Copyright 2014-2015, Facebook, Inc.
@@ -48215,26 +47740,20 @@ if (process.env.NODE_ENV !== 'production') {
 module.exports = warning;
 
 }).call(this,require('_process'))
-},{"_process":88}],431:[function(require,module,exports){
+},{"_process":143}],385:[function(require,module,exports){
 var Loader = function() {
-
   // will be replaced with the json.
   this.dependencies = {"npm":{"material-ui/AutoComplete/AutoComplete":"latest","react-dom":"latest"}};
   //this.nodes = ;
-  this.nodeDefinitions = {"https://api.chix.io/nodes/{ns}/{name}":{"react-material-ui":{"AutoComplete":{"_id":"57d20e75ba58aac5a4714617","name":"AutoComplete","ns":"react-material-ui","description":"","type":"ReactNode","dependencies":{"npm":{"material-ui/AutoComplete/AutoComplete":"latest"}},"ports":{"input":{"anchorOrigin":{"type":"custom","name":"anchorOrigin","default":null},"animated":{"type":"boolean","name":"animated","default":false},"animation":{"title":"Enable animation","type":"boolean","name":"animation"},"dataSource":{"type":"array","name":"dataSource"},"dataSourceConfig":{"type":"object","name":"dataSourceConfig","default":{}},"disableFocusRipple":{"type":"boolean","name":"disableFocusRipple","default":false},"errorStyle":{"type":"object","name":"errorStyle"},"errorText":{"type":"node","name":"errorText"},"filter":{"title":"Enable filter","type":"boolean","name":"filter","default":false},"floatingLabelText":{"type":"node","name":"floatingLabelText"},"fullWidth":{"type":"boolean","name":"fullWidth","default":false},"hintText":{"type":"node","name":"hintText"},"listStyle":{"type":"object","name":"listStyle"},"maxSearchResults":{"type":"number","name":"maxSearchResults"},"menuCloseDelay":{"type":"number","name":"menuCloseDelay","default":""},"menuProps":{"type":"object","name":"menuProps"},"menuStyle":{"type":"object","name":"menuStyle"},"onBlur":{"title":"Enable onBlur","type":"boolean","name":"onBlur"},"onFocus":{"title":"Enable onFocus","type":"boolean","name":"onFocus"},"onKeyDown":{"title":"Enable onKeyDown","type":"boolean","name":"onKeyDown"},"onNewRequest":{"title":"Enable onNewRequest","type":"boolean","name":"onNewRequest","default":false},"onUpdateInput":{"title":"Enable onUpdateInput","type":"boolean","name":"onUpdateInput","default":false},"open":{"type":"boolean","name":"open","default":false},"openOnFocus":{"type":"boolean","name":"openOnFocus","default":false},"searchText":{"type":"string","name":"searchText","default":""},"style":{"type":"object","name":"style"},"targetOrigin":{"type":"custom","name":"targetOrigin","default":null},"textFieldStyle":{"type":"object","name":"textFieldStyle"}},"output":{"component":{"title":"AutoComplete","type":"Component"},"animation":{"type":"any"},"filter":{"type":"any"},"onBlur":{"type":"any"},"onFocus":{"type":"any"},"onKeyDown":{"type":"any"},"onNewRequest":{"type":"any"},"onUpdateInput":{"type":"any"}}},"provider":"https://api.chix.io/nodes/{ns}/{name}"}},"react":{"render":{"_id":"57d20d0eba58aac5a4714538","name":"render","ns":"react","description":"Render a ReactElement into the DOM","phrases":{"active":"Rendering ReactElement"},"dependencies":{"npm":{"react-dom":"latest"}},"ports":{"input":{"element":{"title":"React Element","type":"function"},"container":{"title":"Container","type":"DOMElement","required":false}},"output":{"element":{"title":"React Element","type":"ReactElement"},"container":{"title":"Container","type":"DOMElement"}}},"fn":"// react.initializeTouchEvents(true); // bit of a hack\noutput = function() {\n  react_dom.render(\n    $.element,\n    $.container,\n    function() {\n      cb({\n        element: $.get('element'),\n      });\n      if ($.container) {\n        cb({container: $.get('container')});\n      }\n    }\n  );\n};\n","provider":"https://api.chix.io/nodes/{ns}/{name}"}},"dom":{"querySelector":{"_id":"57d20c38ba58aac5a471443c","name":"querySelector","ns":"dom","title":"querySelector","description":"[Document query selector](https://developer.mozilla.org/en-US/docs/Web/API/document.querySelector)","expose":["document"],"phrases":{"active":"Gathering elements matching criteria: {{input.selector}}"},"ports":{"input":{"element":{"title":"Element","type":"HTMLElement","default":null},"selector":{"title":"Selector","type":"string"}},"output":{"element":{"title":"Element","type":"HTMLElement"},"selection":{"title":"Selection","type":"HTMLElement"},"error":{"title":"Error","type":"Error"}}},"fn":"var el;\nif ($.element) {\n  el = $.element;\n  output = {\n    element: $.get('element') \n  };\n} else {\n  el = document;\n  output = {\n    element: $.create(el) \n  };\n}\n\nvar selection = el.querySelector($.selector);\nif(selection) {\n  output.selection = $.create(selection);\n} else {\n  output.error = $.create(Error('Selector ' + $.selector + ' did not match'));\n}\n","provider":"https://api.chix.io/nodes/{ns}/{name}"}}}};
-
+  this.nodeDefinitions = {"https://api.chix.io/nodes/{ns}/{name}":{"react-material-ui":{"AutoComplete":{"_id":"57d20e75ba58aac5a4714617","name":"AutoComplete","ns":"react-material-ui","description":"","type":"ReactNode","dependencies":{"npm":{"material-ui/AutoComplete/AutoComplete":"latest"}},"ports":{"input":{"anchorOrigin":{"type":"custom","name":"anchorOrigin","default":null},"animated":{"type":"boolean","name":"animated","default":false},"animation":{"title":"Enable animation","type":"boolean","name":"animation"},"dataSource":{"type":"array","name":"dataSource"},"dataSourceConfig":{"type":"object","name":"dataSourceConfig","default":{}},"disableFocusRipple":{"type":"boolean","name":"disableFocusRipple","default":false},"errorStyle":{"type":"object","name":"errorStyle"},"errorText":{"type":"node","name":"errorText"},"filter":{"title":"Enable filter","type":"boolean","name":"filter","default":false},"floatingLabelText":{"type":"node","name":"floatingLabelText"},"fullWidth":{"type":"boolean","name":"fullWidth","default":false},"hintText":{"type":"node","name":"hintText"},"listStyle":{"type":"object","name":"listStyle"},"maxSearchResults":{"type":"number","name":"maxSearchResults"},"menuCloseDelay":{"type":"number","name":"menuCloseDelay","default":0},"menuProps":{"type":"object","name":"menuProps"},"menuStyle":{"type":"object","name":"menuStyle"},"onBlur":{"title":"Enable onBlur","type":"boolean","name":"onBlur"},"onFocus":{"title":"Enable onFocus","type":"boolean","name":"onFocus"},"onKeyDown":{"title":"Enable onKeyDown","type":"boolean","name":"onKeyDown"},"onNewRequest":{"title":"Enable onNewRequest","type":"boolean","name":"onNewRequest","default":false},"onUpdateInput":{"title":"Enable onUpdateInput","type":"boolean","name":"onUpdateInput","default":false},"open":{"type":"boolean","name":"open","default":false},"openOnFocus":{"type":"boolean","name":"openOnFocus","default":false},"searchText":{"type":"string","name":"searchText","default":""},"style":{"type":"object","name":"style"},"targetOrigin":{"type":"custom","name":"targetOrigin","default":null},"textFieldStyle":{"type":"object","name":"textFieldStyle"}},"output":{"component":{"title":"AutoComplete","type":"Component"},"animation":{"type":"any"},"filter":{"type":"any"},"onBlur":{"type":"any"},"onFocus":{"type":"any"},"onKeyDown":{"type":"any"},"onNewRequest":{"type":"any"},"onUpdateInput":{"type":"any"}}},"provider":"https://api.chix.io/nodes/{ns}/{name}"}},"react":{"render":{"_id":"57d20d0eba58aac5a4714538","name":"render","ns":"react","description":"Render a ReactElement into the DOM","phrases":{"active":"Rendering ReactElement"},"dependencies":{"npm":{"react-dom":"latest"}},"ports":{"input":{"element":{"title":"React Element","type":"function"},"container":{"title":"Container","type":"HTMLElement","required":false}},"output":{"element":{"title":"React Element","type":"ReactElement"},"container":{"title":"Container","type":"HTMLElement"}}},"fn":"// react.initializeTouchEvents(true); // bit of a hack\noutput = function() {console.log('RENDER', $.element, $container);\n  react_dom.render(\n    $.element,\n    $.container,\n    function() {\n      cb({\n        element: $.get('element'),\n      });\n      if ($.container) {\n        cb({container: $.get('container')});\n      }\n    }\n  );\n};\n","provider":"https://api.chix.io/nodes/{ns}/{name}"}},"dom":{"querySelector":{"_id":"57d20c38ba58aac5a471443c","name":"querySelector","ns":"dom","title":"querySelector","description":"[Document query selector](https://developer.mozilla.org/en-US/docs/Web/API/document.querySelector)","expose":["document"],"phrases":{"active":"Gathering elements matching criteria: {{input.selector}}"},"ports":{"input":{"element":{"title":"Element","type":"HTMLElement","default":null},"selector":{"title":"Selector","type":"string"}},"output":{"element":{"title":"Element","type":"HTMLElement"},"selection":{"title":"Selection","type":"HTMLElement"},"error":{"title":"Error","type":"Error"}}},"fn":"var el;\nif ($.element) {\n  el = $.element;\n  output = {\n    element: $.get('element') \n  };\n} else {\n  el = document;\n  output = {\n    element: $.create(el) \n  };\n}\n\nvar selection = el.querySelector($.selector);\nif(selection) {\n  output.selection = $.create(selection);\n} else {\n  output.error = $.create(Error('Selector ' + $.selector + ' did not match'));\n}\n","provider":"https://api.chix.io/nodes/{ns}/{name}"}},"console":{"log":{"_id":"57d2deaeba58aac5a47149de","name":"log","ns":"console","description":"Console log","async":true,"phrases":{"active":"Logging to console"},"ports":{"input":{"msg":{"type":"any","title":"Log message","description":"Logs a message to the console","async":true,"required":true}},"output":{"out":{"type":"any","title":"Log message"}}},"fn":"on.input.msg = function() {\n  console.log($.msg);\n  output( { out: $.get('msg') });\n}\n","provider":"https://api.chix.io/nodes/{ns}/{name}"}}}};
 };
 
 Loader.prototype.hasNodeDefinition = function(nodeId) {
-
   return !!this.nodes[nodeId];
-
 };
 
 Loader.prototype.getNodeDefinition = function(node, map) {
-
   if (!this.nodeDefinitions[node.provider]) {
-
     // needed for subgraphs
     if (map.providers && map.providers[node.provider]) {
       node.provider = map.providers[node.provider].path ||
@@ -48248,27 +47767,34 @@ Loader.prototype.getNodeDefinition = function(node, map) {
   }
 
   return this.nodeDefinitions[node.provider][node.ns][node.name];
-
 };
 
-var Flow = require('chix-flow').Flow;
+var Actor = require('chix-flow').Actor;
 var ReactNode = require('chix-node-react');
 var loader = new Loader();
 
-var map = {"type":"flow","nodes":[{"id":"AutoComplete","title":"AutoComplete","ns":"react-material-ui","name":"AutoComplete","context":{"hintText":"Type anything","onUpdateInput":true,"fullWidth":true,"dataSource":["aaaaa","bbbbb","ccccc"]}},{"id":"Render","title":"Render","ns":"react","name":"render"},{"id":"Selector","title":"Selector","ns":"dom","name":"querySelector","context":{"selector":"#app"}}],"links":[{"source":{"id":"AutoComplete","port":"component"},"target":{"id":"Render","port":"element"},"metadata":{"title":"AutoComplete component -> element Render"}},{"source":{"id":"Selector","port":"selection"},"target":{"id":"Render","port":"container"},"metadata":{"title":"Selector selection -> container Render"}}],"title":"AutoComplete Simple","ns":"material-ui","name":"AutoComplete","id":"AutoComplete","providers":{"@":{"url":"https://api.chix.io/nodes/{ns}/{name}"}}};
+var map = {"type":"flow","nodes":[{"id":"AutoComplete","title":"AutoComplete","ns":"react-material-ui","name":"AutoComplete","context":{"dataSource":["aaaaa","bbbbb","ccccc"]}},{"id":"Render","title":"Render","ns":"react","name":"render"},{"id":"Selector","title":"Selector","ns":"dom","name":"querySelector","context":{"selector":"#app"}},{"id":"Log","title":"Log","ns":"console","name":"log","context":{"msg":"Rendered!"}},{"id":"Finished","title":"Finished","ns":"console","name":"log","context":{"msg":"AutoComplete finished!"}}],"links":[{"source":{"id":"AutoComplete","port":"component"},"target":{"id":"Render","port":"element"},"metadata":{"title":"AutoComplete component -> element Render"}},{"source":{"id":"Selector","port":"selection"},"target":{"id":"Render","port":"container"},"metadata":{"title":"Selector selection -> container Render"}},{"source":{"id":"Selector","port":"selection"},"target":{"id":"Log","port":"msg"},"metadata":{"title":"Selector selection -> msg Log"}}],"title":"AutoComplete Simple","ns":"material-ui","name":"AutoComplete","id":"AutoComplete","providers":{"@":{"url":"https://api.chix.io/nodes/{ns}/{name}"}}};
 
-Flow.nodeTypes.ReactNode = ReactNode;
+Actor.nodeTypes.ReactNode = ReactNode;
 
 var actor;
-window.Actor = actor = Flow.create(map, loader);
+window.Actor = actor = new Actor();
+actor.addLoader(loader);
+actor.addMap(map);
 
+var monitor = require('chix-monitor-npmlog').Actor;
+monitor(console, actor);
+localStorage.debug = 'chix:*'
 
-
+// perhaps because it's a Flow it will not start
 function onDeviceReady() {
-actor.run();
-actor.push();
-actor.sendIIPs([]);
-
+console.log('on Device Ready', map)
+// actor.run();
+// actor.start();
+// actor.push();
+console.log('sendIIPS', [{"source":{"id":"AutoComplete","port":":iip"},"target":{"id":"Log","port":"msg"},"metadata":{"title":"AutoComplete Simple :iip -> msg Log"},"data":"Started?"},{"source":{"id":"AutoComplete","port":":iip"},"target":{"id":"AutoComplete","port":"onUpdateInput"},"metadata":{"title":"AutoComplete Simple :iip -> onUpdateInput AutoComplete"},"data":true},{"source":{"id":"AutoComplete","port":":iip"},"target":{"id":"AutoComplete","port":"fullWidth"},"metadata":{"title":"AutoComplete Simple :iip -> fullWidth AutoComplete"},"data":true}])
+actor.sendIIPs([{"source":{"id":"AutoComplete","port":":iip"},"target":{"id":"Log","port":"msg"},"metadata":{"title":"AutoComplete Simple :iip -> msg Log"},"data":"Started?"},{"source":{"id":"AutoComplete","port":":iip"},"target":{"id":"AutoComplete","port":"onUpdateInput"},"metadata":{"title":"AutoComplete Simple :iip -> onUpdateInput AutoComplete"},"data":true},{"source":{"id":"AutoComplete","port":":iip"},"target":{"id":"AutoComplete","port":"fullWidth"},"metadata":{"title":"AutoComplete Simple :iip -> fullWidth AutoComplete"},"data":true}]);
+// actor.push();
 };
 
 if (navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/)) {
@@ -48277,11 +47803,9 @@ if (navigator.userAgent.match(/(iPhone|iPod|iPad|Android|BlackBerry|IEMobile)/))
   document.addEventListener("DOMContentLoaded" , onDeviceReady); //this is the browser
 }
 
-// for entry it doesn't really matter what is the module.
-// as long as this module is loaded.
 module.exports = actor;
 
-},{"chix-flow":"chix-flow","chix-node-react":46}],"chix-flow":[function(require,module,exports){
+},{"chix-flow":"chix-flow","chix-monitor-npmlog":"chix-monitor-npmlog","chix-node-react":104}],"chix-flow":[function(require,module,exports){
 'use strict'
 
 var xNode = require('./lib/node')
@@ -48306,7 +47830,181 @@ module.exports = {
   }
 }
 
-},{"./lib/actor":93,"./lib/flow":116,"./lib/link":134,"./lib/node":136,"./lib/validate":172,"./schemas/map.json":174,"./schemas/node.json":175,"./schemas/stage.json":176}],"material-ui/AutoComplete/AutoComplete":[function(require,module,exports){
+},{"./lib/actor":2,"./lib/flow":25,"./lib/link":43,"./lib/node":45,"./lib/validate":81,"./schemas/map.json":101,"./schemas/node.json":102,"./schemas/stage.json":103}],"chix-monitor-npmlog":[function(require,module,exports){
+exports.Actor = require('./lib/actor')
+exports.Loader = require('./lib/loader')
+
+},{"./lib/actor":147,"./lib/loader":148}],"debug":[function(require,module,exports){
+
+/**
+ * This is the web browser implementation of `debug()`.
+ *
+ * Expose `debug()` as the module.
+ */
+
+exports = module.exports = require('./debug');
+exports.log = log;
+exports.formatArgs = formatArgs;
+exports.save = save;
+exports.load = load;
+exports.useColors = useColors;
+exports.storage = 'undefined' != typeof chrome
+               && 'undefined' != typeof chrome.storage
+                  ? chrome.storage.local
+                  : localstorage();
+
+/**
+ * Colors.
+ */
+
+exports.colors = [
+  'lightseagreen',
+  'forestgreen',
+  'goldenrod',
+  'dodgerblue',
+  'darkorchid',
+  'crimson'
+];
+
+/**
+ * Currently only WebKit-based Web Inspectors, Firefox >= v31,
+ * and the Firebug extension (any Firefox version) are known
+ * to support "%c" CSS customizations.
+ *
+ * TODO: add a `localStorage` variable to explicitly enable/disable colors
+ */
+
+function useColors() {
+  // is webkit? http://stackoverflow.com/a/16459606/376773
+  return ('WebkitAppearance' in document.documentElement.style) ||
+    // is firebug? http://stackoverflow.com/a/398120/376773
+    (window.console && (console.firebug || (console.exception && console.table))) ||
+    // is firefox >= v31?
+    // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
+    (navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31);
+}
+
+/**
+ * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
+ */
+
+exports.formatters.j = function(v) {
+  return JSON.stringify(v);
+};
+
+
+/**
+ * Colorize log arguments if enabled.
+ *
+ * @api public
+ */
+
+function formatArgs() {
+  var args = arguments;
+  var useColors = this.useColors;
+
+  args[0] = (useColors ? '%c' : '')
+    + this.namespace
+    + (useColors ? ' %c' : ' ')
+    + args[0]
+    + (useColors ? '%c ' : ' ')
+    + '+' + exports.humanize(this.diff);
+
+  if (!useColors) return args;
+
+  var c = 'color: ' + this.color;
+  args = [args[0], c, 'color: inherit'].concat(Array.prototype.slice.call(args, 1));
+
+  // the final "%c" is somewhat tricky, because there could be other
+  // arguments passed either before or after the %c, so we need to
+  // figure out the correct index to insert the CSS into
+  var index = 0;
+  var lastC = 0;
+  args[0].replace(/%[a-z%]/g, function(match) {
+    if ('%%' === match) return;
+    index++;
+    if ('%c' === match) {
+      // we only are interested in the *last* %c
+      // (the user may have provided their own)
+      lastC = index;
+    }
+  });
+
+  args.splice(lastC, 0, c);
+  return args;
+}
+
+/**
+ * Invokes `console.log()` when available.
+ * No-op when `console.log` is not a "function".
+ *
+ * @api public
+ */
+
+function log() {
+  // this hackery is required for IE8/9, where
+  // the `console.log` function doesn't have 'apply'
+  return 'object' === typeof console
+    && console.log
+    && Function.prototype.apply.call(console.log, console, arguments);
+}
+
+/**
+ * Save `namespaces`.
+ *
+ * @param {String} namespaces
+ * @api private
+ */
+
+function save(namespaces) {
+  try {
+    if (null == namespaces) {
+      exports.storage.removeItem('debug');
+    } else {
+      exports.storage.debug = namespaces;
+    }
+  } catch(e) {}
+}
+
+/**
+ * Load `namespaces`.
+ *
+ * @return {String} returns the previously persisted debug modes
+ * @api private
+ */
+
+function load() {
+  var r;
+  try {
+    r = exports.storage.debug;
+  } catch(e) {}
+  return r;
+}
+
+/**
+ * Enable namespaces listed in `localStorage.debug` initially.
+ */
+
+exports.enable(load());
+
+/**
+ * Localstorage attempts to return the localstorage.
+ *
+ * This is necessary because safari throws
+ * when a user disables cookies/localstorage
+ * and you attempt to access it.
+ *
+ * @return {LocalStorage}
+ * @api private
+ */
+
+function localstorage(){
+  try {
+    return window.localStorage;
+  } catch (e) {}
+}
+
+},{"./debug":149}],"material-ui/AutoComplete/AutoComplete":[function(require,module,exports){
 (function (process){
 'use strict';
 
@@ -48971,9 +48669,9 @@ AutoComplete.Divider = _Divider2.default;
 
 exports.default = AutoComplete;
 }).call(this,require('_process'))
-},{"../Divider":204,"../Menu":213,"../MenuItem":216,"../Popover/Popover":219,"../TextField":230,"../utils/deprecatedPropType":247,"../utils/propTypes":250,"_process":88,"keycode":189,"react":416,"react-dom":"react-dom","simple-assign":427,"warning":430}],"react-dom":[function(require,module,exports){
+},{"../Divider":162,"../Menu":171,"../MenuItem":174,"../Popover/Popover":177,"../TextField":188,"../utils/deprecatedPropType":205,"../utils/propTypes":208,"_process":143,"keycode":151,"react":372,"react-dom":"react-dom","simple-assign":383,"warning":384}],"react-dom":[function(require,module,exports){
 'use strict';
 
 module.exports = require('react/lib/ReactDOM');
 
-},{"react/lib/ReactDOM":296}]},{},[431]);
+},{"react/lib/ReactDOM":252}]},{},[385]);

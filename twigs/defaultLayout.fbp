@@ -6,12 +6,15 @@ id: AutoComplete
 AutoComplete(react-material-ui/AutoComplete)
 Render(react/render)
 Selector(dom/querySelector)
+Log(console/log)
 
 '#app' -> @selector Selector
 
-'Type anything' ->      @hintText AutoComplete
-true            -> @onUpdateInput AutoComplete
-true            ->     @fullWidth AutoComplete
+'Started?' -> msg Log
+
+# 'Type anything' ->       hintText AutoComplete
+true            ->  onUpdateInput AutoComplete
+true            ->      fullWidth AutoComplete
 
 [
   "aaaaa",
@@ -21,3 +24,7 @@ true            ->     @fullWidth AutoComplete
 
 AutoComplete component ->   element Render
 Selector selection     -> container Render
+Selector selection     -> msg Log
+
+'AutoComplete finished!' -> @msg Finished(console/log)
+'Rendered!' -> @msg Log
