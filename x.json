@@ -7,7 +7,9 @@
     "url": "https://github.com/nodule/react-material-ui.git"
   },
   "dependencies": {
-    "material-ui": "^0.15.4"
+    "chix-node-react": "github:psichi/chix-node-react",
+    "material-ui": "^0.15.4",
+    "react-dom": "^15.3.1"
   },
   "nodes": [
     {
@@ -4594,7 +4596,7 @@
           "menuCloseDelay": {
             "type": "number",
             "name": "menuCloseDelay",
-            "default": ""
+            "default": 0
           },
           "menuProps": {
             "type": "object",
@@ -4829,7 +4831,7 @@
           "size": {
             "type": "number",
             "name": "size",
-            "default": ""
+            "default": 0
           },
           "src": {
             "type": "string",
@@ -7487,7 +7489,7 @@
           "opacity": {
             "type": "number",
             "name": "opacity",
-            "default": ""
+            "default": 0
           },
           "style": {
             "type": "object",
@@ -7529,12 +7531,12 @@
           "max": {
             "type": "number",
             "name": "max",
-            "default": ""
+            "default": 0
           },
           "min": {
             "type": "number",
             "name": "min",
-            "default": ""
+            "default": 0
           },
           "mode": {
             "type": "enum",
@@ -7544,7 +7546,7 @@
           "size": {
             "type": "number",
             "name": "size",
-            "default": ""
+            "default": 0
           },
           "style": {
             "type": "object",
@@ -7553,12 +7555,12 @@
           "thickness": {
             "type": "number",
             "name": "thickness",
-            "default": ""
+            "default": 0
           },
           "value": {
             "type": "number",
             "name": "value",
-            "default": ""
+            "default": 0
           }
         },
         "output": {
@@ -7693,7 +7695,7 @@
           "initialHours": {
             "type": "number",
             "name": "initialHours",
-            "default": ""
+            "default": 0
           },
           "onChange": {
             "title": "Enable onChange",
@@ -7728,7 +7730,7 @@
           "initialMinutes": {
             "type": "number",
             "name": "initialMinutes",
-            "default": ""
+            "default": 0
           },
           "onChange": {
             "title": "Enable onChange",
@@ -7778,7 +7780,7 @@
           "value": {
             "type": "number",
             "name": "value",
-            "default": ""
+            "default": 0
           }
         },
         "output": {
@@ -7817,7 +7819,7 @@
           "value": {
             "type": "number",
             "name": "value",
-            "default": ""
+            "default": 0
           }
         },
         "output": {
@@ -9704,7 +9706,7 @@
           "weekCount": {
             "type": "number",
             "name": "weekCount",
-            "default": ""
+            "default": 0
           }
         },
         "output": {
@@ -9780,7 +9782,7 @@
           "firstDayOfWeek": {
             "type": "number",
             "name": "firstDayOfWeek",
-            "default": ""
+            "default": 0
           },
           "formatDate": {
             "title": "Enable formatDate",
@@ -11859,12 +11861,12 @@
           "swipeAreaWidth": {
             "type": "number",
             "name": "swipeAreaWidth",
-            "default": ""
+            "default": 0
           },
           "width": {
             "type": "number",
             "name": "width",
-            "default": ""
+            "default": 0
           },
           "zDepth": {
             "type": "custom",
@@ -11938,7 +11940,7 @@
           "maxHeight": {
             "type": "number",
             "name": "maxHeight",
-            "default": ""
+            "default": 0
           },
           "menuStyle": {
             "type": "object",
@@ -13483,7 +13485,7 @@
           "tabIndex": {
             "type": "number",
             "name": "tabIndex",
-            "default": ""
+            "default": 0
           },
           "touchRippleColor": {
             "type": "string",
@@ -13756,7 +13758,7 @@
           "rows": {
             "type": "number",
             "name": "rows",
-            "default": ""
+            "default": 0
           },
           "rowsMax": {
             "type": "number",
@@ -13816,7 +13818,7 @@
           "enterDelay": {
             "type": "number",
             "name": "enterDelay",
-            "default": ""
+            "default": 0
           },
           "loading": {
             "type": "boolean",
@@ -13835,12 +13837,12 @@
           "transitionDelay": {
             "type": "number",
             "name": "transitionDelay",
-            "default": ""
+            "default": 0
           },
           "transitionDuration": {
             "type": "number",
             "name": "transitionDuration",
-            "default": ""
+            "default": 0
           }
         },
         "output": {
@@ -13870,7 +13872,7 @@
           "enterDelay": {
             "type": "number",
             "name": "enterDelay",
-            "default": ""
+            "default": 0
           },
           "style": {
             "type": "object",
@@ -13879,12 +13881,12 @@
           "transitionDelay": {
             "type": "number",
             "name": "transitionDelay",
-            "default": ""
+            "default": 0
           },
           "transitionDuration": {
             "type": "number",
             "name": "transitionDuration",
-            "default": ""
+            "default": 0
           }
         },
         "output": {
@@ -14546,7 +14548,7 @@
           "cellHeight": {
             "type": "number",
             "name": "cellHeight",
-            "default": ""
+            "default": 0
           },
           "children": {
             "type": "node",
@@ -14555,12 +14557,12 @@
           "cols": {
             "type": "number",
             "name": "cols",
-            "default": ""
+            "default": 0
           },
           "padding": {
             "type": "number",
             "name": "padding",
-            "default": ""
+            "default": 0
           },
           "style": {
             "type": "object",
@@ -14603,7 +14605,7 @@
           "cols": {
             "type": "number",
             "name": "cols",
-            "default": ""
+            "default": 0
           },
           "containerElement": {
             "type": "union",
@@ -14613,7 +14615,7 @@
           "rows": {
             "type": "number",
             "name": "rows",
-            "default": ""
+            "default": 0
           },
           "style": {
             "type": "object",
@@ -15845,7 +15847,7 @@
           "touchTapCloseDelay": {
             "type": "number",
             "name": "touchTapCloseDelay",
-            "default": ""
+            "default": 0
           },
           "useLayerForClickAway": {
             "type": "boolean",
@@ -19044,12 +19046,12 @@
           "max": {
             "type": "number",
             "name": "max",
-            "default": ""
+            "default": 0
           },
           "min": {
             "type": "number",
             "name": "min",
-            "default": ""
+            "default": 0
           },
           "mode": {
             "type": "enum",
@@ -19063,7 +19065,7 @@
           "value": {
             "type": "number",
             "name": "value",
-            "default": ""
+            "default": 0
           }
         },
         "output": {
@@ -19168,7 +19170,7 @@
           "nestedLevel": {
             "type": "number",
             "name": "nestedLevel",
-            "default": ""
+            "default": 0
           },
           "nestedListStyle": {
             "type": "object",
@@ -20682,7 +20684,7 @@
           "maxHeight": {
             "type": "number",
             "name": "maxHeight",
-            "default": ""
+            "default": 0
           },
           "multiple": {
             "type": "boolean",
@@ -23515,12 +23517,12 @@
           "percentage": {
             "type": "number",
             "name": "percentage",
-            "default": ""
+            "default": 0
           },
           "size": {
             "type": "number",
             "name": "size",
-            "default": ""
+            "default": 0
           },
           "status": {
             "type": "enum",
@@ -23613,7 +23615,7 @@
           "enterDelay": {
             "type": "number",
             "name": "enterDelay",
-            "default": ""
+            "default": 0
           },
           "maxScale": {
             "type": "number",
@@ -23655,17 +23657,17 @@
           "enterDelay": {
             "type": "number",
             "name": "enterDelay",
-            "default": ""
+            "default": 0
           },
           "maxScale": {
             "type": "number",
             "name": "maxScale",
-            "default": ""
+            "default": 0
           },
           "minScale": {
             "type": "number",
             "name": "minScale",
-            "default": ""
+            "default": 0
           },
           "style": {
             "type": "object",
@@ -23840,7 +23842,7 @@
           "enterDelay": {
             "type": "number",
             "name": "enterDelay",
-            "default": ""
+            "default": 0
           },
           "style": {
             "type": "object",
@@ -23878,7 +23880,7 @@
           "enterDelay": {
             "type": "number",
             "name": "enterDelay",
-            "default": ""
+            "default": 0
           },
           "getLeaveDirection": {
             "title": "Enable getLeaveDirection",
@@ -23991,7 +23993,7 @@
           "step": {
             "type": "number",
             "name": "step",
-            "default": ""
+            "default": 0
           },
           "style": {
             "type": "object",
@@ -24928,7 +24930,7 @@
           "transitionDuration": {
             "type": "number",
             "name": "transitionDuration",
-            "default": ""
+            "default": 0
           }
         },
         "output": {
@@ -25829,7 +25831,7 @@
           "initialSelectedIndex": {
             "type": "number",
             "name": "initialSelectedIndex",
-            "default": ""
+            "default": 0
           },
           "inkBarStyle": {
             "type": "object",
@@ -26004,7 +26006,7 @@
           "rows": {
             "type": "number",
             "name": "rows",
-            "default": ""
+            "default": 0
           },
           "rowsMax": {
             "type": "number",
@@ -27004,6 +27006,79 @@
           "onTouchTap": {
             "type": "any"
           }
+        }
+      }
+    },
+    {
+      "type": "flow",
+      "nodes": [
+        {
+          "id": "AutoComplete",
+          "title": "AutoComplete",
+          "ns": "react-material-ui",
+          "name": "AutoComplete",
+          "context": {
+            "hintText": "Type anything",
+            "onUpdateInput": true,
+            "fullWidth": true,
+            "dataSource": [
+              "aaaaa",
+              "bbbbb",
+              "ccccc"
+            ]
+          }
+        },
+        {
+          "id": "Render",
+          "title": "Render",
+          "ns": "react",
+          "name": "render"
+        },
+        {
+          "id": "Selector",
+          "title": "Selector",
+          "ns": "dom",
+          "name": "querySelector",
+          "context": {
+            "selector": "#app"
+          }
+        }
+      ],
+      "links": [
+        {
+          "source": {
+            "id": "AutoComplete",
+            "port": "component"
+          },
+          "target": {
+            "id": "Render",
+            "port": "element"
+          },
+          "metadata": {
+            "title": "AutoComplete component -> element Render"
+          }
+        },
+        {
+          "source": {
+            "id": "Selector",
+            "port": "selection"
+          },
+          "target": {
+            "id": "Render",
+            "port": "container"
+          },
+          "metadata": {
+            "title": "Selector selection -> container Render"
+          }
+        }
+      ],
+      "title": "AutoComplete Simple",
+      "ns": "react-material-ui",
+      "name": "defaultLayout",
+      "id": "AutoComplete",
+      "providers": {
+        "@": {
+          "url": "https://serve-chix.rhcloud.com/nodes/{ns}/{name}"
         }
       }
     }
