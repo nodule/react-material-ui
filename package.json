@@ -11,6 +11,7 @@
   "scripts": {
     "test": "chit -r",
     "build:cards": "fbpx browserify twigs/cards.fbp -o examples/bundle.js -t react --debug",
+    "watch:cards": "fbpx browserify twigs/cards.fbp -o examples/bundle.js -t react --debug --watch",
     "svg:cards": "fbpx graph twigs/cards.fbp | dot -Tsvg > twigs/cards.svg"
   },
   "dependencies": {
