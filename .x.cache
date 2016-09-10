@@ -1,0 +1,1090 @@
+{
+  "dependencies": {
+    "npm": {
+      "material-ui/styles/MuiThemeProvider": "latest",
+      "material-ui/svg-icons/toggle/star": "latest",
+      "react-dom": "latest",
+      "material-ui/Card/Card": "latest",
+      "material-ui/Card/CardActions": "latest",
+      "material-ui/Card/CardHeader": "latest",
+      "material-ui/Card/CardMedia": "latest",
+      "material-ui/Card/CardTitle": "latest",
+      "material-ui/Card/CardText": "latest",
+      "material-ui/FlatButton/FlatButton": "latest",
+      "react": "latest",
+      "material-ui/svg-icons/action/android": "latest",
+      "material-ui/svg-icons/action/flight-takeoff": "latest",
+      "material-ui/RaisedButton/RaisedButton": "latest",
+      "material-ui/AppBar/AppBar": "latest"
+    }
+  },
+  "nodeDefinitions": {
+    "https://api.chix.io/nodes/{ns}/{name}": {
+      "react-material-ui": {
+        "MuiThemeProvider": {
+          "_id": "57d20e76ba58aac5a47148af",
+          "name": "MuiThemeProvider",
+          "ns": "react-material-ui",
+          "description": "",
+          "type": "ReactNode",
+          "dependencies": {
+            "npm": {
+              "material-ui/styles/MuiThemeProvider": "latest"
+            }
+          },
+          "ports": {
+            "input": {
+              "children": {
+                "type": "array",
+                "propType": "element",
+                "name": "children",
+                "required": false
+              },
+              "muiTheme": {
+                "type": "object",
+                "name": "muiTheme",
+                "required": false
+              }
+            },
+            "output": {
+              "component": {
+                "title": "MuiThemeProvider",
+                "type": "Component"
+              }
+            }
+          },
+          "provider": "https://api.chix.io/nodes/{ns}/{name}"
+        },
+        "ToggleStar": {
+          "_id": "57d20e76ba58aac5a4714962",
+          "name": "ToggleStar",
+          "ns": "react-material-ui",
+          "description": "",
+          "type": "ReactNode",
+          "dependencies": {
+            "npm": {
+              "material-ui/svg-icons/toggle/star": "latest"
+            }
+          },
+          "ports": {
+            "input": {},
+            "output": {
+              "component": {
+                "title": "ToggleStar",
+                "type": "Component"
+              }
+            }
+          },
+          "provider": "https://api.chix.io/nodes/{ns}/{name}"
+        },
+        "Card": {
+          "_id": "57d20e75ba58aac5a4714673",
+          "name": "Card",
+          "ns": "react-material-ui",
+          "description": "",
+          "type": "ReactNode",
+          "dependencies": {
+            "npm": {
+              "material-ui/Card/Card": "latest"
+            }
+          },
+          "ports": {
+            "input": {
+              "children": {
+                "type": "array",
+                "propType": "object",
+                "name": "children",
+                "required": false
+              },
+              "containerStyle": {
+                "type": "object",
+                "name": "containerStyle",
+                "required": false
+              },
+              "expandable": {
+                "type": "boolean",
+                "name": "expandable",
+                "default": false
+              },
+              "expanded": {
+                "type": "boolean",
+                "name": "expanded",
+                "default": false
+              },
+              "initiallyExpanded": {
+                "type": "boolean",
+                "name": "initiallyExpanded",
+                "default": false
+              },
+              "onExpandChange": {
+                "title": "Enable onExpandChange",
+                "type": "boolean",
+                "name": "onExpandChange",
+                "required": false
+              },
+              "showExpandableButton": {
+                "type": "boolean",
+                "name": "showExpandableButton",
+                "required": false
+              },
+              "style": {
+                "type": "object",
+                "name": "style",
+                "required": false
+              }
+            },
+            "output": {
+              "component": {
+                "title": "Card",
+                "type": "Component"
+              },
+              "onExpandChange": {
+                "type": "any"
+              }
+            }
+          },
+          "provider": "https://api.chix.io/nodes/{ns}/{name}"
+        },
+        "CardActions": {
+          "_id": "57d20e75ba58aac5a4714674",
+          "name": "CardActions",
+          "ns": "react-material-ui",
+          "description": "",
+          "type": "ReactNode",
+          "dependencies": {
+            "npm": {
+              "material-ui/Card/CardActions": "latest"
+            }
+          },
+          "ports": {
+            "input": {
+              "actAsExpander": {
+                "type": "boolean",
+                "name": "actAsExpander",
+                "required": false
+              },
+              "children": {
+                "type": "array",
+                "propType": "object",
+                "name": "children",
+                "required": false
+              },
+              "expandable": {
+                "type": "boolean",
+                "name": "expandable",
+                "required": false
+              },
+              "showExpandableButton": {
+                "type": "boolean",
+                "name": "showExpandableButton",
+                "required": false
+              },
+              "style": {
+                "type": "object",
+                "name": "style",
+                "required": false
+              }
+            },
+            "output": {
+              "component": {
+                "title": "CardActions",
+                "type": "Component"
+              }
+            }
+          },
+          "provider": "https://api.chix.io/nodes/{ns}/{name}"
+        },
+        "CardHeader": {
+          "_id": "57d20e75ba58aac5a4714676",
+          "name": "CardHeader",
+          "ns": "react-material-ui",
+          "description": "",
+          "type": "ReactNode",
+          "dependencies": {
+            "npm": {
+              "material-ui/Card/CardHeader": "latest"
+            }
+          },
+          "ports": {
+            "input": {
+              "actAsExpander": {
+                "type": "boolean",
+                "name": "actAsExpander",
+                "required": false
+              },
+              "avatar": {
+                "type": "string",
+                "name": "avatar",
+                "default": null
+              },
+              "children": {
+                "type": "array",
+                "propType": "node",
+                "name": "children",
+                "required": false
+              },
+              "expandable": {
+                "type": "boolean",
+                "name": "expandable",
+                "required": false
+              },
+              "showExpandableButton": {
+                "type": "boolean",
+                "name": "showExpandableButton",
+                "required": false
+              },
+              "style": {
+                "type": "object",
+                "name": "style",
+                "required": false
+              },
+              "subtitle": {
+                "type": "string",
+                "name": "subtitle",
+                "required": false
+              },
+              "subtitleColor": {
+                "type": "string",
+                "name": "subtitleColor",
+                "required": false
+              },
+              "subtitleStyle": {
+                "type": "object",
+                "name": "subtitleStyle",
+                "required": false
+              },
+              "textStyle": {
+                "type": "object",
+                "name": "textStyle",
+                "required": false
+              },
+              "title": {
+                "type": "string",
+                "name": "title",
+                "required": false
+              },
+              "titleColor": {
+                "type": "string",
+                "name": "titleColor",
+                "required": false
+              },
+              "titleStyle": {
+                "type": "object",
+                "name": "titleStyle",
+                "required": false
+              }
+            },
+            "output": {
+              "component": {
+                "title": "CardHeader",
+                "type": "Component"
+              }
+            }
+          },
+          "provider": "https://api.chix.io/nodes/{ns}/{name}"
+        },
+        "CardMedia": {
+          "_id": "57d20e75ba58aac5a4714677",
+          "name": "CardMedia",
+          "ns": "react-material-ui",
+          "description": "",
+          "type": "ReactNode",
+          "dependencies": {
+            "npm": {
+              "material-ui/Card/CardMedia": "latest"
+            }
+          },
+          "ports": {
+            "input": {
+              "actAsExpander": {
+                "type": "boolean",
+                "name": "actAsExpander",
+                "required": false
+              },
+              "children": {
+                "type": "array",
+                "propType": "object",
+                "name": "children",
+                "required": false
+              },
+              "expandable": {
+                "type": "boolean",
+                "name": "expandable",
+                "required": false
+              },
+              "mediaStyle": {
+                "type": "object",
+                "name": "mediaStyle",
+                "required": false
+              },
+              "overlay": {
+                "type": "object",
+                "name": "overlay",
+                "required": false
+              },
+              "overlayContainerStyle": {
+                "type": "object",
+                "name": "overlayContainerStyle",
+                "required": false
+              },
+              "overlayContentStyle": {
+                "type": "object",
+                "name": "overlayContentStyle",
+                "required": false
+              },
+              "overlayStyle": {
+                "type": "object",
+                "name": "overlayStyle",
+                "required": false
+              },
+              "style": {
+                "type": "object",
+                "name": "style",
+                "required": false
+              }
+            },
+            "output": {
+              "component": {
+                "title": "CardMedia",
+                "type": "Component"
+              }
+            }
+          },
+          "provider": "https://api.chix.io/nodes/{ns}/{name}"
+        },
+        "CardTitle": {
+          "_id": "57d20e75ba58aac5a4714679",
+          "name": "CardTitle",
+          "ns": "react-material-ui",
+          "description": "",
+          "type": "ReactNode",
+          "dependencies": {
+            "npm": {
+              "material-ui/Card/CardTitle": "latest"
+            }
+          },
+          "ports": {
+            "input": {
+              "actAsExpander": {
+                "type": "boolean",
+                "name": "actAsExpander",
+                "required": false
+              },
+              "children": {
+                "type": "array",
+                "propType": "node",
+                "name": "children",
+                "required": false
+              },
+              "expandable": {
+                "type": "boolean",
+                "name": "expandable",
+                "required": false
+              },
+              "showExpandableButton": {
+                "type": "boolean",
+                "name": "showExpandableButton",
+                "required": false
+              },
+              "style": {
+                "type": "object",
+                "name": "style",
+                "required": false
+              },
+              "subtitle": {
+                "type": "string",
+                "name": "subtitle",
+                "required": false
+              },
+              "subtitleColor": {
+                "type": "string",
+                "name": "subtitleColor",
+                "required": false
+              },
+              "subtitleStyle": {
+                "type": "object",
+                "name": "subtitleStyle",
+                "required": false
+              },
+              "title": {
+                "type": "string",
+                "name": "title",
+                "required": false
+              },
+              "titleColor": {
+                "type": "string",
+                "name": "titleColor",
+                "required": false
+              },
+              "titleStyle": {
+                "type": "object",
+                "name": "titleStyle",
+                "required": false
+              }
+            },
+            "output": {
+              "component": {
+                "title": "CardTitle",
+                "type": "Component"
+              }
+            }
+          },
+          "provider": "https://api.chix.io/nodes/{ns}/{name}"
+        },
+        "CardText": {
+          "_id": "57d20e75ba58aac5a4714678",
+          "name": "CardText",
+          "ns": "react-material-ui",
+          "description": "",
+          "type": "ReactNode",
+          "dependencies": {
+            "npm": {
+              "material-ui/Card/CardText": "latest"
+            }
+          },
+          "ports": {
+            "input": {
+              "actAsExpander": {
+                "type": "boolean",
+                "name": "actAsExpander",
+                "required": false
+              },
+              "children": {
+                "type": "array",
+                "propType": "node",
+                "name": "children",
+                "required": false
+              },
+              "color": {
+                "type": "string",
+                "name": "color",
+                "required": false
+              },
+              "expandable": {
+                "type": "boolean",
+                "name": "expandable",
+                "required": false
+              },
+              "style": {
+                "type": "object",
+                "name": "style",
+                "required": false
+              }
+            },
+            "output": {
+              "component": {
+                "title": "CardText",
+                "type": "Component"
+              }
+            }
+          },
+          "provider": "https://api.chix.io/nodes/{ns}/{name}"
+        },
+        "FlatButton": {
+          "_id": "57d20e76ba58aac5a471478e",
+          "name": "FlatButton",
+          "ns": "react-material-ui",
+          "description": "",
+          "type": "ReactNode",
+          "dependencies": {
+            "npm": {
+              "material-ui/FlatButton/FlatButton": "latest"
+            }
+          },
+          "ports": {
+            "input": {
+              "backgroundColor": {
+                "type": "string",
+                "name": "backgroundColor",
+                "required": false
+              },
+              "children": {
+                "type": "array",
+                "propType": "node",
+                "name": "children",
+                "required": false
+              },
+              "disabled": {
+                "type": "boolean",
+                "name": "disabled",
+                "default": false
+              },
+              "hoverColor": {
+                "type": "string",
+                "name": "hoverColor",
+                "required": false
+              },
+              "href": {
+                "type": "string",
+                "name": "href",
+                "required": false
+              },
+              "icon": {
+                "type": "object",
+                "name": "icon",
+                "required": false
+              },
+              "label": {
+                "type": "string",
+                "name": "label",
+                "required": false
+              },
+              "labelPosition": {
+                "type": "string",
+                "name": "labelPosition",
+                "default": ""
+              },
+              "labelStyle": {
+                "type": "object",
+                "name": "labelStyle",
+                "default": {}
+              },
+              "onKeyboardFocus": {
+                "title": "Enable onKeyboardFocus",
+                "type": "boolean",
+                "name": "onKeyboardFocus",
+                "default": false
+              },
+              "onMouseEnter": {
+                "title": "Enable onMouseEnter",
+                "type": "boolean",
+                "name": "onMouseEnter",
+                "default": false
+              },
+              "onMouseLeave": {
+                "title": "Enable onMouseLeave",
+                "type": "boolean",
+                "name": "onMouseLeave",
+                "default": false
+              },
+              "onTouchStart": {
+                "title": "Enable onTouchStart",
+                "type": "boolean",
+                "name": "onTouchStart",
+                "default": false
+              },
+              "primary": {
+                "type": "boolean",
+                "name": "primary",
+                "default": false
+              },
+              "rippleColor": {
+                "type": "string",
+                "name": "rippleColor",
+                "required": false
+              },
+              "secondary": {
+                "type": "boolean",
+                "name": "secondary",
+                "default": false
+              },
+              "style": {
+                "type": "object",
+                "name": "style",
+                "required": false
+              }
+            },
+            "output": {
+              "component": {
+                "title": "FlatButton",
+                "type": "Component"
+              },
+              "onKeyboardFocus": {
+                "type": "any"
+              },
+              "onMouseEnter": {
+                "type": "any"
+              },
+              "onMouseLeave": {
+                "type": "any"
+              },
+              "onTouchStart": {
+                "type": "any"
+              }
+            }
+          },
+          "provider": "https://api.chix.io/nodes/{ns}/{name}"
+        },
+        "ActionAndroid": {
+          "_id": "57d20e75ba58aac5a4714546",
+          "name": "ActionAndroid",
+          "ns": "react-material-ui",
+          "description": "",
+          "type": "ReactNode",
+          "dependencies": {
+            "npm": {
+              "material-ui/svg-icons/action/android": "latest"
+            }
+          },
+          "ports": {
+            "input": {},
+            "output": {
+              "component": {
+                "title": "ActionAndroid",
+                "type": "Component"
+              }
+            }
+          },
+          "provider": "https://api.chix.io/nodes/{ns}/{name}"
+        },
+        "ActionFlightTakeoff": {
+          "_id": "57d20e75ba58aac5a471457d",
+          "name": "ActionFlightTakeoff",
+          "ns": "react-material-ui",
+          "description": "",
+          "type": "ReactNode",
+          "dependencies": {
+            "npm": {
+              "material-ui/svg-icons/action/flight-takeoff": "latest"
+            }
+          },
+          "ports": {
+            "input": {},
+            "output": {
+              "component": {
+                "title": "ActionFlightTakeoff",
+                "type": "Component"
+              }
+            }
+          },
+          "provider": "https://api.chix.io/nodes/{ns}/{name}"
+        },
+        "RaisedButton": {
+          "_id": "57d20e76ba58aac5a471491b",
+          "name": "RaisedButton",
+          "ns": "react-material-ui",
+          "description": "",
+          "type": "ReactNode",
+          "dependencies": {
+            "npm": {
+              "material-ui/RaisedButton/RaisedButton": "latest"
+            }
+          },
+          "ports": {
+            "input": {
+              "backgroundColor": {
+                "type": "string",
+                "name": "backgroundColor",
+                "required": false
+              },
+              "children": {
+                "type": "array",
+                "propType": "node",
+                "name": "children",
+                "required": false
+              },
+              "className": {
+                "type": "string",
+                "name": "className",
+                "required": false
+              },
+              "disabled": {
+                "type": "boolean",
+                "name": "disabled",
+                "default": false
+              },
+              "disabledBackgroundColor": {
+                "type": "string",
+                "name": "disabledBackgroundColor",
+                "required": false
+              },
+              "disabledLabelColor": {
+                "type": "string",
+                "name": "disabledLabelColor",
+                "required": false
+              },
+              "fullWidth": {
+                "type": "boolean",
+                "name": "fullWidth",
+                "default": false
+              },
+              "href": {
+                "type": "string",
+                "name": "href",
+                "required": false
+              },
+              "icon": {
+                "type": "object",
+                "name": "icon",
+                "required": false
+              },
+              "label": {
+                "type": "string",
+                "name": "label",
+                "required": false
+              },
+              "labelColor": {
+                "type": "string",
+                "name": "labelColor",
+                "required": false
+              },
+              "labelPosition": {
+                "type": "string",
+                "name": "labelPosition",
+                "default": ""
+              },
+              "labelStyle": {
+                "type": "object",
+                "name": "labelStyle",
+                "required": false
+              },
+              "onMouseDown": {
+                "title": "Enable onMouseDown",
+                "type": "boolean",
+                "name": "onMouseDown",
+                "required": false
+              },
+              "onMouseEnter": {
+                "title": "Enable onMouseEnter",
+                "type": "boolean",
+                "name": "onMouseEnter",
+                "required": false
+              },
+              "onMouseLeave": {
+                "title": "Enable onMouseLeave",
+                "type": "boolean",
+                "name": "onMouseLeave",
+                "required": false
+              },
+              "onMouseUp": {
+                "title": "Enable onMouseUp",
+                "type": "boolean",
+                "name": "onMouseUp",
+                "required": false
+              },
+              "onTouchEnd": {
+                "title": "Enable onTouchEnd",
+                "type": "boolean",
+                "name": "onTouchEnd",
+                "required": false
+              },
+              "onTouchStart": {
+                "title": "Enable onTouchStart",
+                "type": "boolean",
+                "name": "onTouchStart",
+                "required": false
+              },
+              "primary": {
+                "type": "boolean",
+                "name": "primary",
+                "default": false
+              },
+              "rippleStyle": {
+                "type": "object",
+                "name": "rippleStyle",
+                "required": false
+              },
+              "secondary": {
+                "type": "boolean",
+                "name": "secondary",
+                "default": false
+              },
+              "style": {
+                "type": "object",
+                "name": "style",
+                "required": false
+              }
+            },
+            "output": {
+              "component": {
+                "title": "RaisedButton",
+                "type": "Component"
+              },
+              "onMouseDown": {
+                "type": "any"
+              },
+              "onMouseEnter": {
+                "type": "any"
+              },
+              "onMouseLeave": {
+                "type": "any"
+              },
+              "onMouseUp": {
+                "type": "any"
+              },
+              "onTouchEnd": {
+                "type": "any"
+              },
+              "onTouchStart": {
+                "type": "any"
+              }
+            }
+          },
+          "provider": "https://api.chix.io/nodes/{ns}/{name}"
+        },
+        "AppBar": {
+          "_id": "57d20e75ba58aac5a4714615",
+          "name": "AppBar",
+          "ns": "react-material-ui",
+          "description": "",
+          "type": "ReactNode",
+          "dependencies": {
+            "npm": {
+              "material-ui/AppBar/AppBar": "latest"
+            }
+          },
+          "ports": {
+            "input": {
+              "children": {
+                "type": "array",
+                "propType": "node",
+                "name": "children",
+                "required": false
+              },
+              "className": {
+                "type": "string",
+                "name": "className",
+                "required": false
+              },
+              "iconClassNameLeft": {
+                "type": "string",
+                "name": "iconClassNameLeft",
+                "required": false
+              },
+              "iconClassNameRight": {
+                "type": "string",
+                "name": "iconClassNameRight",
+                "required": false
+              },
+              "iconElementLeft": {
+                "type": "element",
+                "name": "iconElementLeft",
+                "required": false
+              },
+              "iconElementRight": {
+                "type": "element",
+                "name": "iconElementRight",
+                "required": false
+              },
+              "iconStyleLeft": {
+                "type": "object",
+                "name": "iconStyleLeft",
+                "required": false
+              },
+              "iconStyleRight": {
+                "type": "object",
+                "name": "iconStyleRight",
+                "required": false
+              },
+              "onLeftIconButtonTouchTap": {
+                "title": "Enable onLeftIconButtonTouchTap",
+                "type": "boolean",
+                "name": "onLeftIconButtonTouchTap",
+                "required": false
+              },
+              "onRightIconButtonTouchTap": {
+                "title": "Enable onRightIconButtonTouchTap",
+                "type": "boolean",
+                "name": "onRightIconButtonTouchTap",
+                "required": false
+              },
+              "onTitleTouchTap": {
+                "title": "Enable onTitleTouchTap",
+                "type": "boolean",
+                "name": "onTitleTouchTap",
+                "required": false
+              },
+              "showMenuIconButton": {
+                "type": "boolean",
+                "name": "showMenuIconButton",
+                "default": false
+              },
+              "style": {
+                "type": "object",
+                "name": "style",
+                "required": false
+              },
+              "title": {
+                "type": "string",
+                "name": "title",
+                "default": null
+              },
+              "titleStyle": {
+                "type": "object",
+                "name": "titleStyle",
+                "required": false
+              },
+              "zDepth": {
+                "type": "custom",
+                "name": "zDepth",
+                "default": null
+              }
+            },
+            "output": {
+              "component": {
+                "title": "AppBar",
+                "type": "Component"
+              },
+              "onLeftIconButtonTouchTap": {
+                "type": "any"
+              },
+              "onRightIconButtonTouchTap": {
+                "type": "any"
+              },
+              "onTitleTouchTap": {
+                "type": "any"
+              }
+            }
+          },
+          "provider": "https://api.chix.io/nodes/{ns}/{name}"
+        }
+      },
+      "react": {
+        "render": {
+          "_id": "57d20d0eba58aac5a4714538",
+          "name": "render",
+          "ns": "react",
+          "description": "Render a ReactElement into the DOM",
+          "phrases": {
+            "active": "Rendering ReactElement"
+          },
+          "dependencies": {
+            "npm": {
+              "react-dom": "latest"
+            }
+          },
+          "ports": {
+            "input": {
+              "element": {
+                "title": "React Element",
+                "type": "function"
+              },
+              "container": {
+                "title": "Container",
+                "type": "HTMLElement",
+                "required": false
+              }
+            },
+            "output": {
+              "element": {
+                "title": "React Element",
+                "type": "ReactElement"
+              },
+              "container": {
+                "title": "Container",
+                "type": "HTMLElement"
+              }
+            }
+          },
+          "fn": "// react.initializeTouchEvents(true); // bit of a hack\noutput = function() {\n  react_dom.render(\n    $.element,\n    $.container,\n    function() {\n      cb({\n        element: $.get('element'),\n      });\n      if ($.container) {\n        cb({container: $.get('container')});\n      }\n    }\n  );\n};\n",
+          "provider": "https://api.chix.io/nodes/{ns}/{name}"
+        },
+        "element": {
+          "_id": "57d4653aba58aac5a47149f0",
+          "name": "element",
+          "ns": "react",
+          "description": "Create a ReactElement",
+          "phrases": {
+            "active": "Creating ReactElement {input.tag}"
+          },
+          "dependencies": {
+            "npm": {
+              "react": "latest"
+            }
+          },
+          "ports": {
+            "input": {
+              "tag": {
+                "title": "Tag",
+                "type": "string"
+              },
+              "props": {
+                "title": "Props",
+                "type": "object",
+                "default": {}
+              },
+              "children": {
+                "title": "Children",
+                "type": "array",
+                "required": false
+              }
+            },
+            "output": {
+              "element": {
+                "title": "React Element",
+                "type": "ReactElement"
+              }
+            }
+          },
+          "fn": "output = function() {\n  var element = react.createElement(\n    $.tag,\n    $.props,\n    $.children\n  );\n\n  cb({\n    element: $.create(element)\n  });\n};\n",
+          "provider": "https://api.chix.io/nodes/{ns}/{name}"
+        }
+      },
+      "dom": {
+        "querySelector": {
+          "_id": "57d20c38ba58aac5a471443c",
+          "name": "querySelector",
+          "ns": "dom",
+          "title": "querySelector",
+          "description": "[Document query selector](https://developer.mozilla.org/en-US/docs/Web/API/document.querySelector)",
+          "expose": [
+            "document"
+          ],
+          "phrases": {
+            "active": "Gathering elements matching criteria: {{input.selector}}"
+          },
+          "ports": {
+            "input": {
+              "element": {
+                "title": "Element",
+                "type": "HTMLElement",
+                "default": null
+              },
+              "selector": {
+                "title": "Selector",
+                "type": "string"
+              }
+            },
+            "output": {
+              "element": {
+                "title": "Element",
+                "type": "HTMLElement"
+              },
+              "selection": {
+                "title": "Selection",
+                "type": "HTMLElement"
+              },
+              "error": {
+                "title": "Error",
+                "type": "Error"
+              }
+            }
+          },
+          "fn": "var el;\nif ($.element) {\n  el = $.element;\n  output = {\n    element: $.get('element') \n  };\n} else {\n  el = document;\n  output = {\n    element: $.create(el) \n  };\n}\n\nvar selection = el.querySelector($.selector);\nif(selection) {\n  output.selection = $.create(selection);\n} else {\n  output.error = $.create(Error('Selector ' + $.selector + ' did not match'));\n}\n",
+          "provider": "https://api.chix.io/nodes/{ns}/{name}"
+        }
+      },
+      "console": {
+        "log": {
+          "_id": "57d2deaeba58aac5a47149de",
+          "name": "log",
+          "ns": "console",
+          "description": "Console log",
+          "async": true,
+          "phrases": {
+            "active": "Logging to console"
+          },
+          "ports": {
+            "input": {
+              "msg": {
+                "type": "any",
+                "title": "Log message",
+                "description": "Logs a message to the console",
+                "async": true,
+                "required": true
+              }
+            },
+            "output": {
+              "out": {
+                "type": "any",
+                "title": "Log message"
+              }
+            }
+          },
+          "fn": "on.input.msg = function() {\n  console.log($.msg);\n  output( { out: $.get('msg') });\n}\n",
+          "provider": "https://api.chix.io/nodes/{ns}/{name}"
+        }
+      }
+    }
+  }
+}
