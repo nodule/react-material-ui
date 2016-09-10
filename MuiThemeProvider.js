@@ -11,7 +11,8 @@ module.exports = {
   ports: {
     input: {
       children: {
-        type: "element",
+        type: "array",
+        propType: "element",
         name: "children",
         required: false
       },

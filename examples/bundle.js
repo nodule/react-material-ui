@@ -13314,6 +13314,30 @@ var ReactNode = function (_XNode) {
       return port.type === 'boolean' && this.ports.output[port.name];
     }
   }, {
+    key: 'allPortsFilled',
+    value: function allPortsFilled() {
+      var allFilled = true;
+
+      (0, _objectForof2.default)(function (name, port) {
+        if (!port.isFilled()) {
+          allFilled = false;
+        }
+      }, this.ports.input);
+
+      return allFilled;
+    }
+  }, {
+    key: 'setRealType',
+    value: function setRealType() {}
+    // can be precalculated anyway.
+
+    /**
+     * Ok when it are children, incoming is an array.
+     * Then there must be a conversion checking propTypes
+     * And pass the correct type.
+     */
+
+  }, {
     key: 'onPortFill',
     value: function onPortFill() {
       var _this3 = this;
@@ -13321,43 +13345,57 @@ var ReactNode = function (_XNode) {
       debug('%s:onPortFill running', this.identifier);
       var input = {};
 
-      var ready = true;
-
-      (0, _objectForof2.default)(function (name, port) {
-        if (port.isFilled()) {
+      if (this.component) {
+        // always update state on every portfill
+        (0, _objectForof2.default)(function (name, port) {
           var data = port.read().read();
 
-          if (_this3.isEventHandler(port)) {
-            input[port.name] = function () {
-              for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-                args[_key] = arguments[_key];
-              }
-
-              var event = {
-                name: (_this3.ns + '_' + _this3.name).toUpperCase(),
-                arguments: args
-              };
-
-              var eventPacket = new _packet2.default(event, 'object');
-
-              _this3.sendPortOutput(port.name, eventPacket);
-            };
-          } else {
+          if (!_this3.isEventHandler(port)) {
+            // only set handler during initialization
             input[port.name] = data;
           }
-        } else {
-          ready = false;
-        }
-      }, this.ports.input);
+        }, this.ports.input);
 
-      if (ready) {
-        debug('%s:onPortFill ready', this.identifier);
-        if (this.component) {
-          debug('%s:onPortFill emitting state', this.identifier);
-          this.stateEmitter.emit('state', input);
-        } else {
+        debug('%s:onPortFill emitting state', this.identifier);
+
+        this.stateEmitter.emit('state', input);
+      } else {
+        if (this.allPortsFilled()) {
+          (0, _objectForof2.default)(function (name, port) {
+            var data = port.read().read();
+
+            if (data === true && _this3.isEventHandler(port)) {
+              input[port.name] = function () {
+                for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                  args[_key] = arguments[_key];
+                }
+
+                var event = {
+                  name: (_this3.ns + '_' + _this3.name).toUpperCase(),
+                  arguments: args
+                };
+
+                var eventPacket = new _packet2.default(event, 'object');
+
+                _this3.sendPortOutput(port.name, eventPacket);
+              };
+            } else if (name === 'children') {
+              // etc. more options.
+              if (port.propType === 'node') {
+                input[port.name] = data.pop();
+              } else {
+                input[port.name] = data;
+              }
+            } else {
+              input[port.name] = data;
+            }
+          }, this.ports.input);
+
           debug('%s:onPortFill creating component', this.identifier);
+
           this.createComponent(input);
+        } else {
+          debug('%s:onPortFill ports not ready yet', this.identifier);
         }
       }
     }
@@ -50215,7 +50253,7 @@ var Loader = function() {
   // will be replaced with the json.
   this.dependencies = {"npm":{"material-ui/AutoComplete/AutoComplete":"latest","react-dom":"latest","material-ui/svg-icons/toggle/star":"latest","material-ui/styles/MuiThemeProvider":"latest"}};
   //this.nodes = ;
-  this.nodeDefinitions = {"https://api.chix.io/nodes/{ns}/{name}":{"react-material-ui":{"AutoComplete":{"_id":"57d20e75ba58aac5a4714617","name":"AutoComplete","ns":"react-material-ui","description":"","type":"ReactNode","dependencies":{"npm":{"material-ui/AutoComplete/AutoComplete":"latest"}},"ports":{"input":{"anchorOrigin":{"type":"custom","name":"anchorOrigin","default":null},"animated":{"type":"boolean","name":"animated","default":false},"animation":{"title":"Enable animation","type":"boolean","name":"animation"},"dataSource":{"type":"array","name":"dataSource"},"dataSourceConfig":{"type":"object","name":"dataSourceConfig","default":{}},"disableFocusRipple":{"type":"boolean","name":"disableFocusRipple","default":false},"errorStyle":{"type":"object","name":"errorStyle"},"errorText":{"type":"node","name":"errorText"},"filter":{"title":"Enable filter","type":"boolean","name":"filter","default":false},"floatingLabelText":{"type":"node","name":"floatingLabelText"},"fullWidth":{"type":"boolean","name":"fullWidth","default":false},"hintText":{"type":"node","name":"hintText"},"listStyle":{"type":"object","name":"listStyle"},"maxSearchResults":{"type":"number","name":"maxSearchResults"},"menuCloseDelay":{"type":"number","name":"menuCloseDelay","default":0},"menuProps":{"type":"object","name":"menuProps"},"menuStyle":{"type":"object","name":"menuStyle"},"onBlur":{"title":"Enable onBlur","type":"boolean","name":"onBlur"},"onFocus":{"title":"Enable onFocus","type":"boolean","name":"onFocus"},"onKeyDown":{"title":"Enable onKeyDown","type":"boolean","name":"onKeyDown"},"onNewRequest":{"title":"Enable onNewRequest","type":"boolean","name":"onNewRequest","default":false},"onUpdateInput":{"title":"Enable onUpdateInput","type":"boolean","name":"onUpdateInput","default":false},"open":{"type":"boolean","name":"open","default":false},"openOnFocus":{"type":"boolean","name":"openOnFocus","default":false},"searchText":{"type":"string","name":"searchText","default":""},"style":{"type":"object","name":"style"},"targetOrigin":{"type":"custom","name":"targetOrigin","default":null},"textFieldStyle":{"type":"object","name":"textFieldStyle"}},"output":{"component":{"title":"AutoComplete","type":"Component"},"animation":{"type":"any"},"filter":{"type":"any"},"onBlur":{"type":"any"},"onFocus":{"type":"any"},"onKeyDown":{"type":"any"},"onNewRequest":{"type":"any"},"onUpdateInput":{"type":"any"}}},"provider":"https://api.chix.io/nodes/{ns}/{name}"},"ToggleStar":{"_id":"57d20e76ba58aac5a4714962","name":"ToggleStar","ns":"react-material-ui","description":"","type":"ReactNode","dependencies":{"npm":{"material-ui/svg-icons/toggle/star":"latest"}},"ports":{"input":{},"output":{"component":{"title":"ToggleStar","type":"Component"}}},"provider":"https://api.chix.io/nodes/{ns}/{name}"},"MuiThemeProvider":{"_id":"57d20e76ba58aac5a47148af","name":"MuiThemeProvider","ns":"react-material-ui","description":"","type":"ReactNode","dependencies":{"npm":{"material-ui/styles/MuiThemeProvider":"latest"}},"ports":{"input":{"children":{"type":"object","name":"children"},"muiTheme":{"type":"object","name":"muiTheme","required":false}},"output":{"component":{"title":"MuiThemeProvider","type":"Component"}}},"provider":"https://api.chix.io/nodes/{ns}/{name}"}},"react":{"render":{"_id":"57d20d0eba58aac5a4714538","name":"render","ns":"react","description":"Render a ReactElement into the DOM","phrases":{"active":"Rendering ReactElement"},"dependencies":{"npm":{"react-dom":"latest"}},"ports":{"input":{"element":{"title":"React Element","type":"function"},"container":{"title":"Container","type":"HTMLElement","required":false}},"output":{"element":{"title":"React Element","type":"ReactElement"},"container":{"title":"Container","type":"HTMLElement"}}},"fn":"// react.initializeTouchEvents(true); // bit of a hack\noutput = function() {\n  react_dom.render(\n    $.element,\n    $.container,\n    function() {\n      cb({\n        element: $.get('element'),\n      });\n      if ($.container) {\n        cb({container: $.get('container')});\n      }\n    }\n  );\n};\n","provider":"https://api.chix.io/nodes/{ns}/{name}"}},"dom":{"querySelector":{"_id":"57d20c38ba58aac5a471443c","name":"querySelector","ns":"dom","title":"querySelector","description":"[Document query selector](https://developer.mozilla.org/en-US/docs/Web/API/document.querySelector)","expose":["document"],"phrases":{"active":"Gathering elements matching criteria: {{input.selector}}"},"ports":{"input":{"element":{"title":"Element","type":"HTMLElement","default":null},"selector":{"title":"Selector","type":"string"}},"output":{"element":{"title":"Element","type":"HTMLElement"},"selection":{"title":"Selection","type":"HTMLElement"},"error":{"title":"Error","type":"Error"}}},"fn":"var el;\nif ($.element) {\n  el = $.element;\n  output = {\n    element: $.get('element') \n  };\n} else {\n  el = document;\n  output = {\n    element: $.create(el) \n  };\n}\n\nvar selection = el.querySelector($.selector);\nif(selection) {\n  output.selection = $.create(selection);\n} else {\n  output.error = $.create(Error('Selector ' + $.selector + ' did not match'));\n}\n","provider":"https://api.chix.io/nodes/{ns}/{name}"}},"console":{"log":{"_id":"57d2deaeba58aac5a47149de","name":"log","ns":"console","description":"Console log","async":true,"phrases":{"active":"Logging to console"},"ports":{"input":{"msg":{"type":"any","title":"Log message","description":"Logs a message to the console","async":true,"required":true}},"output":{"out":{"type":"any","title":"Log message"}}},"fn":"on.input.msg = function() {\n  console.log($.msg);\n  output( { out: $.get('msg') });\n}\n","provider":"https://api.chix.io/nodes/{ns}/{name}"}}}};
+  this.nodeDefinitions = {"https://api.chix.io/nodes/{ns}/{name}":{"react-material-ui":{"AutoComplete":{"_id":"57d20e75ba58aac5a4714617","name":"AutoComplete","ns":"react-material-ui","description":"","type":"ReactNode","dependencies":{"npm":{"material-ui/AutoComplete/AutoComplete":"latest"}},"ports":{"input":{"anchorOrigin":{"type":"custom","name":"anchorOrigin","default":null},"animated":{"type":"boolean","name":"animated","default":false},"animation":{"title":"Enable animation","type":"boolean","name":"animation"},"dataSource":{"type":"array","name":"dataSource"},"dataSourceConfig":{"type":"object","name":"dataSourceConfig","default":{}},"disableFocusRipple":{"type":"boolean","name":"disableFocusRipple","default":false},"errorStyle":{"type":"object","name":"errorStyle"},"errorText":{"type":"node","name":"errorText"},"filter":{"title":"Enable filter","type":"boolean","name":"filter","default":false},"floatingLabelText":{"type":"node","name":"floatingLabelText"},"fullWidth":{"type":"boolean","name":"fullWidth","default":false},"hintText":{"type":"node","name":"hintText"},"listStyle":{"type":"object","name":"listStyle"},"maxSearchResults":{"type":"number","name":"maxSearchResults"},"menuCloseDelay":{"type":"number","name":"menuCloseDelay","default":0},"menuProps":{"type":"object","name":"menuProps"},"menuStyle":{"type":"object","name":"menuStyle"},"onBlur":{"title":"Enable onBlur","type":"boolean","name":"onBlur"},"onFocus":{"title":"Enable onFocus","type":"boolean","name":"onFocus"},"onKeyDown":{"title":"Enable onKeyDown","type":"boolean","name":"onKeyDown"},"onNewRequest":{"title":"Enable onNewRequest","type":"boolean","name":"onNewRequest","default":false},"onUpdateInput":{"title":"Enable onUpdateInput","type":"boolean","name":"onUpdateInput","default":false},"open":{"type":"boolean","name":"open","default":false},"openOnFocus":{"type":"boolean","name":"openOnFocus","default":false},"searchText":{"type":"string","name":"searchText","default":""},"style":{"type":"object","name":"style"},"targetOrigin":{"type":"custom","name":"targetOrigin","default":null},"textFieldStyle":{"type":"object","name":"textFieldStyle"}},"output":{"component":{"title":"AutoComplete","type":"Component"},"animation":{"type":"any"},"filter":{"type":"any"},"onBlur":{"type":"any"},"onFocus":{"type":"any"},"onKeyDown":{"type":"any"},"onNewRequest":{"type":"any"},"onUpdateInput":{"type":"any"}}},"provider":"https://api.chix.io/nodes/{ns}/{name}"},"ToggleStar":{"_id":"57d20e76ba58aac5a4714962","name":"ToggleStar","ns":"react-material-ui","description":"","type":"ReactNode","dependencies":{"npm":{"material-ui/svg-icons/toggle/star":"latest"}},"ports":{"input":{},"output":{"component":{"title":"ToggleStar","type":"Component"}}},"provider":"https://api.chix.io/nodes/{ns}/{name}"},"MuiThemeProvider":{"_id":"57d20e76ba58aac5a47148af","name":"MuiThemeProvider","ns":"react-material-ui","description":"","type":"ReactNode","dependencies":{"npm":{"material-ui/styles/MuiThemeProvider":"latest"}},"ports":{"input":{"children":{"type":"array","name":"children"},"muiTheme":{"type":"object","name":"muiTheme","required":false}},"output":{"component":{"title":"MuiThemeProvider","type":"Component"}}},"provider":"https://api.chix.io/nodes/{ns}/{name}"}},"react":{"render":{"_id":"57d20d0eba58aac5a4714538","name":"render","ns":"react","description":"Render a ReactElement into the DOM","phrases":{"active":"Rendering ReactElement"},"dependencies":{"npm":{"react-dom":"latest"}},"ports":{"input":{"element":{"title":"React Element","type":"function"},"container":{"title":"Container","type":"HTMLElement","required":false}},"output":{"element":{"title":"React Element","type":"ReactElement"},"container":{"title":"Container","type":"HTMLElement"}}},"fn":"// react.initializeTouchEvents(true); // bit of a hack\noutput = function() {\n  react_dom.render(\n    $.element,\n    $.container,\n    function() {\n      cb({\n        element: $.get('element'),\n      });\n      if ($.container) {\n        cb({container: $.get('container')});\n      }\n    }\n  );\n};\n","provider":"https://api.chix.io/nodes/{ns}/{name}"}},"dom":{"querySelector":{"_id":"57d20c38ba58aac5a471443c","name":"querySelector","ns":"dom","title":"querySelector","description":"[Document query selector](https://developer.mozilla.org/en-US/docs/Web/API/document.querySelector)","expose":["document"],"phrases":{"active":"Gathering elements matching criteria: {{input.selector}}"},"ports":{"input":{"element":{"title":"Element","type":"HTMLElement","default":null},"selector":{"title":"Selector","type":"string"}},"output":{"element":{"title":"Element","type":"HTMLElement"},"selection":{"title":"Selection","type":"HTMLElement"},"error":{"title":"Error","type":"Error"}}},"fn":"var el;\nif ($.element) {\n  el = $.element;\n  output = {\n    element: $.get('element') \n  };\n} else {\n  el = document;\n  output = {\n    element: $.create(el) \n  };\n}\n\nvar selection = el.querySelector($.selector);\nif(selection) {\n  output.selection = $.create(selection);\n} else {\n  output.error = $.create(Error('Selector ' + $.selector + ' did not match'));\n}\n","provider":"https://api.chix.io/nodes/{ns}/{name}"}},"console":{"log":{"_id":"57d2deaeba58aac5a47149de","name":"log","ns":"console","description":"Console log","async":true,"phrases":{"active":"Logging to console"},"ports":{"input":{"msg":{"type":"any","title":"Log message","description":"Logs a message to the console","async":true,"required":true}},"output":{"out":{"type":"any","title":"Log message"}}},"fn":"on.input.msg = function() {\n  console.log($.msg);\n  output( { out: $.get('msg') });\n}\n","provider":"https://api.chix.io/nodes/{ns}/{name}"}}}};
 };
 
 Loader.prototype.hasNodeDefinition = function(nodeId) {
@@ -50243,7 +50281,7 @@ var Actor = require('chix-flow').Actor;
 var ReactNode = require('chix-node-react');
 var loader = new Loader();
 
-var map = {"type":"flow","nodes":[{"id":"MuiThemeProvider","title":"MuiThemeProvider","ns":"react-material-ui","name":"MuiThemeProvider"},{"id":"Star","title":"Star","ns":"react-material-ui","name":"ToggleStar"},{"id":"Render","title":"Render","ns":"react","name":"render"},{"id":"Selector","title":"Selector","ns":"dom","name":"querySelector","context":{"selector":"#app"}},{"id":"Log","title":"Log","ns":"console","name":"log","context":{"msg":"Rendered!"}},{"id":"Finished","title":"Finished","ns":"console","name":"log","context":{"msg":"AutoComplete finished!"}}],"links":[{"source":{"id":"Star","port":"component"},"target":{"id":"MuiThemeProvider","port":"children"},"metadata":{"title":"Star component -> children MuiThemeProvider"}},{"source":{"id":"MuiThemeProvider","port":"component"},"target":{"id":"Render","port":"element"},"metadata":{"title":"MuiThemeProvider component -> element Render"}},{"source":{"id":"Selector","port":"selection"},"target":{"id":"Render","port":"container"},"metadata":{"title":"Selector selection -> container Render"}},{"source":{"id":"Selector","port":"selection"},"target":{"id":"Log","port":"msg"},"metadata":{"title":"Selector selection -> msg Log"}}],"title":"AutoComplete Simple","ns":"material-ui","name":"AutoComplete","id":"AutoComplete","providers":{"@":{"url":"https://api.chix.io/nodes/{ns}/{name}"}}};
+var map = {"type":"flow","nodes":[{"id":"MuiThemeProvider","title":"MuiThemeProvider","ns":"react-material-ui","name":"MuiThemeProvider"},{"id":"Star","title":"Star","ns":"react-material-ui","name":"ToggleStar"},{"id":"Render","title":"Render","ns":"react","name":"render"},{"id":"Selector","title":"Selector","ns":"dom","name":"querySelector","context":{"selector":"#app"}},{"id":"Log","title":"Log","ns":"console","name":"log","context":{"msg":"Rendered!"}},{"id":"Finished","title":"Finished","ns":"console","name":"log","context":{"msg":"AutoComplete finished!"}}],"links":[{"source":{"id":"Star","port":"component"},"target":{"id":"MuiThemeProvider","port":"children","setting":{"index":0}},"metadata":{"title":"Star component -> children MuiThemeProvider"}},{"source":{"id":"MuiThemeProvider","port":"component"},"target":{"id":"Render","port":"element"},"metadata":{"title":"MuiThemeProvider component -> element Render"}},{"source":{"id":"Selector","port":"selection"},"target":{"id":"Render","port":"container"},"metadata":{"title":"Selector selection -> container Render"}},{"source":{"id":"Selector","port":"selection"},"target":{"id":"Log","port":"msg"},"metadata":{"title":"Selector selection -> msg Log"}}],"title":"AutoComplete Simple","ns":"material-ui","name":"AutoComplete","id":"AutoComplete","providers":{"@":{"url":"https://api.chix.io/nodes/{ns}/{name}"}}};
 
 Actor.nodeTypes.ReactNode = ReactNode;
 

@@ -55,7 +55,10 @@ module.exports = {
       },
       "target": {
         "id": "MuiThemeProvider",
-        "port": "children"
+        "port": "children",
+        "setting": {
+          "index": 0
+        }
       },
       "metadata": {
         "title": "Star component -> children MuiThemeProvider"

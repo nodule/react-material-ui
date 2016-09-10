@@ -27,7 +27,8 @@ module.exports = {
         "default": false
       },
       children: {
-        type: "node",
+        type: "array",
+        propType: "node",
         name: "children",
         required: false
       },

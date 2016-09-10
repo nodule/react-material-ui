@@ -4405,7 +4405,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -4518,7 +4519,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           }
@@ -4844,7 +4846,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -6430,7 +6433,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -6496,7 +6500,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -6532,7 +6537,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -6962,7 +6968,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -7032,7 +7039,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -7123,7 +7131,8 @@
             "default": null
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -7204,7 +7213,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -7270,7 +7280,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -7316,7 +7327,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -7477,7 +7489,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -7743,7 +7756,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -7774,7 +7788,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -11905,7 +11920,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -12036,7 +12052,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -12152,7 +12169,8 @@
             "default": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -13610,7 +13628,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -14114,7 +14133,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -14170,7 +14190,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -14501,7 +14522,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -14654,7 +14676,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -14889,7 +14912,8 @@
             "default": 0
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -14940,7 +14964,8 @@
             "default": ""
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -15966,7 +15991,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -16117,7 +16143,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -19460,7 +19487,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -19496,7 +19524,8 @@
             "default": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -21046,7 +21075,8 @@
             "default": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -21174,7 +21204,8 @@
             "default": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -21272,7 +21303,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "element",
+            "type": "array",
+            "propType": "element",
             "name": "children",
             "required": false
           },
@@ -21863,7 +21895,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -23025,7 +23058,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -23487,7 +23521,8 @@
             "default": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -23555,7 +23590,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -23606,7 +23642,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -23737,7 +23774,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -23807,7 +23845,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -24077,7 +24116,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -24123,7 +24163,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -24174,7 +24215,8 @@
             "default": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -24327,7 +24369,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -24368,7 +24411,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -25288,7 +25332,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -25344,7 +25389,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -25453,7 +25499,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -25513,7 +25560,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -25569,7 +25617,8 @@
             "required": false
           },
           "children": {
-            "type": "arrayOf",
+            "type": "array",
+            "propType": "arrayOf",
             "name": "children",
             "required": false
           },
@@ -25610,7 +25659,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -25646,7 +25696,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -25799,7 +25850,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -25934,7 +25986,8 @@
             "default": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -26064,7 +26117,8 @@
             "default": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -26105,7 +26159,8 @@
             "default": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -26165,7 +26220,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -26248,7 +26304,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -26373,7 +26430,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -26446,7 +26504,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -26530,7 +26589,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -26561,7 +26621,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -26785,7 +26846,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -27453,7 +27515,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -27494,7 +27557,8 @@
       "ports": {
         "input": {
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -27673,7 +27737,8 @@
             "required": false
           },
           "children": {
-            "type": "node",
+            "type": "array",
+            "propType": "node",
             "name": "children",
             "required": false
           },
@@ -27803,7 +27868,10 @@
           },
           "target": {
             "id": "MuiThemeProvider",
-            "port": "children"
+            "port": "children",
+            "setting": {
+              "index": 0
+            }
           },
           "metadata": {
             "title": "Star component -> children MuiThemeProvider"

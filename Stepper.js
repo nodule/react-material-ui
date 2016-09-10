@@ -16,7 +16,8 @@ module.exports = {
         required: false
       },
       children: {
-        type: "arrayOf",
+        type: "array",
+        propType: "arrayOf",
         name: "children",
         required: false
       },
