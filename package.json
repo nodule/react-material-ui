@@ -10,7 +10,8 @@
   },
   "scripts": {
     "test": "chit -r",
-    "build:cards": "fbpx browserify twigs/cards.fbp -o examples/bundle.js -t react --debug"
+    "build:cards": "fbpx browserify twigs/cards.fbp -o examples/bundle.js -t react --debug",
+    "svg:cards": "fbpx graph twigs/cards.fbp | dot -Tsvg > twigs/cards.svg"
   },
   "dependencies": {
     "chix-node-react": "github:psichi/chix-node-react",
