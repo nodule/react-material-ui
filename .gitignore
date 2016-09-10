@@ -3,3 +3,5 @@ node_modules
 *.swp
 *.txt
 .x.cache
+.idea
+bundle.js

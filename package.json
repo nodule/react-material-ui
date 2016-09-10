@@ -9,7 +9,8 @@
     "url": "https://github.com/nodule/react-material-ui.git"
   },
   "scripts": {
-    "test": "chit -r"
+    "test": "chit -r",
+    "build:cards": "fbpx browserify twigs/cards.fbp -o examples/bundle.js -t react --debug"
   },
   "dependencies": {
     "chix-node-react": "github:psichi/chix-node-react",

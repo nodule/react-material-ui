@@ -1,0 +1,96 @@
+title: Card Example
+ns: material-ui
+name: TheCard
+id: TheCard
+
+MuiThemeProvider(react-material-ui/MuiThemeProvider)
+Render(react/render)
+Selector(dom/querySelector)
+Log(console/log)
+Card(react-material-ui/Card)
+CardHeader(react-material-ui/CardHeader)
+CardActions(react-material-ui/CardActions)
+CardMedia(react-material-ui/CardMedia)
+CardTitle(react-material-ui/CardTitle)
+CardMediaTitle(react-material-ui/CardTitle)
+CardText(react-material-ui/CardText)
+Img(react/element)
+ActionButton1(react-material-ui/FlatButton)
+ActionButton2(react-material-ui/FlatButton)
+ActionAndroid(react-material-ui/ActionAndroid)
+ActionFlightTakeOff(react-material-ui/ActionFlightTakeoff)
+
+'#app' -> @selector Selector
+
+# {} -> muiTheme MuiThemeProvider
+
+MuiThemeProvider component ->  element Render
+Selector selection     -> container Render
+Selector selection     -> msg Log
+
+'img'             ->         tag Img
+'images/mars.jpg' -> [src] props Img
+
+# context does not work as expected, fix that
+'Rhalff'         ->     title CardHeader
+"If I don't see you no more in this world, I'll meet you on the next one."           ->  subtitle CardHeader
+'images/rhalff.jpg' ->    avatar CardHeader
+
+'Mars Rocks'    ->    title CardMediaTitle
+'Some finely layered rocks' -> subtitle CardMediaTitle
+
+'NASA’s Curiosity Mars Rover'         ->    title CardTitle
+'Image Credit: NASA/JPL-Caltech/MSSS' -> subtitle CardTitle
+
+CardMediaTitle component -> overlay CardMedia
+
+'Curiosity got close to this outcrop on Sept. 8, 2016,
+ which displays finely layered rocks.' -> [0] children CardText
+
+Img element -> [0] children CardMedia
+
+CardHeader  component -> [0] children Card
+CardMedia   component -> [1] children Card
+CardTitle   component -> [2] children Card
+CardText    component -> [3] children Card
+CardActions component -> [4] children Card
+
+Card component -> [0] children MuiThemeProvider
+
+# context property does not seem to work well
+ActionAndroid component ->  icon ActionButton1
+'Explore'               -> label ActionButton1
+
+ActionFlightTakeOff component ->  icon ActionButton2
+'Visit'                       -> label ActionButton2
+
+ActionButton1 component -> [0] children CardActions
+ActionButton2 component -> [1] children CardActions
+
+/*
+  Derived from the example below:
+
+  <Card>
+    <CardHeader
+      title="URL Avatar"
+      subtitle="Subtitle"
+      avatar="images/jsa-128.jpg"
+    />
+    <CardMedia
+      overlay={<CardTitle title="Overlay title" subtitle="Overlay subtitle" />}
+    a
+      <img src="images/nature-600-337.jpg" />
+    </CardMedia>
+    <CardTitle title="Card title" subtitle="Card subtitle" />
+    <CardText>
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+      Donec mattis pretium massa. Aliquam erat volutpat. Nulla facilisi.
+      Donec vulputate interdum sollicitudin. Nunc lacinia auctor quam sed pellentesque.
+      Aliquam dui mauris, mattis quis lacus id, pellentesque lobortis odio.
+    </CardText>
+    <CardActions>
+      <FlatButton label="Action1" />
+      <FlatButton label="Action2" />
+    </CardActions>
+  </Card>
+*/
