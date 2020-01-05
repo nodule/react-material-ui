@@ -3,6 +3,8 @@ ns: material-ui
 name: TheCard
 id: TheCard
 
+provider https://api.chix.io/v1/nodes/rhalff/{ns}/{name}
+
 MuiThemeProvider(react-material-ui/MuiThemeProvider)
 Render(react/render)
 Selector(dom/querySelector)
@@ -48,7 +50,8 @@ CardMediaTitle component -> overlay CardMedia
 'Curiosity got close to this outcrop on Sept. 8, 2016,
  which displays finely layered rocks.' -> [0] children CardText
 
-Img element -> [0] children CardMedia
+# Img element -> [0] children CardMedia
+Img component -> [0] children CardMedia
 
 'Move Over, Rover' -> title AppBar
 true -> showMenuIconButton AppBar

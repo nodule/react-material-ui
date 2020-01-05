@@ -15,13 +15,16 @@
     "svg:cards": "fbpx graph twigs/cards.fbp | dot -Tsvg > twigs/cards.svg"
   },
   "dependencies": {
-    "chix-node-react": "github:psichi/chix-node-react",
+    "@chix/install": "^2.9.9",
+    "@chix/node-react": "^2.9.9",
     "material-ui": "^0.15.4",
+    "react": "^16.12.0",
     "react-dom": "^15.3.1"
   },
   "devDependencies": {
-    "chit": "0.x.x",
-    "chix-flow": "^1.2.0"
+    "@chix/flow": "^2.9.8",
+    "@chix/monitor-npmlog": "^2.7.8",
+    "chit": "0.x.x"
   },
   "chix": {
     "name": "react-material-ui",
